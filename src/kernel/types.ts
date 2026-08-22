@@ -1,0 +1,379 @@
+/** Opaque Mission identifier persisted by the Control Plane. */
+export type MissionId = string & { readonly __missionId: unique symbol }
+
+/** Canonical Git worktree identity frozen at Mission acceptance. */
+export interface RepositoryIdentity {
+  readonly canonicalRoot: string
+  readonly branch: string
+  readonly head: string
+  readonly workspaceFingerprint: string
+}
+
+/** Host-resolved policy facts needed by the pure Kernel. */
+export interface EffectivePolicy {
+  readonly schemaVersion: number
+  readonly digest: string
+  readonly verificationProfile: string
+  readonly subagentProvider?: 'spawn'
+  readonly maxSubagentDepth?: number
+  readonly rolePolicies?: Readonly<Record<RoleName, EffectiveRolePolicy>>
+  readonly verification?: EffectiveVerificationProfile
+  readonly artifactBudgets?: EffectiveArtifactBudgets
+  readonly hostExecution?: {
+    readonly gitCommand: string
+    readonly gitCommandTimeoutMs: number
+    readonly terminationGraceMs: number
+  }
+}
+
+/** Redacted role execution policy frozen without provider credentials. */
+export interface EffectiveRolePolicy {
+  readonly allowTools: readonly string[]
+  readonly denyTools: readonly string[]
+  readonly agentProvider?: string
+  readonly model?: string
+  readonly maxTokens?: number
+}
+
+export interface EffectiveVerificationCommand {
+  readonly name: string
+  readonly argv: readonly string[]
+  readonly timeoutMs: number
+  readonly environmentNames: readonly string[]
+}
+
+export type EffectiveVerificationCategory =
+  | { readonly mode: 'commands'; readonly commands: readonly EffectiveVerificationCommand[] }
+  | { readonly mode: 'not_applicable'; readonly reason: string }
+
+export interface EffectiveVerificationProfile {
+  readonly name: string
+  readonly categories: Readonly<Record<VerificationCategory, EffectiveVerificationCategory>>
+}
+
+export interface EffectiveArtifactBudgets {
+  readonly maxRecordBytes: number
+  readonly maxStdoutBytes: number
+  readonly maxStderrBytes: number
+  readonly maxUntrackedFiles: number
+  readonly maxUntrackedBytes: number
+}
+
+/** Actions a host principal may perform for one repository. */
+export type MissionAction = 'start' | 'read' | 'resume' | 'cancel' | 'rework' | 'orchestrate' | 'recover'
+
+/** Host-process proof required to mutate Mission state under one lease epoch. */
+export interface WriteLeaseProof {
+  readonly holderId: string
+  readonly fencingToken: number
+}
+
+/** Durable repository-scoped lease epoch; a released lease has no holder. */
+export interface WriteLeaseState {
+  readonly fencingToken: number
+  readonly holderId?: string
+  readonly acquiredAt?: string
+  readonly releasedAt?: string
+}
+
+/** Host-derived, repository-scoped authority supplied to every Kernel call. */
+export interface MissionAuthority {
+  readonly principalId: string
+  readonly repository: RepositoryIdentity
+  readonly actions: readonly MissionAction[]
+  /** Host identity used only when Start, Resume, or Rework acquires a lease. */
+  readonly leaseHolderId?: string
+  /** Fenced proof used by the transient Mission Runner. */
+  readonly writeLease?: WriteLeaseProof
+}
+
+/** Explicit Mission intent accepted by atomic Start. */
+export interface StartMissionInput {
+  readonly objective: string
+  readonly context?: string
+  readonly acceptanceCriteria?: readonly string[]
+  readonly constraints?: readonly string[]
+}
+
+/** v0.1 Mission lifecycle states. */
+export type MissionStatus =
+  | 'CREATED'
+  | 'ANALYZING'
+  | 'PLANNING'
+  | 'IMPLEMENTING'
+  | 'VERIFYING'
+  | 'REVIEWING'
+  | 'APPROVED'
+  | 'REWORK_REQUIRED'
+  | 'BLOCKED'
+  | 'CANCELLED'
+
+/** Ordered non-terminal phases advanced by the Mission Runner. */
+export type MissionPhase = 'CREATED' | 'ANALYZING' | 'PLANNING' | 'IMPLEMENTING' | 'VERIFYING' | 'REVIEWING'
+
+/** Recoverable reason recorded when progress cannot be judged or continued. */
+export interface BlockedReason {
+  readonly code:
+    | 'needs_input'
+    | 'host_restarted'
+    | 'provider_failure'
+    | 'command_timeout'
+    | 'evidence_incomplete'
+    | 'policy_violation'
+  readonly detail?: string
+}
+
+/** Immutable Mission input provenance. */
+export type MissionInputRecord =
+  | {
+    readonly sequence: number
+    readonly kind: 'initial'
+    readonly submittedBy: string
+    readonly submittedAt: string
+    readonly objective: string
+    readonly context?: string
+    readonly acceptanceCriteria: readonly string[]
+    readonly constraints: readonly string[]
+  }
+
+  | {
+    readonly sequence: number
+    readonly kind: 'resume'
+    readonly submittedBy: string
+    readonly submittedAt: string
+    readonly supplementalContext?: string
+  }
+  | {
+    readonly sequence: number
+    readonly kind: 'rework'
+    readonly submittedBy: string
+    readonly submittedAt: string
+    readonly instructions?: string
+  }
+
+/** Integrity state of one Gate-required Evidence Record. */
+export interface RequiredEvidenceState {
+  readonly kind: string
+  readonly state: 'valid' | 'missing' | 'corrupt' | 'redacted'
+}
+
+/** Normalized outcome of one required verification command. */
+export type VerificationCategory = 'functional' | 'negative' | 'regression' | 'security'
+
+/** Normalized outcome of one required verification command. */
+export interface VerificationEvidenceState {
+  readonly category: VerificationCategory
+  readonly outcome:
+    | 'passed'
+    | 'not_applicable'
+    | 'failed'
+    | 'missing'
+    | 'timed_out'
+    | 'truncated'
+    | 'redacted'
+    | 'provider_failed'
+}
+
+/** Deterministic facts consumed by the pure Quality Gate. */
+export interface GateInput {
+  readonly requiredEvidence: readonly RequiredEvidenceState[]
+  readonly verifications: readonly VerificationEvidenceState[]
+  readonly reviewerFindings: readonly {
+    readonly severity: 'blocking' | 'non_blocking'
+    readonly code: string
+  }[]
+  readonly implementationSecretCount: number
+  readonly workspacePolicyViolations: readonly string[]
+}
+
+/** Machine-readable Gate result persisted with the Mission revision. */
+export interface GateDecision {
+  readonly kind: 'approved' | 'rework_required' | 'blocked'
+  readonly reasons: readonly { readonly code: string; readonly source: string }[]
+}
+
+/** Attempt-bound immutable Quality Gate decision history. */
+export interface GateDecisionRecord {
+  readonly attempt: number
+  readonly decidedAt: string
+  readonly decision: GateDecision
+}
+
+/** Immutable reference to one completely published canonical Evidence envelope. */
+export interface EvidenceRecord {
+  readonly recordId: string
+  readonly missionId: string
+  readonly attempt: number
+  readonly kind: string
+  readonly schemaVersion: number
+  readonly digest: string
+  readonly byteLength: number
+  readonly relativePath: string
+  readonly redacted: boolean
+  readonly createdAt: string
+}
+
+/** Fixed v0.1 engineering roles; each run is one-shot within one Attempt. */
+export type RoleName = 'planner' | 'developer' | 'tester' | 'reviewer'
+
+/** Trace-only identity returned by a Harness subagent provider. */
+export interface RoleRunTrace {
+  readonly provider: string
+  readonly providerRunId: string
+  readonly sessionId?: string
+}
+
+/** Durable lifecycle record for one bounded Role assignment. */
+export interface RoleRunRecord {
+  readonly runId: string
+  readonly missionId: string
+  readonly attempt: number
+  readonly role: RoleName
+  readonly state: 'starting' | 'running' | 'completed' | 'failed' | 'aborted'
+  readonly createdAt: string
+  readonly publishedAt?: string
+  readonly settledAt?: string
+  readonly trace?: RoleRunTrace
+  readonly stopReason?: string
+  readonly diagnostic?: string
+  readonly evidenceRecordIds: readonly string[]
+}
+
+/** Closed commands accepted by the Kernel Interface. */
+export type MissionCommand =
+  | { readonly kind: 'start'; readonly idempotencyKey: string; readonly input: StartMissionInput }
+  | {
+    readonly kind: 'resume'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly supplementalContext?: string
+  }
+  | {
+    readonly kind: 'cancel'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly finalRepositoryEvidence: EvidenceRecord
+    readonly reason?: string
+  }
+  | {
+    readonly kind: 'rework'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly instructions?: string
+  }
+  | {
+    readonly kind: 'advance'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly to: MissionPhase
+  }
+  | {
+    readonly kind: 'block'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly reason: BlockedReason
+    readonly workspaceFingerprint?: string
+    readonly sealLiveRoleRuns?: {
+      readonly stopReason: string
+      readonly diagnostic?: string
+    }
+  }
+  | {
+    readonly kind: 'decide_gate'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly input: GateInput
+  }
+  | {
+    readonly kind: 'record_evidence'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly record: EvidenceRecord
+  }
+  | {
+    readonly kind: 'prepare_role_run'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly runId: string
+    readonly role: RoleName
+  }
+  | {
+    readonly kind: 'publish_role_run'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly runId: string
+    readonly trace: RoleRunTrace
+  }
+  | {
+    readonly kind: 'settle_role_run'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly runId: string
+    readonly outcome: 'completed' | 'failed' | 'aborted'
+    readonly evidenceRecordIds: readonly string[]
+    readonly stopReason?: string
+    readonly diagnostic?: string
+  }
+
+/** Durable acknowledgement of an accepted Mission command. */
+export interface MissionReceipt {
+  readonly missionId: MissionId
+  readonly revision: number
+  readonly status: MissionStatus
+  readonly attempt: number
+  readonly acceptedAt: string
+}
+
+/** Durable Mission truth returned through the Kernel query Interface. */
+export interface MissionSnapshot {
+  readonly missionId: MissionId
+  readonly revision: number
+  readonly repository: RepositoryIdentity
+  readonly writeLease: WriteLeaseState
+  readonly objective: string
+  readonly context?: string
+  readonly acceptanceCriteria: readonly string[]
+  readonly constraints: readonly string[]
+  readonly effectivePolicy: EffectivePolicy
+  readonly effectivePolicyDigest: string
+  readonly status: MissionStatus
+  readonly attempt: number
+  readonly inputRecords: readonly MissionInputRecord[]
+  readonly roleRuns: readonly RoleRunRecord[]
+  readonly evidence: { readonly records: readonly EvidenceRecord[] }
+  readonly gate?: GateDecision
+  readonly gateHistory: readonly GateDecisionRecord[]
+  readonly blocked?: {
+    readonly reason: BlockedReason
+    readonly resumeStatus: MissionPhase
+    readonly blockedAt: string
+    readonly workspaceFingerprint?: string
+  }
+  readonly cancellation?: {
+    readonly reason?: string
+    readonly requestedBy: string
+    readonly requestedAt: string
+    readonly repositoryEvidenceRecordId: string
+  }
+  readonly createdAt: string
+  readonly updatedAt: string
+}
+
+/** Small external Kernel Interface shared by production callers and tests. */
+export interface ControlPlaneKernel {
+  /**
+   * Validate and durably apply one Mission command.
+   * @param command - closed Mission command.
+   * @param authority - host-derived repository/action authority.
+   * @returns the durable command receipt.
+   */
+  dispatch(command: MissionCommand, authority: MissionAuthority): Promise<MissionReceipt>
+
+  /**
+   * Read one durable Mission revision.
+   * @param missionId - Mission to read.
+   * @param authority - host-derived read authority.
+   * @returns the current durable snapshot.
+   */
+  snapshot(missionId: MissionId | string, authority: MissionAuthority): Promise<MissionSnapshot>
+}

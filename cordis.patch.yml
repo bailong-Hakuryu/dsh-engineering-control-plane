@@ -1,0 +1,15 @@
+- insert:
+    # Repository authority and verification policy are deployment-owned. The
+    # bundle therefore installs dormant rows; activate them in a later profile
+    # patch only after supplying the complete Service configuration.
+    - id: engineering-control-plane
+      name: dsh-engineering-control-plane
+      disabled: true
+
+    - id: engineering-control-plane-tools
+      name: dsh-engineering-control-plane/tools
+      disabled: true
+
+    - id: engineering-control-plane-invariant
+      name: dsh-engineering-control-plane/invariant
+      disabled: true

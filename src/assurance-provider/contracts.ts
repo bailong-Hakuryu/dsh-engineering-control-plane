@@ -1,0 +1,111 @@
+declare const assuranceExecutionContextBrand: unique symbol
+declare const assuranceRequestBrand: unique symbol
+declare const assuranceSubmissionBrand: unique symbol
+declare const externalAssessmentFailureBrand: unique symbol
+
+const PROVIDER_ID = /^[a-z0-9](?:[a-z0-9._-]{0,62})(?:\/[a-z0-9](?:[a-z0-9._-]{0,62})){1,7}$/
+const PROVIDER_VERSION = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/
+
+/** Startup-composed identity of one Assurance Provider implementation line. */
+export interface AssuranceProviderDescriptorV1 {
+  readonly schemaVersion: 1
+  readonly providerId: string
+  readonly providerVersion: string
+}
+
+function record(value: unknown, label: string): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new TypeError(`${label} must be an object`)
+  }
+  return value as Record<string, unknown>
+}
+
+function exactDescriptorKeys(value: Record<string, unknown>): void {
+  const allowed = ['schemaVersion', 'providerId', 'providerVersion'] as const
+  const allowedSet = new Set<string>(allowed)
+  const unknown = Object.keys(value).find(key => !allowedSet.has(key))
+  if (unknown !== undefined) {
+    throw new TypeError(`Assurance Provider descriptor contains unknown field '${unknown}'`)
+  }
+  const missing = allowed.find(key => !Object.hasOwn(value, key))
+  if (missing !== undefined) {
+    throw new TypeError(`Assurance Provider descriptor is missing '${missing}'`)
+  }
+}
+
+function boundedCanonicalString(value: unknown, label: string, pattern: RegExp): string {
+  if (typeof value !== 'string' || value.length === 0 || value !== value.trim() || !pattern.test(value)) {
+    throw new TypeError(`${label} is not canonical`)
+  }
+  return value
+}
+
+/** Strictly validate, detach, and freeze one startup contribution descriptor. */
+export function parseAssuranceProviderDescriptorV1(candidate: unknown): AssuranceProviderDescriptorV1 {
+  const value = record(candidate, 'Assurance Provider descriptor')
+  exactDescriptorKeys(value)
+  if (value.schemaVersion !== 1) {
+    throw new TypeError('Assurance Provider descriptor schemaVersion must be 1')
+  }
+  return Object.freeze({
+    schemaVersion: 1,
+    providerId: boundedCanonicalString(value.providerId, 'providerId', PROVIDER_ID),
+    providerVersion: boundedCanonicalString(value.providerVersion, 'providerVersion', PROVIDER_VERSION),
+  })
+}
+
+/** Kernel-issued, non-serializable capability supplied only during assessment. */
+export interface AssuranceExecutionContext {
+  readonly [assuranceExecutionContextBrand]: true
+}
+
+/** Opaque until the Kernel execution-context slice publishes its strict constructor. */
+export interface AssuranceRequestV1 {
+  readonly schemaVersion: 1
+  readonly [assuranceRequestBrand]: true
+}
+
+/** Opaque until the Submission-validation slice publishes its strict parser. */
+export interface AssuranceSubmissionV1 {
+  readonly schemaVersion: 1
+  readonly [assuranceSubmissionBrand]: true
+}
+
+/** Opaque until the Provider-invocation slice publishes its strict failure parser. */
+export interface ExternalAssessmentFailureV1 {
+  readonly schemaVersion: 1
+  readonly reason: 'blocked' | 'canceled' | 'failed'
+  readonly code: string
+  readonly [externalAssessmentFailureBrand]: true
+}
+
+export interface ProviderInvocationOptions {
+  readonly signal?: AbortSignal
+}
+
+export type AssuranceProviderOutcomeV1 =
+  | {
+    readonly kind: 'sealed_submission'
+    readonly submission: AssuranceSubmissionV1
+  }
+  | {
+    readonly kind: 'external_failure'
+    readonly failure: ExternalAssessmentFailureV1
+  }
+
+/** Deep Provider Interface hiding its private assessment lifecycle behind one operation. */
+export interface AssuranceProviderV1 {
+  readonly descriptor: AssuranceProviderDescriptorV1
+
+  assess(
+    context: AssuranceExecutionContext,
+    request: AssuranceRequestV1,
+    options?: ProviderInvocationOptions,
+  ): Promise<AssuranceProviderOutcomeV1>
+}
+
+export type AssuranceProviderFactoryV1 = (
+  descriptor: AssuranceProviderDescriptorV1,
+) => AssuranceProviderV1
+
+export type AssuranceProviderDisposer = () => void
