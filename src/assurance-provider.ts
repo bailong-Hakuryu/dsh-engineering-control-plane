@@ -1,5 +1,7 @@
 export { parseAssuranceProviderDescriptorV1 } from './assurance-provider/contracts.js'
+export { sealAssuranceSubmissionV1 } from './assurance-provider/submission.js'
 export type {
+  AssuranceClaimedOutcomeV1,
   AssuranceExecutionContext,
   AssuranceExecutionSubjectV1,
   AssuranceProviderActivation,
@@ -10,6 +12,15 @@ export type {
   AssuranceProviderOutcomeV1,
   AssuranceProviderV1,
   AssuranceRequestV1,
+  AssuranceSubmissionArtifactDraftV1,
+  AssuranceSubmissionArtifactV1,
+  AssuranceSubmissionBindingV1,
+  AssuranceSubmissionDigestV1,
+  AssuranceSubmissionDraftV1,
+  AssuranceSubmissionExternalAssessmentV1,
+  AssuranceSubmissionJsonV1,
+  AssuranceSubmissionPayloadV1,
+  AssuranceSubmissionRejectionCode,
   AssuranceSubmissionV1,
   ExternalAssessmentFailureV1,
   FrozenAssuranceProviderSelectionV1,

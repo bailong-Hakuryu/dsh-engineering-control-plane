@@ -75,7 +75,7 @@ async function waitForBlocked(
   throw new Error('Mission did not reach its expected provider-failure Blocked state')
 }
 
-describe('packed plugin Loader contracts', () => {
+describe('source plugin Loader contracts', () => {
   it('exposes one default root Service and namespace companion entrypoints', () => {
     const loader = Object.create(Loader.prototype) as Loader
     expect(loader.unwrapExports(rootPlugin)).toBe(EngineeringControlPlane)
@@ -87,7 +87,10 @@ describe('packed plugin Loader contracts', () => {
     expect('default' in clientPlugin).toBe(false)
     expect('default' in invariantPlugin).toBe(false)
     expect('default' in assuranceProviderPlugin).toBe(false)
-    expect(Object.keys(assuranceProviderPlugin)).toEqual(['parseAssuranceProviderDescriptorV1'])
+    expect(Object.keys(assuranceProviderPlugin)).toEqual([
+      'parseAssuranceProviderDescriptorV1',
+      'sealAssuranceSubmissionV1',
+    ])
   })
 
   it('loads, recovers, runs through public Harness seams, and tears down its SQLite owner', async () => {

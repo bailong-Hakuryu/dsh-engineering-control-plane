@@ -296,6 +296,14 @@ _Avoid_: Assurance Result, installation presence, automatic fallback
 An immutable, digest-bound Provider export that binds an external assessment to its subject, policy, coverage, outcome, Evidence, and provenance for validation and import into the Mission Evidence Store.
 _Avoid_: Shared database row, report path, Provider-owned Gate decision
 
+**Submission Digest**:
+The canonical transport-integrity binding over an Assurance Submission payload; it proves that the transported value is unchanged but not that the source assessment is eligible or correct.
+_Avoid_: Assessment Seal, Provider eligibility proof, Assurance Result
+
+**Source Seal**:
+The Provider-domain sealing artifact embedded by value in an Assurance Submission for later validation by a compatible Requirement evaluator.
+_Avoid_: Submission Digest, Quality Gate decision, opaque Provider path
+
 **Assurance Plan**:
 The immutable set of host-observed, verification, and independent-review Assurance Requirements frozen for one Mission Attempt; later Attempts may add requirements but cannot remove inherited ones.
 _Avoid_: Assurance Policy, Plan, role list

@@ -5,7 +5,11 @@ import {
   inspectSqliteMissionStore,
   MissionStoreFormatError,
 } from './adapters/sqlite-mission-store.js'
-import { createFilesystemEvidenceStore } from './evidence/filesystem-store.js'
+import {
+  createFilesystemEvidenceStore,
+  EvidenceStoreError,
+} from './evidence/filesystem-store.js'
+import { validateAssuranceSubmissionV1 } from './assurance-provider/submission.js'
 import type { MissionSnapshot } from './kernel/types.js'
 
 export interface DoctorIssue {
@@ -155,6 +159,62 @@ export async function inspectControlPlane(
         detail: 'Cancellation metadata points to no indexed Evidence Record.',
         missionId: snapshot.missionId,
       })
+    }
+    for (const invocation of snapshot.assuranceProviderInvocations ?? []) {
+      if (invocation.state !== 'settled') continue
+      const referenced = snapshot.evidence.records.find(record => (
+        record.recordId === invocation.outcome.evidenceRecordId
+      ))
+      if (referenced === undefined) {
+        issues.push({
+          code: 'missing_assurance_submission_evidence_reference',
+          detail: 'A settled Assurance Provider Invocation points to no indexed Evidence Record.',
+          missionId: snapshot.missionId,
+          recordId: invocation.outcome.evidenceRecordId,
+        })
+      } else if (
+        referenced.missionId !== snapshot.missionId
+        || referenced.attempt !== invocation.attempt
+        || referenced.kind !== 'assurance-provider-submission'
+        || referenced.redacted
+      ) {
+        issues.push({
+          code: 'invalid_assurance_submission_evidence_reference',
+          detail: 'A settled Assurance Provider Invocation points to ineligible Submission Evidence.',
+          missionId: snapshot.missionId,
+          recordId: referenced.recordId,
+        })
+      } else {
+        try {
+          const payload = await evidenceStore.read(referenced)
+          const validated = validateAssuranceSubmissionV1(payload, {
+            invocationId: invocation.invocationId,
+            missionId: snapshot.missionId,
+            attempt: invocation.attempt,
+            provider: invocation.descriptor,
+            subject: {
+              kind: 'git_worktree',
+              branch: snapshot.repository.branch,
+              head: snapshot.repository.head,
+              workspaceFingerprint: snapshot.repository.workspaceFingerprint,
+            },
+            effectivePolicyDigest: snapshot.effectivePolicyDigest,
+          }, snapshot.effectivePolicy.artifactBudgets?.maxRecordBytes)
+          if (
+            validated.submissionDigest !== invocation.outcome.submissionDigest
+            || validated.claimedOutcome !== invocation.outcome.claimedOutcome
+          ) throw new TypeError('Invocation outcome disagrees with imported Submission')
+        } catch (error) {
+          if (!(error instanceof EvidenceStoreError)) {
+            issues.push({
+              code: 'invalid_assurance_submission_evidence_payload',
+              detail: 'Imported Submission Evidence disagrees with its settled Provider Invocation.',
+              missionId: snapshot.missionId,
+              recordId: referenced.recordId,
+            })
+          }
+        }
+      }
     }
 
     const recordIds = new Set<string>()

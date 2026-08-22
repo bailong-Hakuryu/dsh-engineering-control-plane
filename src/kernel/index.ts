@@ -3,7 +3,11 @@ import type { MissionStore } from './memory-store.js'
 import { MissionError } from './errors.js'
 import { isMissionPhase, mayAdvance } from './state-machine.js'
 import { evaluateGate } from './gate.js'
-import type { AssuranceProviderUnavailableCode } from '../assurance-provider/contracts.js'
+import type {
+  AssuranceProviderUnavailableCode,
+  AssuranceSubmissionBindingV1,
+  AssuranceSubmissionRejectionCode,
+} from '../assurance-provider/contracts.js'
 import type {
   ControlPlaneKernel,
   EffectivePolicy,
@@ -23,6 +27,23 @@ const ASSURANCE_PROVIDER_UNAVAILABLE_CODES = new Set<AssuranceProviderUnavailabl
   'invalid_provider',
   'descriptor_mismatch',
 ])
+
+const ASSURANCE_SUBMISSION_REJECTION_CODES = new Set<AssuranceSubmissionRejectionCode>([
+  'malformed_submission',
+  'unsupported_schema',
+  'unsealed_submission',
+  'invocation_mismatch',
+  'mission_mismatch',
+  'attempt_mismatch',
+  'provider_mismatch',
+  'subject_mismatch',
+  'policy_mismatch',
+  'digest_mismatch',
+  'redacted_submission',
+  'submission_too_large',
+])
+
+const SHA256 = /^sha256:[0-9a-f]{64}$/u
 
 export { createInMemoryMissionStore }
 export { MissionError }
@@ -89,6 +110,87 @@ function preparedAssuranceProviderInvocationIndex(
     )
   }
   return index
+}
+
+function begunAssuranceProviderInvocationIndex(
+  snapshot: MissionSnapshot,
+  invocationId: string,
+): number {
+  const index = snapshot.assuranceProviderInvocations?.findIndex(record => (
+    record.invocationId === invocationId
+  )) ?? -1
+  const invocation = snapshot.assuranceProviderInvocations?.[index]
+  if (
+    snapshot.status !== 'BLOCKED'
+    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    || invocation === undefined
+    || invocation.attempt !== snapshot.attempt
+    || invocation.state !== 'begun'
+    || invocationId.trim().length === 0
+  ) {
+    throw new MissionError(
+      'illegal_transition',
+      `Mission '${snapshot.missionId}' cannot settle Assurance Provider invocation '${invocationId}'`,
+      {
+        missionId: snapshot.missionId,
+        status: snapshot.status,
+        currentRevision: snapshot.revision,
+      },
+    )
+  }
+  return index
+}
+
+function unavailableAssuranceProviderInvocationIndex(
+  snapshot: MissionSnapshot,
+  invocationId: string,
+  expectedState: 'prepared' | 'begun',
+): number {
+  const index = snapshot.assuranceProviderInvocations?.findIndex(record => (
+    record.invocationId === invocationId
+  )) ?? -1
+  const invocation = snapshot.assuranceProviderInvocations?.[index]
+  if (
+    snapshot.status !== 'BLOCKED'
+    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    || invocation === undefined
+    || invocation.attempt !== snapshot.attempt
+    || invocation.state !== expectedState
+    || invocationId.trim().length === 0
+  ) {
+    throw new MissionError(
+      'illegal_transition',
+      `Mission '${snapshot.missionId}' cannot mark Assurance Provider invocation '${invocationId}' unavailable`,
+      {
+        missionId: snapshot.missionId,
+        status: snapshot.status,
+        currentRevision: snapshot.revision,
+      },
+    )
+  }
+  return index
+}
+
+function sameSubmissionBinding(
+  snapshot: MissionSnapshot,
+  invocationId: string,
+  binding: AssuranceSubmissionBindingV1,
+): boolean {
+  const invocation = snapshot.assuranceProviderInvocations?.find(record => (
+    record.invocationId === invocationId
+  ))
+  return invocation !== undefined
+    && binding.invocationId === invocationId
+    && binding.missionId === snapshot.missionId
+    && binding.attempt === snapshot.attempt
+    && binding.provider.schemaVersion === invocation.descriptor.schemaVersion
+    && binding.provider.providerId === invocation.descriptor.providerId
+    && binding.provider.providerVersion === invocation.descriptor.providerVersion
+    && binding.subject.kind === 'git_worktree'
+    && binding.subject.branch === snapshot.repository.branch
+    && binding.subject.head === snapshot.repository.head
+    && binding.subject.workspaceFingerprint === snapshot.repository.workspaceFingerprint
+    && binding.effectivePolicyDigest === snapshot.effectivePolicyDigest
 }
 
 function unavailableAssuranceExecutionError(snapshot: MissionSnapshot): MissionError {
@@ -562,12 +664,19 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
 
       if (command.kind === 'mark_assurance_provider_invocation_unavailable') {
         requireAction(authority, 'orchestrate')
+        if (command.expectedState !== 'prepared' && command.expectedState !== 'begun') {
+          throw new TypeError('Assurance Provider unavailable expectedState is invalid')
+        }
         if (!ASSURANCE_PROVIDER_UNAVAILABLE_CODES.has(command.failureCode)) {
           throw new TypeError('Assurance Provider unavailable failureCode is invalid')
         }
         const result = await options.store.update(command.missionId, command.expectedRevision, current => {
           requireRepository(current, authority)
-          const invocationIndex = preparedAssuranceProviderInvocationIndex(current, command.invocationId)
+          const invocationIndex = unavailableAssuranceProviderInvocationIndex(
+            current,
+            command.invocationId,
+            command.expectedState,
+          )
           const unavailableAt = options.now()
           return {
             ...current,
@@ -583,6 +692,115 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 : record
             )),
             updatedAt: unavailableAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
+      if (command.kind === 'settle_assurance_provider_invocation') {
+        requireAction(authority, 'orchestrate')
+        const terminalOutcome = command.outcome
+        if (
+          terminalOutcome.kind !== 'sealed_submission'
+          && terminalOutcome.kind !== 'rejected_submission'
+          && terminalOutcome.kind !== 'import_failed'
+        ) throw new TypeError('Assurance Provider terminal outcome kind is invalid')
+        if (
+          terminalOutcome.kind === 'rejected_submission'
+          && !ASSURANCE_SUBMISSION_REJECTION_CODES.has(terminalOutcome.failureCode)
+        ) {
+          throw new TypeError('Assurance Submission rejection failureCode is invalid')
+        }
+        if (
+          terminalOutcome.kind === 'import_failed'
+          && terminalOutcome.failureCode !== 'evidence_store_failure'
+        ) throw new TypeError('Assurance Submission import failureCode is invalid')
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          const invocationIndex = begunAssuranceProviderInvocationIndex(current, command.invocationId)
+          const begunInvocation = current.assuranceProviderInvocations?.[invocationIndex]
+          if (begunInvocation?.state !== 'begun') throw new Error('Unreachable begun invocation')
+          const terminalAt = options.now()
+          if (terminalOutcome.kind === 'sealed_submission') {
+            if (
+              !sameSubmissionBinding(current, command.invocationId, terminalOutcome.binding)
+              || !SHA256.test(terminalOutcome.submissionDigest)
+              || (terminalOutcome.claimedOutcome !== 'satisfied'
+                && terminalOutcome.claimedOutcome !== 'failed'
+                && terminalOutcome.claimedOutcome !== 'indeterminate')
+              || terminalOutcome.evidenceRecord.redacted
+            ) {
+              throw new MissionError(
+                'invalid_evidence',
+                `Submission Evidence for invocation '${command.invocationId}' is not bound to this Mission Attempt`,
+                {
+                  missionId: current.missionId,
+                  status: current.status,
+                  currentRevision: current.revision,
+                },
+              )
+            }
+            requireIndexableEvidence(
+              current,
+              terminalOutcome.evidenceRecord,
+              'assurance-provider-submission',
+            )
+            return {
+              ...current,
+              revision: current.revision + 1,
+              assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+                index === invocationIndex
+                  ? {
+                      ...begunInvocation,
+                      state: 'settled' as const,
+                      settledAt: terminalAt,
+                      outcome: {
+                        kind: 'sealed_submission' as const,
+                        submissionDigest: terminalOutcome.submissionDigest,
+                        evidenceRecordId: terminalOutcome.evidenceRecord.recordId,
+                        claimedOutcome: terminalOutcome.claimedOutcome,
+                      },
+                    }
+                  : record
+              )),
+              evidence: {
+                records: [...current.evidence.records, terminalOutcome.evidenceRecord],
+              },
+              updatedAt: terminalAt,
+            }
+          }
+          if (terminalOutcome.kind === 'import_failed') {
+            return {
+              ...current,
+              revision: current.revision + 1,
+              assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+                index === invocationIndex
+                  ? {
+                      ...begunInvocation,
+                      state: 'import_failed' as const,
+                      failedAt: terminalAt,
+                      failureCode: terminalOutcome.failureCode,
+                    }
+                  : record
+              )),
+              updatedAt: terminalAt,
+            }
+          }
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+              index === invocationIndex
+                ? {
+                    ...begunInvocation,
+                    state: 'rejected' as const,
+                    rejectedAt: terminalAt,
+                    failureCode: terminalOutcome.failureCode,
+                  }
+                : record
+            )),
+            updatedAt: terminalAt,
           }
         })
         if (result.kind !== 'updated') return updateError(result, command.missionId)

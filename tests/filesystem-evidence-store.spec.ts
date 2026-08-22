@@ -1,4 +1,5 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -134,6 +135,87 @@ describe('FilesystemEvidenceStore', () => {
       kind: 'implementation',
       schemaVersion: 1,
       payload: { diff: 'x'.repeat(2_048) },
+    })).rejects.toMatchObject({ code: 'artifact_too_large' })
+  })
+
+  it('continues to verify Evidence written by the original redaction codec', async () => {
+    const root = await temporaryEvidenceRoot()
+    const store = createFilesystemEvidenceStore({ root })
+    const payload = {
+      auth: 'none',
+      opaqueReference: 'AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_+',
+    }
+    const canonicalPayload = JSON.stringify(payload)
+    const relativePath = 'mission-legacy/attempt-0001/records/record-legacy.json'
+    const record = {
+      recordId: 'record-legacy',
+      missionId: 'mission-legacy',
+      attempt: 1,
+      kind: 'context',
+      schemaVersion: 1,
+      digest: `sha256:${createHash('sha256').update(canonicalPayload, 'utf8').digest('hex')}`,
+      byteLength: Buffer.byteLength(canonicalPayload, 'utf8'),
+      relativePath,
+      redacted: false,
+      createdAt: '2026-08-22T17:00:00.000Z',
+    }
+    const absolutePath = resolve(root, ...relativePath.split('/'))
+    await mkdir(resolve(absolutePath, '..'), { recursive: true })
+    await writeFile(absolutePath, JSON.stringify({ record, payload }), 'utf8')
+
+    await expect(store.read(record)).resolves.toEqual(payload)
+  })
+
+  it('rejects sparse arrays before canonical byte accounting can amplify holes', async () => {
+    const root = await temporaryEvidenceRoot()
+    const store = createFilesystemEvidenceStore({
+      root,
+      maxRecordBytes: 256,
+      nextRecordId: () => 'record-sparse-array',
+    })
+    const sparse: unknown[] = []
+    sparse.length = 1_000_000
+
+    await expect(store.publish({
+      missionId: 'mission-sparse-array',
+      attempt: 1,
+      kind: 'context',
+      schemaVersion: 1,
+      payload: { sparse },
+    })).rejects.toMatchObject({ code: 'invalid_evidence' })
+  })
+
+  it('rejects escaped scalar expansion against the traversal budget', async () => {
+    const root = await temporaryEvidenceRoot()
+    const store = createFilesystemEvidenceStore({
+      root,
+      maxRecordBytes: 256,
+      nextRecordId: () => 'record-escaped-scalar',
+    })
+
+    await expect(store.publish({
+      missionId: 'mission-escaped-scalar',
+      attempt: 1,
+      kind: 'context',
+      schemaVersion: 1,
+      payload: { data: '\u0000'.repeat(100) },
+    })).rejects.toMatchObject({ code: 'artifact_too_large' })
+  })
+
+  it('rejects escaped property-name expansion against the traversal budget', async () => {
+    const root = await temporaryEvidenceRoot()
+    const store = createFilesystemEvidenceStore({
+      root,
+      maxRecordBytes: 256,
+      nextRecordId: () => 'record-escaped-property',
+    })
+
+    await expect(store.publish({
+      missionId: 'mission-escaped-property',
+      attempt: 1,
+      kind: 'context',
+      schemaVersion: 1,
+      payload: { ['\u0000'.repeat(100)]: true },
     })).rejects.toMatchObject({ code: 'artifact_too_large' })
   })
 })

@@ -106,11 +106,108 @@ export interface AssuranceRequestV1 {
   readonly [assuranceRequestBrand]: true
 }
 
-/** Opaque until the Submission-validation slice publishes its strict parser. */
+/** Provider claim carried by a Submission; it is never a Mission Gate decision. */
+export type AssuranceClaimedOutcomeV1 = 'satisfied' | 'failed' | 'indeterminate'
+
+/** Credential-free JSON value detached at the Provider boundary. */
+export type AssuranceSubmissionJsonV1 =
+  | null
+  | boolean
+  | number
+  | string
+  | readonly AssuranceSubmissionJsonV1[]
+  | { readonly [key: string]: AssuranceSubmissionJsonV1 }
+
+/** Canonical digest envelope used for transport integrity, not assessor eligibility. */
+export interface AssuranceSubmissionDigestV1 {
+  readonly schemaVersion: 1
+  readonly algorithm: 'sha256'
+  readonly mediaType: string
+  readonly byteLength: number
+  readonly canonicalization: 'dsh-canonical-json-v1'
+  readonly value: string
+}
+
+/** Provider-neutral, credential-free typed JSON artifact embedded by value in one Submission. */
+export interface AssuranceSubmissionArtifactV1 {
+  readonly artifactId: string
+  readonly schemaId: string
+  readonly schemaVersion: number
+  readonly digest: AssuranceSubmissionDigestV1
+  readonly value: AssuranceSubmissionJsonV1
+}
+
+/** Artifact draft accepted by the public strict Submission constructor. */
+export interface AssuranceSubmissionArtifactDraftV1 {
+  readonly artifactId: string
+  readonly schemaId: string
+  readonly schemaVersion: number
+  readonly value: unknown
+}
+
+/** Exact invocation facts that prevent cross-Mission, Attempt, Provider, or Subject replay. */
+export interface AssuranceSubmissionBindingV1 {
+  readonly invocationId: string
+  readonly missionId: string
+  readonly attempt: number
+  readonly provider: AssuranceProviderDescriptorV1
+  readonly subject: AssuranceExecutionSubjectV1
+  readonly effectivePolicyDigest: string
+}
+
+export interface AssuranceSubmissionExternalAssessmentV1 {
+  readonly state: 'sealed'
+  readonly assessmentId: string
+  readonly claimedOutcome: AssuranceClaimedOutcomeV1
+}
+
+export interface AssuranceSubmissionPayloadV1 {
+  readonly binding: AssuranceSubmissionBindingV1
+  readonly externalAssessment: AssuranceSubmissionExternalAssessmentV1
+  readonly providerComposition: AssuranceSubmissionArtifactV1
+  readonly providerPolicy: AssuranceSubmissionArtifactV1
+  readonly coverage: AssuranceSubmissionArtifactV1
+  /** Provider-owned domain seal represented as an opaque typed artifact. */
+  readonly sourceSeal: AssuranceSubmissionArtifactV1
+  readonly provenance: AssuranceSubmissionArtifactV1
+  readonly evidence: readonly AssuranceSubmissionArtifactV1[]
+}
+
+/** Input whose embedded artifacts and outer payload are canonically digested by the constructor. */
+export interface AssuranceSubmissionDraftV1 {
+  readonly schemaVersion: 1
+  readonly binding: AssuranceSubmissionBindingV1
+  readonly externalAssessment: AssuranceSubmissionExternalAssessmentV1
+  readonly providerComposition: AssuranceSubmissionArtifactDraftV1
+  readonly providerPolicy: AssuranceSubmissionArtifactDraftV1
+  readonly coverage: AssuranceSubmissionArtifactDraftV1
+  readonly sourceSeal: AssuranceSubmissionArtifactDraftV1
+  readonly provenance: AssuranceSubmissionArtifactDraftV1
+  readonly evidence: readonly AssuranceSubmissionArtifactDraftV1[]
+}
+
+/** Self-contained transport-sealed Provider value; Control Plane still evaluates eligibility. */
 export interface AssuranceSubmissionV1 {
   readonly schemaVersion: 1
+  readonly payload: AssuranceSubmissionPayloadV1
+  readonly digest: AssuranceSubmissionDigestV1
   readonly [assuranceSubmissionBrand]: true
 }
+
+/** Stable fail-closed classifications for a fulfilled but ineligible Submission. */
+export type AssuranceSubmissionRejectionCode =
+  | 'malformed_submission'
+  | 'unsupported_schema'
+  | 'unsealed_submission'
+  | 'invocation_mismatch'
+  | 'mission_mismatch'
+  | 'attempt_mismatch'
+  | 'provider_mismatch'
+  | 'subject_mismatch'
+  | 'policy_mismatch'
+  | 'digest_mismatch'
+  | 'redacted_submission'
+  | 'submission_too_large'
 
 /** Opaque until the Provider-invocation slice publishes its strict failure parser. */
 export interface ExternalAssessmentFailureV1 {

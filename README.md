@@ -182,19 +182,42 @@ or invalid registration becomes `unavailable`; there is no version fallback,
 substitution, or replay of an invocation that already reached `begun`, including
 after host restart. Service disposal sends an independent abort signal to live
 Provider work; the originating tool-call signal does not own that work.
+Concurrent replay admission joins one process-local promise before Provider
+factory resolution, so every replay waits for the same durable result; the
+`prepared → begun` compare-and-swap remains the cross-process authority for
+calling `assess()`. If a registration disappears
+during admission, the begun Invocation becomes `unavailable` without calling
+the detached instance.
 
-This staged slice does not yet validate or import sealed Submissions, settle
-Provider outcomes, propagate Provider selection through Rework, or grant
-external assurance credit at the Quality Gate. A Mission with a non-empty
-selection therefore remains `BLOCKED` with
-`assurance_execution_unavailable`, and the engineering Runner does not launch.
-Use only Reference Fake Providers until the Submission-import slice is installed.
+One fulfilled `sealed_submission` is detached and strictly checked for exact
+schema, Invocation, Mission, Attempt, Provider, Subject, and Effective Policy
+bindings. Every typed JSON artifact and the outer payload has a canonical
+digest. The complete self-contained value is copied into the Control Plane's
+Evidence Store before one Kernel revision atomically indexes that Evidence and
+settles the Invocation. Malformed, unsealed, mismatched, redacted, or
+digest-mismatched values are durably rejected without importing Evidence. The
+public `sealAssuranceSubmissionV1()` constructor creates the provider-neutral
+credential-free transport envelope; its Submission Digest is not the
+Provider's Source Seal. A local Evidence publication failure is recorded as
+operational `import_failed`, not misclassified as a Provider rejection.
+
+This staged slice does not yet evaluate a frozen Assurance Requirement, verify
+Provider Composition or assessor eligibility, derive an Assurance Result,
+propagate Provider selection through Rework, or grant external assurance credit
+at the Quality Gate. The Provider outcome remains a claim, so even `satisfied`
+does not approve a Mission. A Mission with a non-empty selection therefore
+remains `BLOCKED` with `assurance_execution_unavailable`, and the engineering
+Runner does not launch. Use only Reference Fake Providers until post-
+implementation Subject freezing and Requirement evaluation are installed.
+The legal `external_failure` Provider outcome also remains deferred to that
+later lifecycle slice.
 
 ## Read-only doctor
 
 The package installs a diagnostic command that validates the SQLite identity and
-schema, Mission lease invariants, Evidence references and Evidence digests. It
-never creates, migrates, repairs, clears or deletes state.
+schema, Mission lease invariants, Evidence references and Evidence digests, and
+the binding between a settled Invocation and its imported Submission payload.
+It never creates, migrates, repairs, clears or deletes state.
 
 ```sh
 dsh-control-plane doctor --pretty

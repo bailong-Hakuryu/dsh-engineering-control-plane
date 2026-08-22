@@ -18,7 +18,10 @@ import type {
   AssuranceProviderFactoryV1,
 } from './assurance-provider/contracts.js'
 import { Config as ConfigSchema, type Config as PluginConfig } from './config.js'
-import { createFilesystemEvidenceStore } from './evidence/filesystem-store.js'
+import {
+  createFilesystemEvidenceStore,
+  type FilesystemEvidenceStore,
+} from './evidence/filesystem-store.js'
 import { createControlPlaneKernel, MissionError } from './kernel/index.js'
 import type {
   ControlPlaneKernel,
@@ -58,6 +61,7 @@ declare module '@deepseek-ai/cordis' {
 interface ControlPlaneRuntime {
   readonly home: string
   readonly store: SqliteMissionStore
+  readonly evidenceStore: FilesystemEvidenceStore
   readonly kernel: ControlPlaneKernel
   readonly runner: MissionRunner
   readonly assuranceInvocations: AssuranceProviderInvocationCoordinator
@@ -373,6 +377,10 @@ export class EngineeringControlPlane extends Service {
     }
 
     const home = resolveDshHome(config.dshHome)
+    const evidenceStore = createFilesystemEvidenceStore({
+      root: join(home, 'control-plane', 'missions'),
+      maxRecordBytes: deployment.artifactBudgets.maxRecordBytes,
+    })
     let store: SqliteMissionStore | undefined
     try {
       store = await openSqliteMissionStore({
@@ -421,10 +429,12 @@ export class EngineeringControlPlane extends Service {
       const assuranceInvocations = new AssuranceProviderInvocationCoordinator({
         kernel,
         registry: this.assuranceProviders,
+        evidenceStore,
+        maxSubmissionBytes: deployment.artifactBudgets.maxRecordBytes,
         onError: message => this.ctx.logger.warn(`engineering control plane assurance: ${message}`),
       })
       await runner.recoverAfterRestart()
-      return { home, store, kernel, runner, assuranceInvocations, git }
+      return { home, store, evidenceStore, kernel, runner, assuranceInvocations, git }
     } catch (error) {
       await store?.close()
       throw error
@@ -537,10 +547,6 @@ export class EngineeringControlPlane extends Service {
       maxUntrackedFiles: policy.artifactBudgets.maxUntrackedFiles,
       maxUntrackedBytes: policy.artifactBudgets.maxUntrackedBytes,
     })
-    const evidenceStore = createFilesystemEvidenceStore({
-      root: join(runtime.home, 'control-plane', 'missions'),
-      maxRecordBytes: policy.artifactBudgets.maxRecordBytes,
-    })
     const roleExecutor = new HarnessRoleExecutor({
       subagents: this.ctx.subagents,
       parent: agent,
@@ -551,7 +557,7 @@ export class EngineeringControlPlane extends Service {
     })
     const verification = new VerificationAdapter(missionCommands)
     return {
-      evidenceStore,
+      evidenceStore: runtime.evidenceStore,
       roleExecutor,
       captureImplementation: (current, signal) => missionGit.captureImplementation(current.repository, signal),
       runVerifications: (current, signal) => verification.run(

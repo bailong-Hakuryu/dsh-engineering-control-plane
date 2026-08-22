@@ -120,7 +120,10 @@ function invokingReferenceProviderContributor(
 
 describe('Assurance Provider startup registration and selection', () => {
   it('admits detached frozen descriptors only during pre-Mission contributor composition', async () => {
-    expect(Object.keys(assuranceProviderEntry)).toEqual(['parseAssuranceProviderDescriptorV1'])
+    expect(Object.keys(assuranceProviderEntry)).toEqual([
+      'parseAssuranceProviderDescriptorV1',
+      'sealAssuranceSubmissionV1',
+    ])
     expect('registerAssuranceProvider' in toolsPlugin).toBe(false)
     expect('registerAssuranceProvider' in clientPlugin).toBe(false)
 

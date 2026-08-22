@@ -23,6 +23,11 @@ export interface PublishEvidenceInput {
   readonly payload: unknown
 }
 
+export interface CanonicalizeEvidenceOptions {
+  /** Stop canonical traversal before constructing an over-budget JSON string. */
+  readonly maxBytes?: number
+}
+
 export type EvidenceStoreErrorCode =
   | 'artifact_too_large'
   | 'corrupt_evidence'
@@ -56,6 +61,8 @@ interface EvidenceEnvelope {
 }
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u
+// This denylist is part of the original Evidence codec. Changing it would make
+// already-published records unverifiable because redaction participates in the digest.
 const SENSITIVE_KEY = /^(?:authorization|cookie|password|passwd|secret|token|api_key|api_token|access_token|refresh_token|client_secret)$/u
 const DEFAULT_MAX_RECORD_BYTES = 16 * 1024 * 1024
 const MAX_JSON_DEPTH = 64
@@ -91,11 +98,70 @@ function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEY.test(normalized)
 }
 
+interface CanonicalByteBudget {
+  readonly maxBytes?: number
+  bytes: number
+}
+
+function charge(budget: CanonicalByteBudget, bytes: number): void {
+  budget.bytes += bytes
+  if (budget.maxBytes !== undefined && budget.bytes > budget.maxBytes) {
+    throw new EvidenceStoreError(
+      'artifact_too_large',
+      `Canonical Evidence exceeds the ${budget.maxBytes} byte traversal budget`,
+    )
+  }
+}
+
+function jsonStringByteLength(value: string): number {
+  let bytes = 2
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index)
+    if (code === 0x22 || code === 0x5c || code === 0x08 || code === 0x09
+      || code === 0x0a || code === 0x0c || code === 0x0d) {
+      bytes += 2
+    } else if (code <= 0x1f) {
+      bytes += 6
+    } else if (code <= 0x7f) {
+      bytes += 1
+    } else if (code <= 0x7ff) {
+      bytes += 2
+    } else if (code >= 0xd800 && code <= 0xdbff) {
+      const next = value.charCodeAt(index + 1)
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4
+        index += 1
+      } else {
+        bytes += 6
+      }
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      bytes += 6
+    } else {
+      bytes += 3
+    }
+  }
+  return bytes
+}
+
+function chargeJsonScalar(budget: CanonicalByteBudget, value: null | boolean | number | string): void {
+  if (typeof value === 'string') {
+    charge(budget, jsonStringByteLength(value))
+    return
+  }
+  charge(budget, Buffer.byteLength(JSON.stringify(value), 'utf8'))
+}
+
+function redactedValue(budget: CanonicalByteBudget): { readonly value: EvidenceJson; readonly redacted: true } {
+  chargeJsonScalar(budget, '[REDACTED]')
+  return { value: '[REDACTED]', redacted: true }
+}
+
 function normalizeEvidence(
   value: unknown,
   seen: WeakSet<object>,
   depth: number,
   mode: 'publish' | 'verify',
+  budget: CanonicalByteBudget,
   key?: string,
 ): { readonly value: EvidenceJson; readonly redacted: boolean } {
   if (depth > MAX_JSON_DEPTH) throw invalid(`Evidence JSON exceeds depth ${MAX_JSON_DEPTH}`)
@@ -103,36 +169,57 @@ function normalizeEvidence(
     if (mode === 'verify' && value !== '[REDACTED]') {
       throw invalid(`Sensitive Evidence field '${key}' was not redacted before persistence`)
     }
-    return { value: '[REDACTED]', redacted: true }
+    return redactedValue(budget)
   }
   if (value === null || typeof value === 'boolean' || typeof value === 'string') {
+    chargeJsonScalar(budget, value)
     return { value, redacted: false }
   }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) throw invalid('Evidence JSON numbers must be finite')
-    return { value: Object.is(value, -0) ? 0 : value, redacted: false }
+    const normalized = Object.is(value, -0) ? 0 : value
+    chargeJsonScalar(budget, normalized)
+    return { value: normalized, redacted: false }
   }
   if (typeof value !== 'object') throw invalid(`Evidence JSON cannot contain ${typeof value}`)
   if (seen.has(value)) throw invalid('Evidence JSON cannot contain cycles')
   seen.add(value)
   try {
     if (Array.isArray(value)) {
+      const keys = Object.keys(value)
+      if (
+        keys.length !== value.length
+        || keys.some((property, index) => property !== String(index))
+      ) throw invalid('Evidence JSON arrays must be dense and contain only indexed values')
+      charge(budget, 2)
       let redacted = false
-      const normalized = value.map((item) => {
-        const result = normalizeEvidence(item, seen, depth + 1, mode)
+      const normalized: EvidenceJson[] = []
+      for (let index = 0; index < value.length; index += 1) {
+        if (index > 0) charge(budget, 1)
+        const result = normalizeEvidence(value[index], seen, depth + 1, mode, budget)
         redacted ||= result.redacted
-        return result.value
-      })
+        normalized.push(result.value)
+      }
       return { value: normalized, redacted }
     }
     const prototype = Object.getPrototypeOf(value)
     if (prototype !== Object.prototype && prototype !== null) {
       throw invalid('Evidence JSON objects must be plain records')
     }
+    charge(budget, 2)
     let redacted = false
     const normalized: Record<string, EvidenceJson> = Object.create(null) as Record<string, EvidenceJson>
-    for (const property of Object.keys(value).sort()) {
-      const result = normalizeEvidence(Reflect.get(value, property), seen, depth + 1, mode, property)
+    for (const [index, property] of Object.keys(value).sort().entries()) {
+      if (index > 0) charge(budget, 1)
+      charge(budget, jsonStringByteLength(property) + 1)
+      const result = normalizeEvidence(
+        Reflect.get(value, property),
+        seen,
+        depth + 1,
+        mode,
+        budget,
+        property,
+      )
       normalized[property] = result.value
       redacted ||= result.redacted
     }
@@ -143,17 +230,33 @@ function normalizeEvidence(
 }
 
 /** Deterministically encode JSON after validation, key ordering and secret-key redaction. */
-export function canonicalizeEvidence(value: unknown): { readonly json: string; readonly value: EvidenceJson; readonly redacted: boolean } {
-  const normalized = normalizeEvidence(value, new WeakSet(), 0, 'publish')
+export function canonicalizeEvidence(
+  value: unknown,
+  options: CanonicalizeEvidenceOptions = {},
+): { readonly json: string; readonly value: EvidenceJson; readonly redacted: boolean } {
+  if (
+    options.maxBytes !== undefined
+    && (!Number.isSafeInteger(options.maxBytes) || options.maxBytes <= 0)
+  ) throw new RangeError('maxBytes must be a positive safe integer')
+  const budget: CanonicalByteBudget = {
+    bytes: 0,
+    ...options.maxBytes === undefined ? {} : { maxBytes: options.maxBytes },
+  }
+  const normalized = normalizeEvidence(value, new WeakSet(), 0, 'publish', budget)
+  const json = JSON.stringify(normalized.value)
+  if (Buffer.byteLength(json, 'utf8') !== budget.bytes) {
+    throw new Error('Canonical Evidence byte accounting invariant failed')
+  }
   return {
-    json: JSON.stringify(normalized.value),
+    json,
     value: normalized.value,
     redacted: normalized.redacted,
   }
 }
 
 function canonicalizeStoredEvidence(value: unknown): ReturnType<typeof canonicalizeEvidence> {
-  const normalized = normalizeEvidence(value, new WeakSet(), 0, 'verify')
+  const budget: CanonicalByteBudget = { bytes: 0 }
+  const normalized = normalizeEvidence(value, new WeakSet(), 0, 'verify', budget)
   return {
     json: JSON.stringify(normalized.value),
     value: normalized.value,
@@ -275,7 +378,7 @@ export class FilesystemEvidenceStore {
 
     const recordId = this.nextRecordId()
     assertSafeSegment(recordId, 'recordId')
-    const canonical = canonicalizeEvidence(input.payload)
+    const canonical = canonicalizeEvidence(input.payload, { maxBytes: this.maxRecordBytes })
     const relativePath = posix.join(
       input.missionId,
       `attempt-${String(input.attempt).padStart(4, '0')}`,

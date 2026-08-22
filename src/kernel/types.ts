@@ -1,6 +1,9 @@
 import type {
+  AssuranceClaimedOutcomeV1,
   AssuranceProviderActivationPolicyV1,
   AssuranceProviderUnavailableCode,
+  AssuranceSubmissionBindingV1,
+  AssuranceSubmissionRejectionCode,
   FrozenAssuranceProviderSelectionV1,
 } from '../assurance-provider/contracts.js'
 
@@ -236,8 +239,34 @@ export type AssuranceProviderInvocationRecordV1 =
   }
   | AssuranceProviderInvocationBaseV1 & {
     readonly state: 'unavailable'
+    /** Present when registration disappeared after durable begin admission. */
+    readonly begunAt?: string
     readonly unavailableAt: string
     readonly failureCode: AssuranceProviderUnavailableCode
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'settled'
+    readonly begunAt: string
+    readonly settledAt: string
+    readonly outcome: {
+      readonly kind: 'sealed_submission'
+      readonly submissionDigest: string
+      readonly evidenceRecordId: string
+      /** Provider claim only; no Assurance Result or Gate authority is implied. */
+      readonly claimedOutcome: AssuranceClaimedOutcomeV1
+    }
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'rejected'
+    readonly begunAt: string
+    readonly rejectedAt: string
+    readonly failureCode: AssuranceSubmissionRejectionCode
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'import_failed'
+    readonly begunAt: string
+    readonly failedAt: string
+    readonly failureCode: 'evidence_store_failure'
   }
 
 /** Immutable reference to one completely published canonical Evidence envelope. */
@@ -366,7 +395,30 @@ export type MissionCommand =
     readonly missionId: MissionId
     readonly expectedRevision: number
     readonly invocationId: string
+    readonly expectedState: 'prepared' | 'begun'
     readonly failureCode: AssuranceProviderUnavailableCode
+  }
+  | {
+    readonly kind: 'settle_assurance_provider_invocation'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly invocationId: string
+    readonly outcome:
+      | {
+        readonly kind: 'sealed_submission'
+        readonly binding: AssuranceSubmissionBindingV1
+        readonly submissionDigest: string
+        readonly claimedOutcome: AssuranceClaimedOutcomeV1
+        readonly evidenceRecord: EvidenceRecord
+      }
+      | {
+        readonly kind: 'rejected_submission'
+        readonly failureCode: AssuranceSubmissionRejectionCode
+      }
+      | {
+        readonly kind: 'import_failed'
+        readonly failureCode: 'evidence_store_failure'
+      }
   }
 
 /** Durable acknowledgement of an accepted Mission command. */

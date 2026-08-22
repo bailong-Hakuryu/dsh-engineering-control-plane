@@ -125,6 +125,13 @@ export class AssuranceProviderRegistry {
     return provider
   }
 
+  /** Revalidate one resolved exact entry synchronously after an awaited admission step. */
+  isRegisteredExact(candidate: AssuranceProviderDescriptorV1): boolean {
+    if (!this.registrationClosed) return false
+    const expected = parseAssuranceProviderDescriptorV1(candidate)
+    return this.entries.has(descriptorKey(expected))
+  }
+
   clear(): void {
     this.entries.clear()
   }
