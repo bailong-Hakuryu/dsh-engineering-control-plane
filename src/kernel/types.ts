@@ -1,3 +1,8 @@
+import type {
+  AssuranceProviderActivationPolicyV1,
+  FrozenAssuranceProviderSelectionV1,
+} from '../assurance-provider/contracts.js'
+
 /** Opaque Mission identifier persisted by the Control Plane. */
 export type MissionId = string & { readonly __missionId: unique symbol }
 
@@ -14,6 +19,10 @@ export interface EffectivePolicy {
   readonly schemaVersion: number
   readonly digest: string
   readonly verificationProfile: string
+  /** Complete Host activation policy, including disabled and unavailable optional selections. */
+  readonly assuranceProviderActivations?: readonly AssuranceProviderActivationPolicyV1[]
+  /** Exact registrations available and selected when this Effective Policy was frozen. */
+  readonly selectedAssuranceProviders?: readonly FrozenAssuranceProviderSelectionV1[]
   readonly subagentProvider?: 'spawn'
   readonly maxSubagentDepth?: number
   readonly rolePolicies?: Readonly<Record<RoleName, EffectiveRolePolicy>>
@@ -116,6 +125,7 @@ export interface BlockedReason {
   readonly code:
     | 'needs_input'
     | 'host_restarted'
+    | 'assurance_execution_unavailable'
     | 'provider_failure'
     | 'command_timeout'
     | 'evidence_incomplete'
@@ -197,6 +207,13 @@ export interface GateDecisionRecord {
   readonly attempt: number
   readonly decidedAt: string
   readonly decision: GateDecision
+}
+
+/** Attempt-bound history row containing selection keys only, never live Provider handles. */
+export interface AttemptAssuranceProviderSelectionV1 {
+  readonly schemaVersion: 1
+  readonly attempt: number
+  readonly providers: readonly FrozenAssuranceProviderSelectionV1[]
 }
 
 /** Immutable reference to one completely published canonical Evidence envelope. */
@@ -336,6 +353,7 @@ export interface MissionSnapshot {
   readonly constraints: readonly string[]
   readonly effectivePolicy: EffectivePolicy
   readonly effectivePolicyDigest: string
+  readonly assuranceProviderSelections?: readonly AttemptAssuranceProviderSelectionV1[]
   readonly status: MissionStatus
   readonly attempt: number
   readonly inputRecords: readonly MissionInputRecord[]

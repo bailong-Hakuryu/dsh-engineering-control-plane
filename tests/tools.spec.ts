@@ -211,6 +211,24 @@ describe('Mission tool Adapter', () => {
     expect(value['evidence']).toHaveLength(128)
   })
 
+  it('does not advertise Resume while frozen Assurance execution is unavailable', () => {
+    const blocked: MissionSnapshot = {
+      ...snapshot(),
+      status: 'BLOCKED',
+      blocked: {
+        reason: { code: 'assurance_execution_unavailable' },
+        resumeStatus: 'CREATED',
+        blockedAt: '2026-08-22T20:00:03.000Z',
+      },
+      writeLease: { fencingToken: 1, releasedAt: '2026-08-22T20:00:03.000Z' },
+    }
+
+    expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
+      'mission_status',
+      'mission_cancel',
+    ])
+  })
+
   it('passes explicit revisions through each existing-Mission mutation without retrying', async () => {
     const { ctx, service } = await harness()
     await execute(ctx, 'mission_resume', { missionId, expectedRevision: 7, supplementalContext: 'answer' })

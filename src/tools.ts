@@ -82,6 +82,7 @@ const STATUS_SCHEMA = {
               enum: [
                 'needs_input',
                 'host_restarted',
+                'assurance_execution_unavailable',
                 'provider_failure',
                 'command_timeout',
                 'evidence_incomplete',
@@ -275,10 +276,25 @@ function receiptValue(receipt: MissionReceipt): ReceiptValue {
   }
 }
 
-function legalNextActions(status: MissionStatus): StatusValue['legalNextActions'] {
-  if (status === 'BLOCKED') return ['mission_status', 'mission_resume', 'mission_cancel']
-  if (status === 'REWORK_REQUIRED') return ['mission_status', 'mission_rework', 'mission_cancel']
-  if (status === 'APPROVED' || status === 'CANCELLED') return ['mission_status']
+function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActions'] {
+  const hasSelectedAssuranceProviders = (snapshot.assuranceProviderSelections
+    ?.find(selection => selection.attempt === snapshot.attempt)
+    ?.providers.length ?? 0) > 0
+  if (snapshot.status === 'BLOCKED') {
+    if (
+      snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
+      || hasSelectedAssuranceProviders
+    ) {
+      return ['mission_status', 'mission_cancel']
+    }
+    return ['mission_status', 'mission_resume', 'mission_cancel']
+  }
+  if (snapshot.status === 'REWORK_REQUIRED') {
+    return hasSelectedAssuranceProviders
+      ? ['mission_status', 'mission_cancel']
+      : ['mission_status', 'mission_rework', 'mission_cancel']
+  }
+  if (snapshot.status === 'APPROVED' || snapshot.status === 'CANCELLED') return ['mission_status']
   return ['mission_status', 'mission_cancel']
 }
 
@@ -350,7 +366,7 @@ export function statusValue(snapshot: MissionSnapshot): StatusValue {
     })),
     roleRunsTruncated: snapshot.roleRuns.length > selectedRoleRuns.length,
     evidenceTruncated: snapshot.evidence.records.length > selectedEvidence.length,
-    legalNextActions: legalNextActions(snapshot.status),
+    legalNextActions: legalNextActions(snapshot),
   }
 }
 

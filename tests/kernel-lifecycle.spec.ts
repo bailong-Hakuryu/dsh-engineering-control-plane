@@ -151,6 +151,55 @@ describe('ControlPlaneKernel lifecycle', () => {
     })
   })
 
+  it('atomically blocks and refuses Resume while frozen Assurance execution is unavailable', async () => {
+    const selectedPolicy: EffectivePolicy = {
+      ...policy,
+      selectedAssuranceProviders: [{
+        schemaVersion: 1,
+        descriptor: {
+          schemaVersion: 1,
+          providerId: 'fixture/kernel-selection-provider',
+          providerVersion: '1.0.0-fixture.1',
+        },
+        activation: 'required',
+      }],
+    }
+    const kernel = createControlPlaneKernel({
+      store: createInMemoryMissionStore(),
+      nextMissionId: () => 'mission-assurance-unavailable',
+      now: () => '2026-08-22T14:00:00.000Z',
+      resolveEffectivePolicy: () => selectedPolicy,
+    })
+    const started = await kernel.dispatch({
+      kind: 'start',
+      idempotencyKey: 'assurance-unavailable-start',
+      input: { objective: 'Preserve the unavailable Assurance boundary' },
+    }, authority)
+
+    expect(started).toMatchObject({ revision: 1, status: 'BLOCKED', attempt: 1 })
+    await expect(kernel.dispatch({
+      kind: 'resume',
+      missionId: started.missionId,
+      expectedRevision: 1,
+    }, authority)).rejects.toMatchObject({
+      code: 'illegal_transition',
+      status: 'BLOCKED',
+      currentRevision: 1,
+    })
+    await expect(kernel.snapshot(started.missionId, authority)).resolves.toMatchObject({
+      revision: 1,
+      status: 'BLOCKED',
+      writeLease: {
+        fencingToken: 1,
+        releasedAt: '2026-08-22T14:00:00.000Z',
+      },
+      blocked: {
+        reason: { code: 'assurance_execution_unavailable' },
+        resumeStatus: 'CREATED',
+      },
+    })
+  })
+
   it('starts Rework as a new Planning Attempt without rewriting the prior Gate decision', async () => {
     const kernel = createControlPlaneKernel({
       store: createInMemoryMissionStore(),

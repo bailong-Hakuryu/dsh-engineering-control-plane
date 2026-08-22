@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { Config } from '../src/config.ts'
-import { createEffectivePolicy, resolveDeploymentConfig } from '../src/policy.ts'
+import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
+import {
+  createEffectivePolicy,
+  resolveAssuranceProviderActivations,
+  resolveDeploymentConfig,
+} from '../src/policy.ts'
 
 function config(): Config {
   const category = { mode: 'not_applicable' as const, reason: 'Not required for this fixture.' }
@@ -38,6 +42,56 @@ function config(): Config {
 }
 
 describe('Effective Policy', () => {
+  it('strictly canonicalizes detached Assurance Provider activation policy', () => {
+    const configured: AssuranceProviderActivationConfig[] = [
+      {
+        providerId: 'fixture/z-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'when-available',
+      },
+      {
+        providerId: 'fixture/a-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'required',
+      },
+    ]
+    const resolved = resolveAssuranceProviderActivations(configured)
+
+    expect(resolved.map(policy => policy.descriptor.providerId)).toEqual([
+      'fixture/a-provider',
+      'fixture/z-provider',
+    ])
+    expect(Object.isFrozen(resolved)).toBe(true)
+    expect(Object.isFrozen(resolved[0])).toBe(true)
+    configured[0]!.providerId = 'caller/mutated'
+    expect(resolved[1]!.descriptor.providerId).toBe('fixture/z-provider')
+
+    expect(() => resolveAssuranceProviderActivations([
+      {
+        providerId: 'fixture/duplicate-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'required',
+      },
+      {
+        providerId: 'fixture/duplicate-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'when-available',
+      },
+    ])).toThrow(
+      "Assurance Provider activation 'fixture/duplicate-provider' version '1.0.0-fixture.1' is duplicated",
+    )
+
+    const unknownField = {
+      providerId: 'fixture/strict-provider',
+      providerVersion: '1.0.0-fixture.1',
+      activation: 'required',
+      fallbackVersion: 'latest',
+    } as unknown as AssuranceProviderActivationConfig
+    expect(() => resolveAssuranceProviderActivations([unknownField])).toThrow(
+      "repositories[].assuranceProviders[0] contains unknown field 'fallbackVersion'",
+    )
+  })
+
   it('materializes and freezes the complete redacted execution policy with a stable digest', () => {
     const deployment = resolveDeploymentConfig(config())
     const first = createEffectivePolicy(deployment, 'fixture')

@@ -1,4 +1,5 @@
 import z from '@deepseek-ai/schemastery'
+import type { AssuranceProviderActivation } from './assurance-provider/contracts.js'
 import type {
   EffectiveArtifactBudgets,
   RoleName,
@@ -7,6 +8,13 @@ import type {
 export interface RepositoryMappingConfig {
   root: string
   verificationProfile: string
+  assuranceProviders?: AssuranceProviderActivationConfig[]
+}
+
+export interface AssuranceProviderActivationConfig {
+  providerId: string
+  providerVersion: string
+  activation: AssuranceProviderActivation
 }
 
 export interface DatabaseConfig {
@@ -76,6 +84,11 @@ const rolePolicy = z.object({
   model: z.string(),
   maxTokens: z.number(),
 })
+const assuranceProviderActivation = z.object({
+  providerId: z.string().required(),
+  providerVersion: z.string().required(),
+  activation: z.union(['disabled', 'when-available', 'required'] as const).required(),
+})
 
 /** Schemastery configuration surface; every execution/gate choice is host-owned. */
 export const Config = z.object({
@@ -91,6 +104,7 @@ export const Config = z.object({
   repositories: z.array(z.object({
     root: z.string().required(),
     verificationProfile: z.string().required(),
+    assuranceProviders: z.array(assuranceProviderActivation).default([]),
   })).required(),
   verificationProfiles: z.array(z.object({
     name: z.string().required(),

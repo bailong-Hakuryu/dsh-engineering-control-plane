@@ -15,7 +15,7 @@ import type {
   AssuranceProviderFactoryV1,
 } from '../src/assurance-provider.ts'
 import { parseAssuranceProviderDescriptorV1 } from '../src/assurance-provider.ts'
-import type { Config } from '../src/config.ts'
+import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
 import * as clientPlugin from '../src/client.ts'
 import * as toolsPlugin from '../src/tools.ts'
 
@@ -38,7 +38,11 @@ async function cleanRepository(): Promise<string> {
   return root
 }
 
-function config(repository: string, home: string): Config {
+function config(
+  repository: string,
+  home: string,
+  assuranceProviders: readonly AssuranceProviderActivationConfig[] = [],
+): Config {
   const notApplicable = { mode: 'not_applicable' as const, reason: 'Not required by this fixture.' }
   return {
     dshHome: home,
@@ -50,7 +54,11 @@ function config(repository: string, home: string): Config {
       tester: { allowTools: [], denyTools: [] },
       reviewer: { allowTools: [], denyTools: [] },
     },
-    repositories: [{ root: repository, verificationProfile: 'provider-fixture' }],
+    repositories: [{
+      root: repository,
+      verificationProfile: 'provider-fixture',
+      assuranceProviders: assuranceProviders.map(provider => ({ ...provider })),
+    }],
     verificationProfiles: [{
       name: 'provider-fixture',
       categories: {
@@ -86,7 +94,7 @@ function referenceProviderContributor(
   }
 }
 
-describe('Assurance Provider startup composition', () => {
+describe('Assurance Provider startup registration and selection', () => {
   it('admits detached frozen descriptors only during pre-Mission contributor composition', async () => {
     expect(Object.keys(assuranceProviderEntry)).toEqual(['parseAssuranceProviderDescriptorV1'])
     expect('registerAssuranceProvider' in toolsPlugin).toBe(false)
@@ -103,8 +111,8 @@ describe('Assurance Provider startup composition', () => {
 
     const descriptor: AssuranceProviderDescriptorV1 = {
       schemaVersion: 1,
-      providerId: 'dsh/security-assurance',
-      providerVersion: '0.1.0-rc.1',
+      providerId: 'fixture/registration-provider',
+      providerVersion: '1.0.0-fixture.1',
     }
     const observed: AssuranceProviderDescriptorV1[] = []
     const normalized = parseAssuranceProviderDescriptorV1(descriptor)
@@ -122,14 +130,14 @@ describe('Assurance Provider startup composition', () => {
       ;(descriptor as { providerId: string }).providerId = 'caller/mutated'
       const registeredIdentity: AssuranceProviderDescriptorV1 = {
         schemaVersion: 1,
-        providerId: 'dsh/security-assurance',
-        providerVersion: '0.1.0-rc.1',
+        providerId: 'fixture/registration-provider',
+        providerVersion: '1.0.0-fixture.1',
       }
       await expect(ctx.plugin(referenceProviderContributor(
         registeredIdentity,
         normalized => observed.push(normalized),
         'duplicate-reference-assurance-provider',
-      ))).rejects.toThrow("Assurance Provider 'dsh/security-assurance' version '0.1.0-rc.1' is already registered")
+      ))).rejects.toThrow("Assurance Provider 'fixture/registration-provider' version '1.0.0-fixture.1' is already registered")
       expect(observed).toHaveLength(0)
 
       const invalidDescriptor = {
@@ -169,6 +177,197 @@ describe('Assurance Provider startup composition', () => {
         'late-reference-assurance-provider',
       ))).rejects.toThrow('Assurance Provider registration is closed after Mission operation began')
       expect(observed).toHaveLength(0)
+    } finally {
+      await serviceFiber.dispose()
+      await subagentFiber.dispose()
+      await subprocessFiber.dispose()
+    }
+  })
+
+  it('freezes Host-selected exact Provider registrations into Attempt 1 before execution', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-selection-home-'))
+    temporaryRoots.push(home)
+    const activations: AssuranceProviderActivationConfig[] = [
+      {
+        providerId: 'fixture/disabled-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'disabled',
+      },
+      {
+        providerId: 'fixture/missing-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'when-available',
+      },
+      {
+        providerId: 'fixture/required-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'required',
+      },
+      {
+        providerId: 'fixture/when-available-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'when-available',
+      },
+    ]
+    const ctx = new Context()
+    const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
+    const subagentFiber = await ctx.plugin(SubagentRuntime)
+    const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, activations))
+    await ctx.engineeringControlPlane.whenReady()
+
+    const descriptors = {
+      disabled: {
+        schemaVersion: 1,
+        providerId: 'fixture/disabled-provider',
+        providerVersion: '1.0.0-fixture.1',
+      },
+      required: {
+        schemaVersion: 1,
+        providerId: 'fixture/required-provider',
+        providerVersion: '1.0.0-fixture.1',
+      },
+      whenAvailable: {
+        schemaVersion: 1,
+        providerId: 'fixture/when-available-provider',
+        providerVersion: '1.0.0-fixture.1',
+      },
+    } as const satisfies Record<string, AssuranceProviderDescriptorV1>
+
+    try {
+      const disabledFiber = await ctx.plugin(referenceProviderContributor(
+        descriptors.disabled,
+        () => {},
+        'disabled-reference-assurance-provider',
+      ))
+      const requiredFiber = await ctx.plugin(referenceProviderContributor(
+        descriptors.required,
+        () => {},
+        'required-reference-assurance-provider',
+      ))
+      const whenAvailableFiber = await ctx.plugin(referenceProviderContributor(
+        descriptors.whenAvailable,
+        () => {},
+        'when-available-reference-assurance-provider',
+      ))
+
+      const agent = {
+        id: 'agent-provider-selection-fixture',
+        session: { header: { cwd: repository } },
+      } as unknown as Agent
+      const receipt = await ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-selection:start:1',
+        objective: 'Freeze exact Host-selected Assurance Providers for Attempt 1',
+      }, new AbortController().signal)
+      const frozen = await ctx.engineeringControlPlane.status(
+        agent,
+        receipt.missionId,
+        new AbortController().signal,
+      )
+
+      expect(frozen.effectivePolicy).toMatchObject({
+        assuranceProviderActivations: [
+          { schemaVersion: 1, descriptor: descriptors.disabled, activation: 'disabled' },
+          {
+            schemaVersion: 1,
+            descriptor: {
+              schemaVersion: 1,
+              providerId: 'fixture/missing-provider',
+              providerVersion: '1.0.0-fixture.1',
+            },
+            activation: 'when-available',
+          },
+          { schemaVersion: 1, descriptor: descriptors.required, activation: 'required' },
+          {
+            schemaVersion: 1,
+            descriptor: descriptors.whenAvailable,
+            activation: 'when-available',
+          },
+        ],
+      })
+      expect(frozen.assuranceProviderSelections).toEqual([{
+        schemaVersion: 1,
+        attempt: 1,
+        providers: [
+          { schemaVersion: 1, descriptor: descriptors.required, activation: 'required' },
+          {
+            schemaVersion: 1,
+            descriptor: descriptors.whenAvailable,
+            activation: 'when-available',
+          },
+        ],
+      }])
+      expect(receipt).toMatchObject({ revision: 1, status: 'BLOCKED' })
+      expect(frozen).toMatchObject({
+        revision: 1,
+        status: 'BLOCKED',
+        writeLease: {
+          fencingToken: 1,
+          releasedAt: frozen.createdAt,
+        },
+        blocked: {
+          reason: { code: 'assurance_execution_unavailable' },
+          resumeStatus: 'CREATED',
+        },
+        roleRuns: [],
+      })
+
+      activations[2]!.providerId = 'caller/mutated-after-start'
+      await disabledFiber.dispose()
+      await requiredFiber.dispose()
+      await whenAvailableFiber.dispose()
+
+      const afterDisposal = await ctx.engineeringControlPlane.status(
+        agent,
+        receipt.missionId,
+        new AbortController().signal,
+      )
+      expect(afterDisposal.effectivePolicy).toEqual(frozen.effectivePolicy)
+      expect(afterDisposal.assuranceProviderSelections).toEqual(frozen.assuranceProviderSelections)
+
+      const replay = await ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-selection:start:1',
+        objective: 'Freeze exact Host-selected Assurance Providers for Attempt 1',
+      }, new AbortController().signal)
+      expect(replay).toEqual(receipt)
+      await expect(ctx.engineeringControlPlane.resume(agent, {
+        missionId: receipt.missionId,
+        expectedRevision: receipt.revision,
+      }, new AbortController().signal)).rejects.toThrow(
+        'Assurance Provider execution is unavailable in this Control Plane build',
+      )
+    } finally {
+      await serviceFiber.dispose()
+      await subagentFiber.dispose()
+      await subprocessFiber.dispose()
+    }
+  })
+
+  it('fails closed before Mission acceptance when an exact required Provider is absent', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-required-provider-home-'))
+    temporaryRoots.push(home)
+    const ctx = new Context()
+    const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
+    const subagentFiber = await ctx.plugin(SubagentRuntime)
+    const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, [{
+      providerId: 'fixture/missing-required-provider',
+      providerVersion: '1.0.0-fixture.1',
+      activation: 'required',
+    }]))
+    await ctx.engineeringControlPlane.whenReady()
+
+    try {
+      const agent = {
+        id: 'agent-missing-required-provider-fixture',
+        session: { header: { cwd: repository } },
+      } as unknown as Agent
+      await expect(ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'missing-required-provider:start:1',
+        objective: 'Reject a Mission whose required Assurance Provider is absent',
+      }, new AbortController().signal)).rejects.toThrow(
+        "Required Assurance Provider 'fixture/missing-required-provider' version '1.0.0-fixture.1' is not registered",
+      )
     } finally {
       await serviceFiber.dispose()
       await subagentFiber.dispose()

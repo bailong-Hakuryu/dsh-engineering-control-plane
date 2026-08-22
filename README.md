@@ -6,7 +6,7 @@ provides replaceable subagent and subprocess capabilities; this package owns the
 authoritative Mission lifecycle, policy snapshot, Evidence manifest and Quality
 Gate.
 
-The v0.1 package exposes four entry points:
+The v0.1 package exposes five entry points:
 
 - `dsh-engineering-control-plane` — the host-side Cordis Service and portable
   Control Plane Kernel contracts.
@@ -14,6 +14,9 @@ The v0.1 package exposes four entry points:
 - `dsh-engineering-control-plane/client` — a browser-safe, revision-aware
   projection store. It is a cache, never Mission authority.
 - `dsh-engineering-control-plane/invariant` — startup readiness diagnostics.
+- `dsh-engineering-control-plane/assurance-provider` — the strict,
+  host-startup-only Provider contract; it exposes no model or browser
+  registration authority.
 
 ## Safety model
 
@@ -79,6 +82,7 @@ replaces the complete earlier row, so keep `id`, `name` and the full `config`.
         repositories:
           - root: 'D:/absolute/path/to/repository'
             verificationProfile: project-default
+            assuranceProviders: []
 
         rolePolicies:
           planner:
@@ -149,6 +153,31 @@ Inspect the resulting composition before booting it:
 dsh --profile engineering --dump-config
 dsh --profile engineering
 ```
+
+## Assurance Provider activation
+
+Repository mappings may bind exact startup registrations with Host-owned
+activation policy:
+
+```yaml
+assuranceProviders:
+  - providerId: fixture/example-provider
+    providerVersion: 1.0.0-fixture.1
+    activation: required
+```
+
+`disabled` never selects a Provider. `when-available` selects only the exact
+registered ID and version when present. `required` rejects Mission acceptance
+when that exact registration is absent. Selected registration keys are copied
+by value into Effective Policy and, in this staged slice, the Attempt 1 history;
+no version fallback or live Registry handle is persisted. Rework propagation is
+part of the later invocation/Rework slice.
+
+This staged slice does not yet invoke Providers, import sealed Submissions, or
+grant external assurance credit at the Quality Gate. A Mission with a non-empty
+selection therefore blocks with `assurance_execution_unavailable` before the
+engineering Runner launches. Keep `assuranceProviders` empty outside integration
+fixtures until the invocation and Submission slices are installed.
 
 ## Read-only doctor
 

@@ -1,7 +1,9 @@
 import type {
+  AssuranceProviderActivationPolicyV1,
   AssuranceProviderDescriptorV1,
   AssuranceProviderDisposer,
   AssuranceProviderFactoryV1,
+  FrozenAssuranceProviderSelectionV1,
 } from './contracts.js'
 import { parseAssuranceProviderDescriptorV1 } from './contracts.js'
 
@@ -47,6 +49,34 @@ export class AssuranceProviderRegistry {
 
   closeRegistration(): void {
     this.registrationClosed = true
+  }
+
+  /** Resolve exact Host selections only after startup composition has closed. */
+  freezeSelections(
+    policies: readonly AssuranceProviderActivationPolicyV1[],
+  ): readonly FrozenAssuranceProviderSelectionV1[] {
+    if (!this.registrationClosed) {
+      throw new Error('Assurance Provider selections cannot freeze before registration closes')
+    }
+    const selections: FrozenAssuranceProviderSelectionV1[] = []
+    for (const policy of policies) {
+      if (policy.activation === 'disabled') continue
+      const entry = this.entries.get(descriptorKey(policy.descriptor))
+      if (entry === undefined) {
+        if (policy.activation === 'required') {
+          throw new TypeError(
+            `Required Assurance Provider '${policy.descriptor.providerId}' version '${policy.descriptor.providerVersion}' is not registered`,
+          )
+        }
+        continue
+      }
+      selections.push(Object.freeze({
+        schemaVersion: 1,
+        descriptor: parseAssuranceProviderDescriptorV1(entry.descriptor),
+        activation: policy.activation,
+      }))
+    }
+    return Object.freeze(selections)
   }
 
   clear(): void {

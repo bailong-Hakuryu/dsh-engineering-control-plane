@@ -43,6 +43,29 @@ function roleForStatus(status: MissionSnapshot['status']): RoleName | undefined 
   }
 }
 
+function hasSelectedAssuranceProviders(snapshot: MissionSnapshot): boolean {
+  return (snapshot.assuranceProviderSelections
+    ?.find(selection => selection.attempt === snapshot.attempt)
+    ?.providers.length ?? 0) > 0
+}
+
+function assuranceExecutionUnavailable(snapshot: MissionSnapshot): boolean {
+  return snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
+    || hasSelectedAssuranceProviders(snapshot)
+}
+
+function unavailableAssuranceExecutionError(snapshot: MissionSnapshot): MissionError {
+  return new MissionError(
+    'illegal_transition',
+    'Assurance Provider execution is unavailable in this Control Plane build',
+    {
+      missionId: snapshot.missionId,
+      status: snapshot.status,
+      currentRevision: snapshot.revision,
+    },
+  )
+}
+
 function receipt(snapshot: MissionSnapshot): MissionReceipt {
   return {
     missionId: snapshot.missionId,
@@ -166,30 +189,52 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
       if (command.kind === 'start') {
         requireAction(authority, 'start')
 
-        const policy = options.resolveEffectivePolicy(authority)
         const holderId = requireLeaseHolderId(authority)
         const acceptance = await options.store.acceptStart(
           command.idempotencyKey,
           authority.repository.canonicalRoot,
           () => {
             const acceptedAt = options.now()
+            const policy = options.resolveEffectivePolicy(authority)
+            const providerSelections = (policy.selectedAssuranceProviders ?? []).map(selection => ({
+              schemaVersion: 1 as const,
+              descriptor: { ...selection.descriptor },
+              activation: selection.activation,
+            }))
+            const assuranceExecutionUnavailable = providerSelections.length > 0
             return {
               missionId: missionId(options.nextMissionId()),
               revision: 1,
               repository: authority.repository,
-              writeLease: {
-                fencingToken: 1,
-                holderId,
-                acquiredAt: acceptedAt,
-              },
+              writeLease: assuranceExecutionUnavailable
+                ? { fencingToken: 1, releasedAt: acceptedAt }
+                : {
+                    fencingToken: 1,
+                    holderId,
+                    acquiredAt: acceptedAt,
+                  },
               objective: command.input.objective,
               ...command.input.context === undefined ? {} : { context: command.input.context },
               acceptanceCriteria: command.input.acceptanceCriteria ?? [],
               constraints: command.input.constraints ?? [],
               effectivePolicy: policy,
               effectivePolicyDigest: policy.digest,
-              status: 'CREATED',
+              assuranceProviderSelections: [{
+                schemaVersion: 1,
+                attempt: 1,
+                providers: providerSelections,
+              }],
+              status: assuranceExecutionUnavailable ? 'BLOCKED' : 'CREATED',
               attempt: 1,
+              ...assuranceExecutionUnavailable
+                ? {
+                    blocked: {
+                      reason: { code: 'assurance_execution_unavailable' as const },
+                      resumeStatus: 'CREATED' as const,
+                      blockedAt: acceptedAt,
+                    },
+                  }
+                : {},
               inputRecords: [{
                 sequence: 1,
                 kind: 'initial',
@@ -377,6 +422,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               },
             )
           }
+          if (assuranceExecutionUnavailable(current)) {
+            throw unavailableAssuranceExecutionError(current)
+          }
           const resumedAt = options.now()
           const { blocked, ...unblocked } = current
           return {
@@ -417,6 +465,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 currentRevision: current.revision,
               },
             )
+          }
+          if (assuranceExecutionUnavailable(current)) {
+            throw unavailableAssuranceExecutionError(current)
           }
           const submittedAt = options.now()
           return {

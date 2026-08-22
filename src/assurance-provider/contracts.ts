@@ -6,11 +6,31 @@ declare const externalAssessmentFailureBrand: unique symbol
 const PROVIDER_ID = /^[a-z0-9](?:[a-z0-9._-]{0,62})(?:\/[a-z0-9](?:[a-z0-9._-]{0,62})){1,7}$/
 const PROVIDER_VERSION = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/
 
-/** Startup-composed identity of one Assurance Provider implementation line. */
+/** Namespaced and versioned registration/selection key; not executable identity. */
 export interface AssuranceProviderDescriptorV1 {
   readonly schemaVersion: 1
   readonly providerId: string
   readonly providerVersion: string
+}
+
+/** Host-owned activation choice; registration or installation grants no authority. */
+export type AssuranceProviderActivation = 'disabled' | 'when-available' | 'required'
+
+/** Exact Host Policy selection key frozen into Effective Policy. */
+export interface AssuranceProviderActivationPolicyV1 {
+  readonly schemaVersion: 1
+  readonly descriptor: AssuranceProviderDescriptorV1
+  readonly activation: AssuranceProviderActivation
+}
+
+/**
+ * Attempt-frozen registration selection. This is not a Capability declaration,
+ * complete Provider Composition, Assessor Identity, or Gate eligibility proof.
+ */
+export interface FrozenAssuranceProviderSelectionV1 {
+  readonly schemaVersion: 1
+  readonly descriptor: AssuranceProviderDescriptorV1
+  readonly activation: Exclude<AssuranceProviderActivation, 'disabled'>
 }
 
 function record(value: unknown, label: string): Record<string, unknown> {

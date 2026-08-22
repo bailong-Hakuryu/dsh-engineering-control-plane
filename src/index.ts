@@ -11,6 +11,7 @@ import { openSqliteMissionStore, type SqliteMissionStore } from './adapters/sqli
 import { VerificationAdapter, type VerificationProfile } from './adapters/verification.js'
 import { AssuranceProviderRegistry } from './assurance-provider/registry.js'
 import type {
+  AssuranceProviderActivationPolicyV1,
   AssuranceProviderDescriptorV1,
   AssuranceProviderDisposer,
   AssuranceProviderFactoryV1,
@@ -34,6 +35,7 @@ import type {
 import { isMissionPhase } from './kernel/state-machine.js'
 import {
   createEffectivePolicy,
+  resolveAssuranceProviderActivations,
   resolveDeploymentConfig,
 } from './policy.js'
 import {
@@ -58,7 +60,11 @@ interface ControlPlaneRuntime {
   readonly kernel: ControlPlaneKernel
   readonly runner: MissionRunner
   readonly git: GitRepositoryAdapter
-  readonly policiesByRepository: ReadonlyMap<string, EffectivePolicy>
+}
+
+interface RepositoryPolicyBinding {
+  readonly verificationProfileName: string
+  readonly assuranceProviderActivations: readonly AssuranceProviderActivationPolicyV1[]
 }
 
 export interface MissionStartRequest extends StartMissionInput {
@@ -84,7 +90,6 @@ export interface MissionReworkRequest {
 }
 
 const ROLE_NAMES = ['planner', 'developer', 'tester', 'reviewer'] as const satisfies readonly RoleName[]
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
@@ -336,7 +341,7 @@ export class EngineeringControlPlane extends Service {
       maxUntrackedFiles: deployment.artifactBudgets.maxUntrackedFiles,
       maxUntrackedBytes: deployment.artifactBudgets.maxUntrackedBytes,
     })
-    const policiesByRepository = new Map<string, EffectivePolicy>()
+    const policyBindingsByRepository = new Map<string, RepositoryPolicyBinding>()
     for (const mapping of config.repositories ?? []) {
       const profileName = mapping.verificationProfile
       if (!deployment.verificationProfiles.has(profileName)) {
@@ -346,12 +351,17 @@ export class EngineeringControlPlane extends Service {
         mapping.root,
         AbortSignal.timeout(deployment.gitCommandTimeoutMs),
       )
-      if (policiesByRepository.has(canonicalRoot)) {
+      if (policyBindingsByRepository.has(canonicalRoot)) {
         throw new TypeError(`Canonical repository '${canonicalRoot}' is mapped more than once`)
       }
-      policiesByRepository.set(canonicalRoot, createEffectivePolicy(deployment, profileName))
+      policyBindingsByRepository.set(canonicalRoot, {
+        verificationProfileName: profileName,
+        assuranceProviderActivations: resolveAssuranceProviderActivations(mapping.assuranceProviders),
+      })
     }
-    if (policiesByRepository.size === 0) throw new TypeError('At least one repository mapping is required')
+    if (policyBindingsByRepository.size === 0) {
+      throw new TypeError('At least one repository mapping is required')
+    }
 
     const home = resolveDshHome(config.dshHome)
     let store: SqliteMissionStore | undefined
@@ -366,9 +376,19 @@ export class EngineeringControlPlane extends Service {
         nextMissionId: () => `mission-${randomUUID()}`,
         now: () => new Date().toISOString(),
         resolveEffectivePolicy: missionAuthority => {
-          const policy = policiesByRepository.get(missionAuthority.repository.canonicalRoot)
-          if (policy === undefined) throw new Error('The canonical repository has no host-owned policy mapping')
-          return policy
+          const binding = policyBindingsByRepository.get(missionAuthority.repository.canonicalRoot)
+          if (binding === undefined) {
+            throw new Error('The canonical repository has no host-owned policy mapping')
+          }
+          const selected = this.assuranceProviders.freezeSelections(
+            binding.assuranceProviderActivations,
+          )
+          return createEffectivePolicy(
+            deployment,
+            binding.verificationProfileName,
+            binding.assuranceProviderActivations,
+            selected,
+          )
         },
       })
       const runner = createMissionRunner({
@@ -390,7 +410,7 @@ export class EngineeringControlPlane extends Service {
         ),
       })
       await runner.recoverAfterRestart()
-      return { home, store, kernel, runner, git, policiesByRepository }
+      return { home, store, kernel, runner, git }
     } catch (error) {
       await store?.close()
       throw error

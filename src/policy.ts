@@ -1,11 +1,21 @@
 import { createHash } from 'node:crypto'
 import type { AgentOptions } from '@deepseek-ai/dsh-agent'
 import type { HarnessRolePolicy } from './adapters/harness-role-executor.js'
+import { parseAssuranceProviderDescriptorV1 } from './assurance-provider/contracts.js'
+import type {
+  AssuranceProviderActivationPolicyV1,
+  FrozenAssuranceProviderSelectionV1,
+} from './assurance-provider/contracts.js'
 import {
   validateVerificationProfile,
   type VerificationProfile,
 } from './adapters/verification.js'
-import type { Config, RolePolicyConfig, VerificationProfileConfig } from './config.js'
+import type {
+  AssuranceProviderActivationConfig,
+  Config,
+  RolePolicyConfig,
+  VerificationProfileConfig,
+} from './config.js'
 import { DEFAULT_ARTIFACT_BUDGETS } from './config.js'
 import { canonicalizeEvidence } from './evidence/filesystem-store.js'
 import type {
@@ -37,6 +47,11 @@ const DEVELOPER_ROLE_TOOLS = new Set([
   'write',
   'edit',
   'str_replace_editor',
+])
+const ASSURANCE_PROVIDER_ACTIVATION_KEYS = new Set([
+  'providerId',
+  'providerVersion',
+  'activation',
 ])
 
 export interface ResolvedDeploymentConfig {
@@ -182,6 +197,59 @@ function deepFreeze<T>(value: T): T {
   return Object.freeze(value)
 }
 
+function activationKey(policy: AssuranceProviderActivationPolicyV1): string {
+  return `${policy.descriptor.providerId}\0${policy.descriptor.providerVersion}`
+}
+
+/** Validate, canonicalize, detach, and freeze one repository's Host activation choices. */
+export function resolveAssuranceProviderActivations(
+  configured: readonly AssuranceProviderActivationConfig[] | undefined,
+): readonly AssuranceProviderActivationPolicyV1[] {
+  const resolved = (configured ?? []).map((candidate, index) => {
+    if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
+      throw new TypeError(`repositories[].assuranceProviders[${index}] must be an object`)
+    }
+    const unknown = Object.keys(candidate)
+      .find(key => !ASSURANCE_PROVIDER_ACTIVATION_KEYS.has(key))
+    if (unknown !== undefined) {
+      throw new TypeError(
+        `repositories[].assuranceProviders[${index}] contains unknown field '${unknown}'`,
+      )
+    }
+    if (
+      candidate.activation !== 'disabled'
+      && candidate.activation !== 'when-available'
+      && candidate.activation !== 'required'
+    ) {
+      throw new TypeError(
+        `repositories[].assuranceProviders[${index}].activation must be disabled, when-available, or required`,
+      )
+    }
+    return {
+      schemaVersion: 1 as const,
+      descriptor: parseAssuranceProviderDescriptorV1({
+        schemaVersion: 1,
+        providerId: candidate.providerId,
+        providerVersion: candidate.providerVersion,
+      }),
+      activation: candidate.activation,
+    }
+  }).sort((left, right) => {
+    const leftKey = activationKey(left)
+    const rightKey = activationKey(right)
+    return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0
+  })
+  for (let index = 1; index < resolved.length; index += 1) {
+    if (activationKey(resolved[index - 1]!) === activationKey(resolved[index]!)) {
+      const descriptor = resolved[index]!.descriptor
+      throw new TypeError(
+        `Assurance Provider activation '${descriptor.providerId}' version '${descriptor.providerVersion}' is duplicated`,
+      )
+    }
+  }
+  return deepFreeze(resolved)
+}
+
 /** Validate direct plugin application as strictly as Loader-normalized configuration. */
 export function resolveDeploymentConfig(config: Config): ResolvedDeploymentConfig {
   const subagentProvider = nonEmpty('subagentProvider', config.subagentProvider)
@@ -251,6 +319,8 @@ export function resolveDeploymentConfig(config: Config): ResolvedDeploymentConfi
 export function createEffectivePolicy(
   deployment: ResolvedDeploymentConfig,
   verificationProfileName: string,
+  assuranceProviderActivations: readonly AssuranceProviderActivationPolicyV1[] = [],
+  selectedAssuranceProviders: readonly FrozenAssuranceProviderSelectionV1[] = [],
 ): EffectivePolicy {
   const verification = deployment.verificationProfiles.get(verificationProfileName)
   if (verification === undefined) {
@@ -259,6 +329,16 @@ export function createEffectivePolicy(
   const unsigned = {
     schemaVersion: 1,
     verificationProfile: verification.name,
+    assuranceProviderActivations: assuranceProviderActivations.map(policy => ({
+      schemaVersion: 1 as const,
+      descriptor: { ...policy.descriptor },
+      activation: policy.activation,
+    })),
+    selectedAssuranceProviders: selectedAssuranceProviders.map(selection => ({
+      schemaVersion: 1 as const,
+      descriptor: { ...selection.descriptor },
+      activation: selection.activation,
+    })),
     subagentProvider: deployment.subagentProvider,
     maxSubagentDepth: deployment.maxSubagentDepth,
     rolePolicies: deployment.rolePolicies,
