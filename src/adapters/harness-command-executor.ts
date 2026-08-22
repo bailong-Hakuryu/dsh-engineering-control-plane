@@ -31,6 +31,7 @@ export interface HarnessCommandExecutorOptions {
 }
 
 const ENVIRONMENT_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
+const COUNTED_GIT_CONFIG_ENVIRONMENT = /^GIT_CONFIG_(?:COUNT|KEY_[0-9]+|VALUE_[0-9]+)$/iu
 
 /** Managed argv-only command executor over `ctx.subprocess`; it never invokes a shell. */
 export class HarnessCommandExecutor {
@@ -60,6 +61,13 @@ export class HarnessCommandExecutor {
     }
     const environmentNames = [...new Set(spec.environmentNames ?? [])]
     const env: NodeJS.ProcessEnv = {}
+    // Harness scrubs credential-shaped names such as GIT_CONFIG_KEY_0. A
+    // surviving COUNT/VALUE without its KEY makes every child Git invocation
+    // fail, so remove the whole ambient counted-config group atomically. Host
+    // policy can still restore an explicitly named complete group below.
+    for (const name of Object.keys(process.env)) {
+      if (COUNTED_GIT_CONFIG_ENVIRONMENT.test(name)) env[name] = undefined
+    }
     for (const name of environmentNames) {
       if (!ENVIRONMENT_NAME.test(name)) throw new TypeError(`Invalid environment reference '${name}'`)
       const value = process.env[name]
