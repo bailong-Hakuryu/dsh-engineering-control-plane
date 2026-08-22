@@ -3,6 +3,7 @@ import type { MissionStore } from './memory-store.js'
 import { MissionError } from './errors.js'
 import { isMissionPhase, mayAdvance } from './state-machine.js'
 import { evaluateGate } from './gate.js'
+import type { AssuranceProviderUnavailableCode } from '../assurance-provider/contracts.js'
 import type {
   ControlPlaneKernel,
   EffectivePolicy,
@@ -15,6 +16,13 @@ import type {
   RoleName,
   WriteLeaseState,
 } from './types.js'
+
+const ASSURANCE_PROVIDER_UNAVAILABLE_CODES = new Set<AssuranceProviderUnavailableCode>([
+  'registration_missing',
+  'factory_failed',
+  'invalid_provider',
+  'descriptor_mismatch',
+])
 
 export { createInMemoryMissionStore }
 export { MissionError }
@@ -52,6 +60,35 @@ function hasSelectedAssuranceProviders(snapshot: MissionSnapshot): boolean {
 function assuranceExecutionUnavailable(snapshot: MissionSnapshot): boolean {
   return snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
     || hasSelectedAssuranceProviders(snapshot)
+}
+
+function preparedAssuranceProviderInvocationIndex(
+  snapshot: MissionSnapshot,
+  invocationId: string,
+): number {
+  const index = snapshot.assuranceProviderInvocations?.findIndex(record => (
+    record.invocationId === invocationId
+  )) ?? -1
+  const invocation = snapshot.assuranceProviderInvocations?.[index]
+  if (
+    snapshot.status !== 'BLOCKED'
+    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    || invocation === undefined
+    || invocation.attempt !== snapshot.attempt
+    || invocation.state !== 'prepared'
+    || invocationId.trim().length === 0
+  ) {
+    throw new MissionError(
+      'illegal_transition',
+      `Mission '${snapshot.missionId}' cannot begin Assurance Provider invocation '${invocationId}'`,
+      {
+        missionId: snapshot.missionId,
+        status: snapshot.status,
+        currentRevision: snapshot.revision,
+      },
+    )
+  }
+  return index
 }
 
 function unavailableAssuranceExecutionError(snapshot: MissionSnapshot): MissionError {
@@ -196,6 +233,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
           () => {
             const acceptedAt = options.now()
             const policy = options.resolveEffectivePolicy(authority)
+            const acceptedMissionId = missionId(options.nextMissionId())
             const providerSelections = (policy.selectedAssuranceProviders ?? []).map(selection => ({
               schemaVersion: 1 as const,
               descriptor: { ...selection.descriptor },
@@ -203,7 +241,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             }))
             const assuranceExecutionUnavailable = providerSelections.length > 0
             return {
-              missionId: missionId(options.nextMissionId()),
+              missionId: acceptedMissionId,
               revision: 1,
               repository: authority.repository,
               writeLease: assuranceExecutionUnavailable
@@ -224,6 +262,14 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 attempt: 1,
                 providers: providerSelections,
               }],
+              assuranceProviderInvocations: providerSelections.map((selection, index) => ({
+                schemaVersion: 1,
+                invocationId: `${acceptedMissionId}:assurance:1:${index + 1}`,
+                attempt: 1,
+                descriptor: { ...selection.descriptor },
+                state: 'prepared' as const,
+                preparedAt: acceptedAt,
+              })),
               status: assuranceExecutionUnavailable ? 'BLOCKED' : 'CREATED',
               attempt: 1,
               ...assuranceExecutionUnavailable
@@ -487,6 +533,56 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               },
             ],
             updatedAt: submittedAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
+      if (command.kind === 'begin_assurance_provider_invocation') {
+        requireAction(authority, 'orchestrate')
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          const invocationIndex = preparedAssuranceProviderInvocationIndex(current, command.invocationId)
+          const begunAt = options.now()
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+              index === invocationIndex
+                ? { ...record, state: 'begun' as const, begunAt }
+                : record
+            )),
+            updatedAt: begunAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
+      if (command.kind === 'mark_assurance_provider_invocation_unavailable') {
+        requireAction(authority, 'orchestrate')
+        if (!ASSURANCE_PROVIDER_UNAVAILABLE_CODES.has(command.failureCode)) {
+          throw new TypeError('Assurance Provider unavailable failureCode is invalid')
+        }
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          const invocationIndex = preparedAssuranceProviderInvocationIndex(current, command.invocationId)
+          const unavailableAt = options.now()
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+              index === invocationIndex
+                ? {
+                    ...record,
+                    state: 'unavailable' as const,
+                    unavailableAt,
+                    failureCode: command.failureCode,
+                  }
+                : record
+            )),
+            updatedAt: unavailableAt,
           }
         })
         if (result.kind !== 'updated') return updateError(result, command.missionId)

@@ -1,5 +1,6 @@
 import type {
   AssuranceProviderActivationPolicyV1,
+  AssuranceProviderUnavailableCode,
   FrozenAssuranceProviderSelectionV1,
 } from '../assurance-provider/contracts.js'
 
@@ -216,6 +217,29 @@ export interface AttemptAssuranceProviderSelectionV1 {
   readonly providers: readonly FrozenAssuranceProviderSelectionV1[]
 }
 
+interface AssuranceProviderInvocationBaseV1 {
+  readonly schemaVersion: 1
+  readonly invocationId: string
+  readonly attempt: number
+  readonly descriptor: FrozenAssuranceProviderSelectionV1['descriptor']
+  readonly preparedAt: string
+}
+
+/** Durable monotonic fact for one exact Provider invocation; never contains its runtime handle. */
+export type AssuranceProviderInvocationRecordV1 =
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'prepared'
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'begun'
+    readonly begunAt: string
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'unavailable'
+    readonly unavailableAt: string
+    readonly failureCode: AssuranceProviderUnavailableCode
+  }
+
 /** Immutable reference to one completely published canonical Evidence envelope. */
 export interface EvidenceRecord {
   readonly recordId: string
@@ -331,6 +355,19 @@ export type MissionCommand =
     readonly stopReason?: string
     readonly diagnostic?: string
   }
+  | {
+    readonly kind: 'begin_assurance_provider_invocation'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly invocationId: string
+  }
+  | {
+    readonly kind: 'mark_assurance_provider_invocation_unavailable'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly invocationId: string
+    readonly failureCode: AssuranceProviderUnavailableCode
+  }
 
 /** Durable acknowledgement of an accepted Mission command. */
 export interface MissionReceipt {
@@ -354,6 +391,7 @@ export interface MissionSnapshot {
   readonly effectivePolicy: EffectivePolicy
   readonly effectivePolicyDigest: string
   readonly assuranceProviderSelections?: readonly AttemptAssuranceProviderSelectionV1[]
+  readonly assuranceProviderInvocations?: readonly AssuranceProviderInvocationRecordV1[]
   readonly status: MissionStatus
   readonly attempt: number
   readonly inputRecords: readonly MissionInputRecord[]

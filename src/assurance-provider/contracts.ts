@@ -33,6 +33,13 @@ export interface FrozenAssuranceProviderSelectionV1 {
   readonly activation: Exclude<AssuranceProviderActivation, 'disabled'>
 }
 
+/** Stable fail-closed classifications for exact runtime Provider resolution. */
+export type AssuranceProviderUnavailableCode =
+  | 'registration_missing'
+  | 'factory_failed'
+  | 'invalid_provider'
+  | 'descriptor_mismatch'
+
 function record(value: unknown, label: string): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeError(`${label} must be an object`)
@@ -74,8 +81,22 @@ export function parseAssuranceProviderDescriptorV1(candidate: unknown): Assuranc
   })
 }
 
+/** Frozen Git Subject metadata exposed without a host filesystem path. */
+export interface AssuranceExecutionSubjectV1 {
+  readonly kind: 'git_worktree'
+  readonly branch: string
+  readonly head: string
+  readonly workspaceFingerprint: string
+}
+
 /** Kernel-issued, non-serializable capability supplied only during assessment. */
 export interface AssuranceExecutionContext {
+  readonly schemaVersion: 1
+  readonly invocationId: string
+  readonly missionId: string
+  readonly attempt: number
+  readonly effectivePolicyDigest: string
+  readonly subject: AssuranceExecutionSubjectV1
   readonly [assuranceExecutionContextBrand]: true
 }
 

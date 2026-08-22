@@ -10,6 +10,7 @@ import { HarnessRoleExecutor, type HarnessRolePolicy } from './adapters/harness-
 import { openSqliteMissionStore, type SqliteMissionStore } from './adapters/sqlite-mission-store.js'
 import { VerificationAdapter, type VerificationProfile } from './adapters/verification.js'
 import { AssuranceProviderRegistry } from './assurance-provider/registry.js'
+import { AssuranceProviderInvocationCoordinator } from './assurance-provider/invocation-coordinator.js'
 import type {
   AssuranceProviderActivationPolicyV1,
   AssuranceProviderDescriptorV1,
@@ -59,6 +60,7 @@ interface ControlPlaneRuntime {
   readonly store: SqliteMissionStore
   readonly kernel: ControlPlaneKernel
   readonly runner: MissionRunner
+  readonly assuranceInvocations: AssuranceProviderInvocationCoordinator
   readonly git: GitRepositoryAdapter
 }
 
@@ -174,6 +176,7 @@ export class EngineeringControlPlane extends Service {
       const runtime = await this.ready
       return async () => {
         this.disposed = true
+        runtime.assuranceInvocations.dispose()
         this.assuranceProviders.clear()
         await runtime.runner.dispose()
         await runtime.store.close()
@@ -223,6 +226,12 @@ export class EngineeringControlPlane extends Service {
       },
     }, missionAuthority)
     const snapshot = await runtime.kernel.snapshot(receipt.missionId, missionAuthority)
+    if ((snapshot.assuranceProviderInvocations?.length ?? 0) > 0) {
+      return runtime.assuranceInvocations.launch(
+        snapshot,
+        authority('service:assurance-provider', snapshot.repository, ['read', 'orchestrate']),
+      )
+    }
     if (snapshot.writeLease.holderId === this.leaseHolderId) {
       const executionAuthority = this.executionAuthority(missionAuthority, snapshot)
       runtime.runner.launch(snapshot.missionId, executionAuthority, this.host(runtime, agent, snapshot))
@@ -409,8 +418,13 @@ export class EngineeringControlPlane extends Service {
           `engineering control plane runner: ${errorMessage(error)}`,
         ),
       })
+      const assuranceInvocations = new AssuranceProviderInvocationCoordinator({
+        kernel,
+        registry: this.assuranceProviders,
+        onError: message => this.ctx.logger.warn(`engineering control plane assurance: ${message}`),
+      })
       await runner.recoverAfterRestart()
-      return { home, store, kernel, runner, git }
+      return { home, store, kernel, runner, assuranceInvocations, git }
     } catch (error) {
       await store?.close()
       throw error

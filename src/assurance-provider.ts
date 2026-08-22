@@ -1,6 +1,7 @@
 export { parseAssuranceProviderDescriptorV1 } from './assurance-provider/contracts.js'
 export type {
   AssuranceExecutionContext,
+  AssuranceExecutionSubjectV1,
   AssuranceProviderActivation,
   AssuranceProviderActivationPolicyV1,
   AssuranceProviderDescriptorV1,

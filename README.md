@@ -169,15 +169,26 @@ assuranceProviders:
 `disabled` never selects a Provider. `when-available` selects only the exact
 registered ID and version when present. `required` rejects Mission acceptance
 when that exact registration is absent. Selected registration keys are copied
-by value into Effective Policy and, in this staged slice, the Attempt 1 history;
-no version fallback or live Registry handle is persisted. Rework propagation is
-part of the later invocation/Rework slice.
+by value into Effective Policy and Attempt 1 history. The same atomic Start
+prepares one durable invocation identity per selected Provider; no factory,
+Provider object, credential, Registry handle, or Execution Context is persisted.
 
-This staged slice does not yet invoke Providers, import sealed Submissions, or
-grant external assurance credit at the Quality Gate. A Mission with a non-empty
-selection therefore blocks with `assurance_execution_unavailable` before the
-engineering Runner launches. Keep `assuranceProviders` empty outside integration
-fixtures until the invocation and Submission slices are installed.
+The host resolves only the frozen exact ID and version, durably changes that
+invocation from `prepared` to `begun`, and only then calls `assess()`. The
+Kernel-issued Context is frozen and non-serializable. It exposes Mission,
+Attempt, Effective Policy digest, and path-free frozen Git Subject identity, but
+no repository path, Store, Gate, Ledger, process, or network capability. A lost
+or invalid registration becomes `unavailable`; there is no version fallback,
+substitution, or replay of an invocation that already reached `begun`, including
+after host restart. Service disposal sends an independent abort signal to live
+Provider work; the originating tool-call signal does not own that work.
+
+This staged slice does not yet validate or import sealed Submissions, settle
+Provider outcomes, propagate Provider selection through Rework, or grant
+external assurance credit at the Quality Gate. A Mission with a non-empty
+selection therefore remains `BLOCKED` with
+`assurance_execution_unavailable`, and the engineering Runner does not launch.
+Use only Reference Fake Providers until the Submission-import slice is installed.
 
 ## Read-only doctor
 

@@ -3,6 +3,8 @@ import type {
   AssuranceProviderDescriptorV1,
   AssuranceProviderDisposer,
   AssuranceProviderFactoryV1,
+  AssuranceProviderUnavailableCode,
+  AssuranceProviderV1,
   FrozenAssuranceProviderSelectionV1,
 } from './contracts.js'
 import { parseAssuranceProviderDescriptorV1 } from './contracts.js'
@@ -14,6 +16,14 @@ interface AssuranceProviderEntry {
 
 function descriptorKey(descriptor: AssuranceProviderDescriptorV1): string {
   return JSON.stringify([descriptor.providerId, descriptor.providerVersion])
+}
+
+/** Package-private failure classification that never carries Provider-owned diagnostics into persistence. */
+export class AssuranceProviderResolutionError extends Error {
+  constructor(readonly code: AssuranceProviderUnavailableCode) {
+    super(`Assurance Provider resolution failed: ${code}`)
+    this.name = 'AssuranceProviderResolutionError'
+  }
 }
 
 /** Package-private startup Registry; callers receive no lookup or mutation handle. */
@@ -77,6 +87,42 @@ export class AssuranceProviderRegistry {
       }))
     }
     return Object.freeze(selections)
+  }
+
+  /** Resolve one frozen exact selection to a process-local Provider without exposing the Registry. */
+  resolveExact(candidate: AssuranceProviderDescriptorV1): AssuranceProviderV1 {
+    if (!this.registrationClosed) {
+      throw new Error('Assurance Provider execution cannot resolve before registration closes')
+    }
+    const expected = parseAssuranceProviderDescriptorV1(candidate)
+    const entry = this.entries.get(descriptorKey(expected))
+    if (entry === undefined) {
+      throw new AssuranceProviderResolutionError('registration_missing')
+    }
+
+    let provider: AssuranceProviderV1
+    try {
+      provider = entry.factory(parseAssuranceProviderDescriptorV1(entry.descriptor))
+    } catch {
+      throw new AssuranceProviderResolutionError('factory_failed')
+    }
+    if (this.entries.get(descriptorKey(expected)) !== entry) {
+      throw new AssuranceProviderResolutionError('registration_missing')
+    }
+    if (typeof provider !== 'object' || provider === null || typeof provider.assess !== 'function') {
+      throw new AssuranceProviderResolutionError('invalid_provider')
+    }
+
+    let actual: AssuranceProviderDescriptorV1
+    try {
+      actual = parseAssuranceProviderDescriptorV1(provider.descriptor)
+    } catch {
+      throw new AssuranceProviderResolutionError('invalid_provider')
+    }
+    if (descriptorKey(actual) !== descriptorKey(expected)) {
+      throw new AssuranceProviderResolutionError('descriptor_mismatch')
+    }
+    return provider
   }
 
   clear(): void {
