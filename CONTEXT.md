@@ -296,6 +296,10 @@ _Avoid_: Assurance Result, installation presence, automatic fallback
 An immutable, digest-bound Provider export that binds an external assessment to its subject, policy, coverage, outcome, Evidence, and provenance for validation and import into the Mission Evidence Store.
 _Avoid_: Shared database row, report path, Provider-owned Gate decision
 
+**Attempt Assurance Subject**:
+The immutable, path-free Git branch, HEAD, and Workspace Fingerprint frozen only after one Attempt's implementation Evidence is published and used to bind every external assessment for that Attempt.
+_Avoid_: Mission baseline, repository path, mutable checkout, Provider-selected subject
+
 **Submission Digest**:
 The canonical transport-integrity binding over an Assurance Submission payload; it proves that the transported value is unchanged but not that the source assessment is eligible or correct.
 _Avoid_: Assessment Seal, Provider eligibility proof, Assurance Result
@@ -329,7 +333,7 @@ A structured Provider outcome showing that no eligible Assurance Submission was 
 _Avoid_: Assurance Submission, failed Assurance Result, missing response
 
 **Assurance Execution Context**:
-The Kernel-issued bounded environment through which an external Provider reads the frozen Subject, writes private staging artifacts, and requests Action-Gated process or network execution.
+The Kernel-issued bounded environment through which an external Provider receives the frozen Attempt Assurance Subject and its exact Mission, Attempt, Provider, and Effective Policy bindings without repository paths or Kernel capabilities.
 _Avoid_: Evidence Store writer, arbitrary repository access, Provider-owned permission
 
 **Assurance Execution Budget**:

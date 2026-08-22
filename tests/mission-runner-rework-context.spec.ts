@@ -47,6 +47,7 @@ const policy: EffectivePolicy = {
 }
 
 const failedGateInput: GateInput = {
+  assuranceResults: [],
   requiredEvidence: [],
   verifications: [
     { category: 'functional', outcome: 'failed' },

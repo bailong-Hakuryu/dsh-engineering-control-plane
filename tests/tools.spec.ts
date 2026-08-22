@@ -78,6 +78,14 @@ function snapshot(): MissionSnapshot {
       kind: 'blocked',
       reasons: [{ code: 'evidence_incomplete', source: 'evidence' }],
     },
+    assuranceResults: [{
+      schemaVersion: 1,
+      requirementId: 'external-provider:fixture/security@1.0.0',
+      attempt: 2,
+      outcome: 'indeterminate',
+      assessmentIds: ['assessment-2'],
+      reasonCodes: ['coverage_invalid'],
+    }],
     gateHistory: [],
     createdAt: '2026-08-22T20:00:00.000Z',
     updatedAt: '2026-08-22T20:00:02.000Z',
@@ -206,6 +214,13 @@ describe('Mission tool Adapter', () => {
         kind: 'blocked',
         reasons: [{ code: 'evidence_incomplete', source: 'evidence' }],
       },
+      assuranceResults: [{
+        requirementId: 'external-provider:fixture/security@1.0.0',
+        attempt: 2,
+        outcome: 'indeterminate',
+        assessmentIds: ['assessment-2'],
+        reasonCodes: ['coverage_invalid'],
+      }],
     })
     expect(value['roleRuns']).toHaveLength(64)
     expect(value['evidence']).toHaveLength(128)
@@ -225,6 +240,33 @@ describe('Mission tool Adapter', () => {
 
     expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
       'mission_status',
+      'mission_cancel',
+    ])
+  })
+
+  it('advertises Rework after a failed external Assurance Gate', () => {
+    const reworkRequired: MissionSnapshot = {
+      ...snapshot(),
+      status: 'REWORK_REQUIRED',
+      assuranceProviderSelections: [{
+        schemaVersion: 1,
+        attempt: 2,
+        providers: [{
+          schemaVersion: 1,
+          descriptor: {
+            schemaVersion: 1,
+            providerId: 'fixture/security',
+            providerVersion: '1.0.0',
+          },
+          activation: 'required',
+        }],
+      }],
+      writeLease: { fencingToken: 1, releasedAt: '2026-08-22T20:00:03.000Z' },
+    }
+
+    expect(missionTools.statusValue(reworkRequired).legalNextActions).toEqual([
+      'mission_status',
+      'mission_rework',
       'mission_cancel',
     ])
   })

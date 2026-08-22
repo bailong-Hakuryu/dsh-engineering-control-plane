@@ -53,6 +53,7 @@ function receipt(snapshot: MissionSnapshot): MissionReceipt {
 export class AssuranceProviderInvocationCoordinator {
   private readonly active = new Map<string, AbortController>()
   private readonly admissions = new Map<string, Promise<void>>()
+  private readonly executions = new Map<string, Promise<void>>()
   private disposed = false
 
   constructor(private readonly options: AssuranceProviderInvocationCoordinatorOptions) {}
@@ -87,6 +88,34 @@ export class AssuranceProviderInvocationCoordinator {
 
     if (this.disposed) return receipt(initial)
     return receipt(await this.options.kernel.snapshot(initial.missionId, authority))
+  }
+
+  /** Run every prepared invocation for the frozen post-implementation Subject to a stable local point. */
+  async execute(
+    initial: MissionSnapshot,
+    authority: MissionAuthority,
+    signal: AbortSignal,
+  ): Promise<MissionSnapshot> {
+    const invocationIds = (initial.assuranceProviderInvocations ?? [])
+      .filter(record => record.attempt === initial.attempt && record.state === 'prepared')
+      .map(record => record.invocationId)
+    await this.launch(initial, authority)
+
+    while (!this.disposed) {
+      const current = await this.options.kernel.snapshot(initial.missionId, authority)
+      const pending = (current.assuranceProviderInvocations ?? []).filter(record => (
+        record.attempt === current.attempt
+        && invocationIds.includes(record.invocationId)
+        && (record.state === 'prepared' || record.state === 'begun')
+      ))
+      if (pending.length === 0) return current
+      const owned = pending
+        .map(record => this.executions.get(record.invocationId))
+        .filter((execution): execution is Promise<void> => execution !== undefined)
+      if (owned.length === 0) return current
+      await this.waitForOwnedExecutions(invocationIds, owned, signal)
+    }
+    return this.options.kernel.snapshot(initial.missionId, authority)
   }
 
   private async admit(
@@ -178,7 +207,8 @@ export class AssuranceProviderInvocationCoordinator {
       this.report(`Assurance Provider invocation '${invocationId}' failed after it began`)
       return
     }
-    void outcome.then(
+    let execution!: Promise<void>
+    execution = outcome.then(
       result => this.acceptOutcome(
         invocationId,
         descriptor,
@@ -194,7 +224,9 @@ export class AssuranceProviderInvocationCoordinator {
       this.report(`Assurance Provider invocation '${invocationId}' outcome could not be imported`)
     }).finally(() => {
       if (this.active.get(invocationId) === controller) this.active.delete(invocationId)
+      if (this.executions.get(invocationId) === execution) this.executions.delete(invocationId)
     })
+    this.executions.set(invocationId, execution)
   }
 
   private async beginWithRetry(
@@ -438,6 +470,35 @@ export class AssuranceProviderInvocationCoordinator {
 
   private owns(invocationId: string, controller: AbortController): boolean {
     return !this.disposed && this.active.get(invocationId) === controller
+  }
+
+  private async waitForOwnedExecutions(
+    invocationIds: readonly string[],
+    executions: readonly Promise<void>[],
+    signal: AbortSignal,
+  ): Promise<void> {
+    if (signal.aborted) {
+      this.abortInvocations(invocationIds, signal.reason)
+      throw signal.reason instanceof Error ? signal.reason : new Error('Assurance Provider execution aborted')
+    }
+    let rejectAbort!: (reason: unknown) => void
+    const aborted = new Promise<never>((_resolve, reject) => { rejectAbort = reject })
+    const onAbort = () => {
+      this.abortInvocations(invocationIds, signal.reason)
+      rejectAbort(signal.reason instanceof Error ? signal.reason : new Error('Assurance Provider execution aborted'))
+    }
+    signal.addEventListener('abort', onAbort, { once: true })
+    try {
+      await Promise.race([Promise.allSettled(executions).then(() => {}), aborted])
+    } finally {
+      signal.removeEventListener('abort', onAbort)
+    }
+  }
+
+  private abortInvocations(invocationIds: readonly string[], reason: unknown): void {
+    for (const invocationId of invocationIds) {
+      this.active.get(invocationId)?.abort(reason)
+    }
   }
 
   private report(message: string): void {

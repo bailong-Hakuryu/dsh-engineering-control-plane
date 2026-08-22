@@ -42,6 +42,7 @@ const passingInput: GateInput = {
     category: category as 'functional' | 'negative' | 'regression' | 'security',
     outcome: 'passed' as const,
   })),
+  assuranceResults: [],
   reviewerFindings: [],
   implementationSecretCount: 0,
   workspacePolicyViolations: [],
@@ -313,4 +314,5 @@ describe('ControlPlaneKernel Quality Gate', () => {
       },
     })
   })
+
 })

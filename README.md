@@ -173,15 +173,19 @@ by value into Effective Policy and Attempt 1 history. The same atomic Start
 prepares one durable invocation identity per selected Provider; no factory,
 Provider object, credential, Registry handle, or Execution Context is persisted.
 
-The host resolves only the frozen exact ID and version, durably changes that
-invocation from `prepared` to `begun`, and only then calls `assess()`. The
-Kernel-issued Context is frozen and non-serializable. It exposes Mission,
-Attempt, Effective Policy digest, and path-free frozen Git Subject identity, but
-no repository path, Store, Gate, Ledger, process, or network capability. A lost
-or invalid registration becomes `unavailable`; there is no version fallback,
-substitution, or replay of an invocation that already reached `begun`, including
-after host restart. Service disposal sends an independent abort signal to live
-Provider work; the originating tool-call signal does not own that work.
+Mission Start freezes the obligation and durable invocation identity, but does
+not assess the baseline checkout or block engineering execution. After the
+Developer finishes, the Runner publishes implementation Evidence and freezes a
+post-implementation, path-free Git Subject for that Attempt. Only then does the
+host resolve the frozen exact ID and version, durably change the invocation from
+`prepared` to `begun`, and call `assess()`. The Kernel-issued Context is frozen
+and non-serializable. It exposes Mission, Attempt, Effective Policy digest, and
+the frozen Subject identity, but no repository path, Store, Gate, Ledger,
+process, or network capability. A lost or invalid registration becomes
+`unavailable`; there is no version fallback, substitution, or replay of an
+invocation that already reached `begun`, including after host restart. Service
+disposal sends an independent abort signal to live Provider work; the
+originating tool-call signal does not own that work.
 Concurrent replay admission joins one process-local promise before Provider
 factory resolution, so every replay waits for the same durable result; the
 `prepared → begun` compare-and-swap remains the cross-process authority for
@@ -201,16 +205,29 @@ credential-free transport envelope; its Submission Digest is not the
 Provider's Source Seal. A local Evidence publication failure is recorded as
 operational `import_failed`, not misclassified as a Provider rejection.
 
-This staged slice does not yet evaluate a frozen Assurance Requirement, verify
-Provider Composition or assessor eligibility, derive an Assurance Result,
-propagate Provider selection through Rework, or grant external assurance credit
-at the Quality Gate. The Provider outcome remains a claim, so even `satisfied`
-does not approve a Mission. A Mission with a non-empty selection therefore
-remains `BLOCKED` with `assurance_execution_unavailable`, and the engineering
-Runner does not launch. Use only Reference Fake Providers until post-
-implementation Subject freezing and Requirement evaluation are installed.
-The legal `external_failure` Provider outcome also remains deferred to that
-later lifecycle slice.
+After transport import, the Runner re-reads the Control Plane Evidence copy and
+applies the provider-neutral V1 eligibility profile. Composition, policy,
+coverage, Source Seal, provenance, Evidence, and exact Subject bindings must use
+the standard `dsh/assurance-provider-*` schemas. The Kernel then derives an
+immutable Machine Provider Assurance Assessment and Assurance Result; it never
+accepts a Provider's claimed outcome as a Gate decision. An eligible
+`satisfied` result satisfies only that external requirement, an eligible
+`failed` result requires Rework, and an `indeterminate`, unavailable, rejected,
+unreadable, or incomplete Provider blocks the Gate. The remaining engineering
+Evidence and Reviewer findings still decide whether the Mission can be
+`APPROVED`.
+
+Rework preserves the prior Attempt's Subject, Submission, Assessment, Result,
+and Gate history. It copies the frozen Provider obligations into the new
+Attempt, prepares fresh invocation identities, and requires a new
+post-implementation Subject and assessment before the next Gate decision.
+`mission_status` exposes bounded Assurance Result summaries and advertises
+`mission_rework` after an external-assurance failure.
+
+The closure is proven with Reference Fake Providers through the public Cordis
+seam. The real DSH Security Assurance `control-plane-provider` Adapter and the
+legal `external_failure` Provider outcome remain separate follow-up slices; no
+Security plugin runtime is implied by installing this package alone.
 
 ## Read-only doctor
 

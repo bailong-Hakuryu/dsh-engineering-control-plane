@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { AssuranceProviderInvocationCoordinator } from '../src/assurance-provider/invocation-coordinator.ts'
 import { AssuranceProviderRegistry } from '../src/assurance-provider/registry.ts'
+import { sealAssuranceSubmissionV1 } from '../src/assurance-provider/submission.ts'
 import type {
   ControlPlaneKernel,
   MissionCommand,
@@ -30,6 +31,18 @@ describe('AssuranceProviderInvocationCoordinator process lifecycle', () => {
       status: 'BLOCKED',
       attempt: 1,
       updatedAt: '2026-08-23T03:30:00.000Z',
+      assuranceSubjects: [{
+        schemaVersion: 1,
+        attempt: 1,
+        subject: {
+          kind: 'git_worktree',
+          branch: repository.branch,
+          head: repository.head,
+          workspaceFingerprint: repository.workspaceFingerprint,
+        },
+        implementationEvidenceRecordId: 'implementation-1',
+        frozenAt: '2026-08-23T03:30:00.000Z',
+      }],
       assuranceProviderInvocations: [{
         schemaVersion: 1,
         invocationId,
@@ -155,6 +168,18 @@ describe('AssuranceProviderInvocationCoordinator process lifecycle', () => {
       status: 'BLOCKED',
       attempt: 1,
       updatedAt: '2026-08-23T03:30:00.000Z',
+      assuranceSubjects: [{
+        schemaVersion: 1,
+        attempt: 1,
+        subject: {
+          kind: 'git_worktree',
+          branch: repository.branch,
+          head: repository.head,
+          workspaceFingerprint: repository.workspaceFingerprint,
+        },
+        implementationEvidenceRecordId: 'implementation-1',
+        frozenAt: '2026-08-23T03:30:00.000Z',
+      }],
       assuranceProviderInvocations: [{
         schemaVersion: 1,
         invocationId,
@@ -324,5 +349,155 @@ describe('AssuranceProviderInvocationCoordinator process lifecycle', () => {
     expect(dispatchCalls).toBe(0)
     expect(factoryCalls).toBe(0)
     expect(assessCalls).toBe(0)
+  })
+
+  it('durably distinguishes local Evidence publication failure from Provider rejection', async () => {
+    const descriptor = {
+      schemaVersion: 1 as const,
+      providerId: 'fixture/publication-failure-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const repository = {
+      canonicalRoot: 'D:/publication-failure-fixture',
+      branch: 'main',
+      head: '1'.repeat(40),
+      workspaceFingerprint: 'sha256:' + '2'.repeat(64),
+    }
+    const invocationId = 'mission-publication-failure:assurance:1:1'
+    let snapshot = {
+      missionId: 'mission-publication-failure',
+      revision: 1,
+      repository,
+      effectivePolicyDigest: 'sha256:' + '3'.repeat(64),
+      status: 'IMPLEMENTING',
+      attempt: 1,
+      updatedAt: '2026-08-23T03:30:00.000Z',
+      assuranceSubjects: [{
+        schemaVersion: 1,
+        attempt: 1,
+        subject: {
+          kind: 'git_worktree',
+          branch: repository.branch,
+          head: repository.head,
+          workspaceFingerprint: repository.workspaceFingerprint,
+        },
+        implementationEvidenceRecordId: 'implementation-1',
+        frozenAt: '2026-08-23T03:30:00.000Z',
+      }],
+      assuranceProviderInvocations: [{
+        schemaVersion: 1,
+        invocationId,
+        attempt: 1,
+        descriptor,
+        state: 'prepared',
+        preparedAt: '2026-08-23T03:30:00.000Z',
+      }],
+    } as unknown as MissionSnapshot
+    const authority = {
+      principalId: 'service:publication-failure',
+      repository,
+      actions: ['read', 'orchestrate'],
+    } satisfies MissionAuthority
+    const kernel: ControlPlaneKernel = {
+      async snapshot() {
+        return structuredClone(snapshot)
+      },
+      async dispatch(command) {
+        if (command.kind === 'begin_assurance_provider_invocation') {
+          snapshot = {
+            ...snapshot,
+            revision: snapshot.revision + 1,
+            assuranceProviderInvocations: [{
+              ...snapshot.assuranceProviderInvocations![0]!,
+              state: 'begun',
+              begunAt: snapshot.updatedAt,
+            }],
+          } as MissionSnapshot
+        } else if (
+          command.kind === 'settle_assurance_provider_invocation'
+          && command.outcome.kind === 'import_failed'
+        ) {
+          snapshot = {
+            ...snapshot,
+            revision: snapshot.revision + 1,
+            assuranceProviderInvocations: [{
+              ...snapshot.assuranceProviderInvocations![0]!,
+              state: 'import_failed',
+              failedAt: snapshot.updatedAt,
+              failureCode: command.outcome.failureCode,
+            }],
+          } as MissionSnapshot
+        } else {
+          throw new Error('Fixture received an unexpected command')
+        }
+        return {
+          missionId: snapshot.missionId,
+          revision: snapshot.revision,
+          status: snapshot.status,
+          attempt: snapshot.attempt,
+          acceptedAt: snapshot.updatedAt,
+        }
+      },
+    }
+    const registry = new AssuranceProviderRegistry()
+    registry.register(descriptor, normalizedDescriptor => ({
+      descriptor: normalizedDescriptor,
+      async assess(context) {
+        const artifact = (artifactId: string) => ({
+          artifactId,
+          schemaId: `fixture/${artifactId}`,
+          schemaVersion: 1 as const,
+          value: { state: 'fixture' },
+        })
+        return {
+          kind: 'sealed_submission' as const,
+          submission: sealAssuranceSubmissionV1({
+            schemaVersion: 1,
+            binding: {
+              invocationId: context.invocationId,
+              missionId: context.missionId,
+              attempt: context.attempt,
+              provider: normalizedDescriptor,
+              subject: context.subject,
+              effectivePolicyDigest: context.effectivePolicyDigest,
+            },
+            externalAssessment: {
+              state: 'sealed',
+              assessmentId: 'fixture-publication-failure-assessment',
+              claimedOutcome: 'satisfied',
+            },
+            providerComposition: artifact('composition'),
+            providerPolicy: artifact('policy'),
+            coverage: artifact('coverage'),
+            sourceSeal: artifact('source-seal'),
+            provenance: artifact('provenance'),
+            evidence: [artifact('evidence')],
+          }),
+        }
+      },
+    }))
+    registry.closeRegistration()
+    const coordinator = new AssuranceProviderInvocationCoordinator({
+      kernel,
+      registry,
+      evidenceStore: {
+        async publish() {
+          throw new Error('fixture disk failure')
+        },
+      },
+      maxSubmissionBytes: 64 * 1024,
+      onError: () => {},
+    })
+
+    try {
+      const settled = await coordinator.execute(snapshot, authority, new AbortController().signal)
+      expect(settled.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        invocationId,
+        state: 'import_failed',
+        failureCode: 'evidence_store_failure',
+      })])
+    } finally {
+      coordinator.dispose()
+    }
   })
 })

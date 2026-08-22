@@ -9,6 +9,9 @@ import type {
   AssuranceSubmissionRejectionCode,
 } from '../assurance-provider/contracts.js'
 import type {
+  AssuranceAssessmentReasonCode,
+  AssuranceEligibilityFailureCode,
+  AssuranceProviderInvocationRecordV1,
   ControlPlaneKernel,
   EffectivePolicy,
   EvidenceRecord,
@@ -45,6 +48,17 @@ const ASSURANCE_SUBMISSION_REJECTION_CODES = new Set<AssuranceSubmissionRejectio
 
 const SHA256 = /^sha256:[0-9a-f]{64}$/u
 
+const ASSURANCE_ELIGIBILITY_FAILURE_CODES = new Set<AssuranceEligibilityFailureCode>([
+  'submission_unreadable',
+  'submission_invalid',
+  'provider_composition_invalid',
+  'provider_policy_invalid',
+  'coverage_invalid',
+  'source_seal_invalid',
+  'provenance_invalid',
+  'evidence_missing',
+])
+
 export { createInMemoryMissionStore }
 export { MissionError }
 export type * from './types.js'
@@ -80,7 +94,22 @@ function hasSelectedAssuranceProviders(snapshot: MissionSnapshot): boolean {
 
 function assuranceExecutionUnavailable(snapshot: MissionSnapshot): boolean {
   return snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
-    || hasSelectedAssuranceProviders(snapshot)
+}
+
+function currentAssuranceSubject(snapshot: MissionSnapshot) {
+  return snapshot.assuranceSubjects?.find(subject => subject.attempt === snapshot.attempt)
+}
+
+function externalAssuranceRequirementId(
+  descriptor: AssuranceProviderInvocationRecordV1['descriptor'],
+): string {
+  return `external-provider:${descriptor.providerId}@${descriptor.providerVersion}`
+}
+
+function mayExecuteAssurance(snapshot: MissionSnapshot): boolean {
+  return snapshot.status === 'IMPLEMENTING'
+    || snapshot.status === 'VERIFYING'
+    || snapshot.status === 'REVIEWING'
 }
 
 function preparedAssuranceProviderInvocationIndex(
@@ -92,8 +121,8 @@ function preparedAssuranceProviderInvocationIndex(
   )) ?? -1
   const invocation = snapshot.assuranceProviderInvocations?.[index]
   if (
-    snapshot.status !== 'BLOCKED'
-    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    !mayExecuteAssurance(snapshot)
+    || currentAssuranceSubject(snapshot) === undefined
     || invocation === undefined
     || invocation.attempt !== snapshot.attempt
     || invocation.state !== 'prepared'
@@ -121,8 +150,8 @@ function begunAssuranceProviderInvocationIndex(
   )) ?? -1
   const invocation = snapshot.assuranceProviderInvocations?.[index]
   if (
-    snapshot.status !== 'BLOCKED'
-    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    !mayExecuteAssurance(snapshot)
+    || currentAssuranceSubject(snapshot) === undefined
     || invocation === undefined
     || invocation.attempt !== snapshot.attempt
     || invocation.state !== 'begun'
@@ -151,8 +180,8 @@ function unavailableAssuranceProviderInvocationIndex(
   )) ?? -1
   const invocation = snapshot.assuranceProviderInvocations?.[index]
   if (
-    snapshot.status !== 'BLOCKED'
-    || snapshot.blocked?.reason.code !== 'assurance_execution_unavailable'
+    !mayExecuteAssurance(snapshot)
+    || currentAssuranceSubject(snapshot) === undefined
     || invocation === undefined
     || invocation.attempt !== snapshot.attempt
     || invocation.state !== expectedState
@@ -179,7 +208,9 @@ function sameSubmissionBinding(
   const invocation = snapshot.assuranceProviderInvocations?.find(record => (
     record.invocationId === invocationId
   ))
+  const frozenSubject = currentAssuranceSubject(snapshot)?.subject
   return invocation !== undefined
+    && frozenSubject !== undefined
     && binding.invocationId === invocationId
     && binding.missionId === snapshot.missionId
     && binding.attempt === snapshot.attempt
@@ -187,9 +218,9 @@ function sameSubmissionBinding(
     && binding.provider.providerId === invocation.descriptor.providerId
     && binding.provider.providerVersion === invocation.descriptor.providerVersion
     && binding.subject.kind === 'git_worktree'
-    && binding.subject.branch === snapshot.repository.branch
-    && binding.subject.head === snapshot.repository.head
-    && binding.subject.workspaceFingerprint === snapshot.repository.workspaceFingerprint
+    && binding.subject.branch === frozenSubject.branch
+    && binding.subject.head === frozenSubject.head
+    && binding.subject.workspaceFingerprint === frozenSubject.workspaceFingerprint
     && binding.effectivePolicyDigest === snapshot.effectivePolicyDigest
 }
 
@@ -341,18 +372,15 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               descriptor: { ...selection.descriptor },
               activation: selection.activation,
             }))
-            const assuranceExecutionUnavailable = providerSelections.length > 0
             return {
               missionId: acceptedMissionId,
               revision: 1,
               repository: authority.repository,
-              writeLease: assuranceExecutionUnavailable
-                ? { fencingToken: 1, releasedAt: acceptedAt }
-                : {
-                    fencingToken: 1,
-                    holderId,
-                    acquiredAt: acceptedAt,
-                  },
+              writeLease: {
+                fencingToken: 1,
+                holderId,
+                acquiredAt: acceptedAt,
+              },
               objective: command.input.objective,
               ...command.input.context === undefined ? {} : { context: command.input.context },
               acceptanceCriteria: command.input.acceptanceCriteria ?? [],
@@ -372,17 +400,8 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 state: 'prepared' as const,
                 preparedAt: acceptedAt,
               })),
-              status: assuranceExecutionUnavailable ? 'BLOCKED' : 'CREATED',
+              status: 'CREATED',
               attempt: 1,
-              ...assuranceExecutionUnavailable
-                ? {
-                    blocked: {
-                      reason: { code: 'assurance_execution_unavailable' as const },
-                      resumeStatus: 'CREATED' as const,
-                      blockedAt: acceptedAt,
-                    },
-                  }
-                : {},
               inputRecords: [{
                 sequence: 1,
                 kind: 'initial',
@@ -618,12 +637,37 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             throw unavailableAssuranceExecutionError(current)
           }
           const submittedAt = options.now()
+          const nextAttempt = current.attempt + 1
+          const priorSelection = current.assuranceProviderSelections
+            ?.find(selection => selection.attempt === current.attempt)
+          const providers = (priorSelection?.providers
+            ?? current.effectivePolicy.selectedAssuranceProviders
+            ?? []).map(provider => ({
+            schemaVersion: 1 as const,
+            descriptor: { ...provider.descriptor },
+            activation: provider.activation,
+          }))
           return {
             ...current,
             revision: current.revision + 1,
             status: 'PLANNING',
-            attempt: current.attempt + 1,
+            attempt: nextAttempt,
             writeLease: activateWriteLease(current, authority, submittedAt),
+            assuranceProviderSelections: [
+              ...(current.assuranceProviderSelections ?? []),
+              { schemaVersion: 1, attempt: nextAttempt, providers },
+            ],
+            assuranceProviderInvocations: [
+              ...(current.assuranceProviderInvocations ?? []),
+              ...providers.map((provider, index) => ({
+                schemaVersion: 1 as const,
+                invocationId: `${current.missionId}:assurance:${nextAttempt}:${index + 1}`,
+                attempt: nextAttempt,
+                descriptor: { ...provider.descriptor },
+                state: 'prepared' as const,
+                preparedAt: submittedAt,
+              })),
+            ],
             inputRecords: [
               ...current.inputRecords,
               {
@@ -635,6 +679,79 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               },
             ],
             updatedAt: submittedAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
+      if (command.kind === 'freeze_assurance_subject') {
+        requireAction(authority, 'orchestrate')
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          requireWriteLease(current, authority)
+          const implementationEvidence = current.evidence.records.find(record => (
+            record.recordId === command.implementationEvidenceRecordId
+            && record.attempt === current.attempt
+            && record.kind === 'implementation'
+            && !record.redacted
+          ))
+          const alreadyFrozen = currentAssuranceSubject(current) !== undefined
+          const selectedProviders = current.assuranceProviderSelections
+            ?.find(selection => selection.attempt === current.attempt)
+            ?.providers ?? []
+          const currentInvocations = (current.assuranceProviderInvocations ?? [])
+            .filter(invocation => invocation.attempt === current.attempt)
+          const allPrepared = currentInvocations.length === selectedProviders.length
+            && currentInvocations.every((invocation, index) => {
+              const selected = selectedProviders[index]
+              return selected !== undefined
+                && invocation.state === 'prepared'
+                && invocation.descriptor.schemaVersion === selected.descriptor.schemaVersion
+                && invocation.descriptor.providerId === selected.descriptor.providerId
+                && invocation.descriptor.providerVersion === selected.descriptor.providerVersion
+            })
+          if (
+            current.status !== 'IMPLEMENTING'
+            || !hasSelectedAssuranceProviders(current)
+            || implementationEvidence === undefined
+            || alreadyFrozen
+            || !allPrepared
+            || command.subject.kind !== 'git_worktree'
+            || command.subject.branch !== current.repository.branch
+            || command.subject.head !== current.repository.head
+            || !SHA256.test(command.subject.workspaceFingerprint)
+          ) {
+            throw new MissionError(
+              'illegal_transition',
+              `Mission '${current.missionId}' cannot freeze its Assurance Subject`,
+              {
+                missionId: current.missionId,
+                status: current.status,
+                currentRevision: current.revision,
+              },
+            )
+          }
+          const frozenAt = options.now()
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceSubjects: [
+              ...(current.assuranceSubjects ?? []),
+              {
+                schemaVersion: 1 as const,
+                attempt: current.attempt,
+                subject: {
+                  kind: 'git_worktree' as const,
+                  branch: command.subject.branch,
+                  head: command.subject.head,
+                  workspaceFingerprint: command.subject.workspaceFingerprint,
+                },
+                implementationEvidenceRecordId: implementationEvidence.recordId,
+                frozenAt,
+              },
+            ],
+            updatedAt: frozenAt,
           }
         })
         if (result.kind !== 'updated') return updateError(result, command.missionId)
@@ -807,6 +924,115 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
         return receipt(result.snapshot)
       }
 
+      if (command.kind === 'evaluate_assurance_provider_invocations') {
+        requireAction(authority, 'orchestrate')
+        const eligibilityByInvocation = new Map<string, (typeof command.eligibilities)[number]>()
+        for (const eligibility of command.eligibilities) {
+          if (
+            typeof eligibility !== 'object'
+            || eligibility === null
+            || typeof eligibility.invocationId !== 'string'
+            || eligibility.invocationId.trim().length === 0
+            || (eligibility.kind !== 'eligible' && eligibility.kind !== 'indeterminate')
+            || (eligibility.kind === 'indeterminate'
+              && !ASSURANCE_ELIGIBILITY_FAILURE_CODES.has(eligibility.failureCode))
+            || eligibilityByInvocation.has(eligibility.invocationId)
+          ) throw new TypeError('Assurance Provider eligibility is invalid')
+          eligibilityByInvocation.set(eligibility.invocationId, eligibility)
+        }
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          requireWriteLease(current, authority)
+          const invocations = (current.assuranceProviderInvocations ?? [])
+            .filter(invocation => invocation.attempt === current.attempt)
+          const settledIds = new Set(invocations
+            .filter(invocation => invocation.state === 'settled')
+            .map(invocation => invocation.invocationId))
+          const alreadyEvaluated = (current.assuranceAssessments ?? [])
+            .some(assessment => assessment.attempt === current.attempt)
+            || (current.assuranceResults ?? []).some(item => item.attempt === current.attempt)
+          const completeEligibility = eligibilityByInvocation.size === settledIds.size
+            && [...eligibilityByInvocation.keys()].every(id => settledIds.has(id))
+          if (
+            current.status !== 'REVIEWING'
+            || !hasSelectedAssuranceProviders(current)
+            || currentAssuranceSubject(current) === undefined
+            || invocations.length === 0
+            || alreadyEvaluated
+            || !completeEligibility
+          ) {
+            throw new MissionError(
+              'illegal_transition',
+              `Mission '${current.missionId}' cannot evaluate Assurance Provider invocations`,
+              {
+                missionId: current.missionId,
+                status: current.status,
+                currentRevision: current.revision,
+              },
+            )
+          }
+          const assessedAt = options.now()
+          const assessments = invocations.map((invocation) => {
+            const requirementId = externalAssuranceRequirementId(invocation.descriptor)
+            const assessmentId = `${invocation.invocationId}:assessment:1`
+            let outcome: 'satisfied' | 'failed' | 'indeterminate' = 'indeterminate'
+            let reasonCodes: AssuranceAssessmentReasonCode[]
+            let evidenceRecordIds: string[] = []
+            if (invocation.state === 'settled') {
+              const eligibility = eligibilityByInvocation.get(invocation.invocationId)
+              if (eligibility === undefined) throw new Error('Unreachable settled eligibility')
+              evidenceRecordIds = [invocation.outcome.evidenceRecordId]
+              if (eligibility.kind === 'eligible') {
+                outcome = invocation.outcome.claimedOutcome
+                reasonCodes = ['eligible_submission']
+              } else {
+                reasonCodes = [eligibility.failureCode]
+              }
+            } else if (invocation.state === 'unavailable') {
+              reasonCodes = ['provider_unavailable']
+            } else if (invocation.state === 'rejected') {
+              reasonCodes = ['submission_rejected']
+            } else if (invocation.state === 'import_failed') {
+              reasonCodes = ['submission_import_failed']
+            } else {
+              reasonCodes = ['provider_incomplete']
+            }
+            return {
+              schemaVersion: 1 as const,
+              assessmentId,
+              requirementId,
+              invocationId: invocation.invocationId,
+              attempt: current.attempt,
+              assessor: {
+                kind: 'machine_provider' as const,
+                provider: { ...invocation.descriptor },
+              },
+              outcome,
+              reasonCodes,
+              evidenceRecordIds,
+              assessedAt,
+            }
+          })
+          const assuranceResults = assessments.map(assessment => ({
+            schemaVersion: 1 as const,
+            requirementId: assessment.requirementId,
+            attempt: current.attempt,
+            outcome: assessment.outcome,
+            assessmentIds: [assessment.assessmentId],
+            reasonCodes: [...assessment.reasonCodes],
+          }))
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceAssessments: [...(current.assuranceAssessments ?? []), ...assessments],
+            assuranceResults: [...(current.assuranceResults ?? []), ...assuranceResults],
+            updatedAt: assessedAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
       if (command.kind === 'prepare_role_run') {
         requireAction(authority, 'orchestrate')
         const result = await options.store.update(command.missionId, command.expectedRevision, current => {
@@ -953,6 +1179,25 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             throw new MissionError(
               'illegal_transition',
               `Mission '${current.missionId}' cannot decide its Gate from ${current.status}`,
+              {
+                missionId: current.missionId,
+                status: current.status,
+                currentRevision: current.revision,
+              },
+            )
+          }
+          const persistedAssurance = (current.assuranceResults ?? [])
+            .filter(item => item.attempt === current.attempt)
+          const gateAssurance = new Map(command.input.assuranceResults.map(item => [item.requirementId, item]))
+          const exactAssuranceResults = gateAssurance.size === command.input.assuranceResults.length
+            && persistedAssurance.length === command.input.assuranceResults.length
+            && persistedAssurance.every(item => (
+              gateAssurance.get(item.requirementId)?.outcome === item.outcome
+            ))
+          if (!exactAssuranceResults || (hasSelectedAssuranceProviders(current) && persistedAssurance.length === 0)) {
+            throw new MissionError(
+              'invalid_evidence',
+              `Mission '${current.missionId}' Gate input does not match its Kernel-owned Assurance Results`,
               {
                 missionId: current.missionId,
                 status: current.status,

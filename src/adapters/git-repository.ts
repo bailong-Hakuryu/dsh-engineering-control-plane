@@ -213,6 +213,12 @@ export class GitRepositoryAdapter implements RepositoryObserver {
         trackedDiffTruncated: diffResult.stdoutTruncated,
         untracked,
       },
+      subject: {
+        kind: 'git_worktree',
+        branch: current.branch,
+        head: current.head,
+        workspaceFingerprint: current.workspaceFingerprint,
+      },
       implementationSecretCount: secretCount,
       workspacePolicyViolations: [...new Set(workspacePolicyViolations)],
     }

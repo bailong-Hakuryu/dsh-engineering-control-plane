@@ -21,6 +21,7 @@ import { parseAssuranceProviderDescriptorV1 } from '../src/assurance-provider.ts
 import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
 import * as clientPlugin from '../src/client.ts'
 import * as toolsPlugin from '../src/tools.ts'
+import { registerScriptedEngineeringProvider } from './fixtures/scripted-engineering-provider.ts'
 
 const run = promisify(execFile)
 const temporaryRoots: string[] = []
@@ -39,6 +40,27 @@ async function cleanRepository(): Promise<string> {
   await run('git', ['add', 'README.md'], { cwd: root })
   await run('git', ['commit', '-m', 'fixture baseline'], { cwd: root })
   return root
+}
+
+async function waitForInvocationState(
+  ctx: Context,
+  agent: Agent,
+  missionId: string,
+  expected: readonly string[],
+) {
+  const deadline = Date.now() + 4_000
+  let lastState: string | undefined
+  while (Date.now() < deadline) {
+    const snapshot = await ctx.engineeringControlPlane.status(
+      agent,
+      missionId,
+      new AbortController().signal,
+    )
+    lastState = snapshot.assuranceProviderInvocations?.[0]?.state
+    if (lastState !== undefined && expected.includes(lastState)) return snapshot
+    await new Promise(resolve => setTimeout(resolve, 10))
+  }
+  throw new Error(`Provider invocation did not reach ${expected.join('/')} (last state: ${lastState ?? 'missing'})`)
 }
 
 function config(
@@ -133,6 +155,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home))
     await ctx.engineeringControlPlane.whenReady()
 
@@ -240,6 +263,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, activations))
     await ctx.engineeringControlPlane.whenReady()
 
@@ -324,19 +348,13 @@ describe('Assurance Provider startup registration and selection', () => {
           },
         ],
       }])
-      expect(receipt).toMatchObject({ revision: 3, status: 'BLOCKED' })
+      expect(receipt).toMatchObject({ revision: 1, status: 'CREATED' })
       expect(frozen).toMatchObject({
-        revision: 3,
-        status: 'BLOCKED',
         writeLease: {
           fencingToken: 1,
-          releasedAt: frozen.createdAt,
+          holderId: expect.any(String),
+          acquiredAt: frozen.createdAt,
         },
-        blocked: {
-          reason: { code: 'assurance_execution_unavailable' },
-          resumeStatus: 'CREATED',
-        },
-        roleRuns: [],
       })
       expect(frozen.assuranceProviderInvocations).toEqual([
         expect.objectContaining({
@@ -344,18 +362,16 @@ describe('Assurance Provider startup registration and selection', () => {
           invocationId: expect.any(String),
           attempt: 1,
           descriptor: descriptors.required,
-          state: 'begun',
+          state: 'prepared',
           preparedAt: frozen.createdAt,
-          begunAt: expect.any(String),
         }),
         expect.objectContaining({
           schemaVersion: 1,
           invocationId: expect.any(String),
           attempt: 1,
           descriptor: descriptors.whenAvailable,
-          state: 'begun',
+          state: 'prepared',
           preparedAt: frozen.createdAt,
-          begunAt: expect.any(String),
         }),
       ])
 
@@ -372,17 +388,6 @@ describe('Assurance Provider startup registration and selection', () => {
       expect(afterDisposal.effectivePolicy).toEqual(frozen.effectivePolicy)
       expect(afterDisposal.assuranceProviderSelections).toEqual(frozen.assuranceProviderSelections)
 
-      const replay = await ctx.engineeringControlPlane.start(agent, {
-        idempotencyKey: 'provider-selection:start:1',
-        objective: 'Freeze exact Host-selected Assurance Providers for Attempt 1',
-      }, new AbortController().signal)
-      expect(replay).toEqual(receipt)
-      await expect(ctx.engineeringControlPlane.resume(agent, {
-        missionId: receipt.missionId,
-        expectedRevision: receipt.revision,
-      }, new AbortController().signal)).rejects.toThrow(
-        'Assurance Provider execution is unavailable in this Control Plane build',
-      )
     } finally {
       await serviceFiber.dispose()
       await subagentFiber.dispose()
@@ -397,6 +402,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, [{
       providerId: 'fixture/missing-required-provider',
       providerVersion: '1.0.0-fixture.1',
@@ -434,6 +440,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, [{
       providerId: descriptor.providerId,
       providerVersion: descriptor.providerVersion,
@@ -496,10 +503,10 @@ describe('Assurance Provider startup registration and selection', () => {
         invocationId: expect.any(String),
       })])
       expect(snapshot).toMatchObject({
-        status: 'BLOCKED',
-        roleRuns: [],
-        blocked: { reason: { code: 'assurance_execution_unavailable' } },
+        status: 'IMPLEMENTING',
       })
+      expect(snapshot.roleRuns.map(run => run.role)).toEqual(['planner', 'developer'])
+      expect(snapshot.assuranceSubjects).toHaveLength(1)
 
       const invocation = observed
       expect(invocation).toBeDefined()
@@ -550,6 +557,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, [{
       providerId: descriptor.providerId,
       providerVersion: descriptor.providerVersion,
@@ -596,10 +604,11 @@ describe('Assurance Provider startup registration and selection', () => {
         request,
         new AbortController().signal,
       )
-      const snapshot = await ctx.engineeringControlPlane.status(
+      const snapshot = await waitForInvocationState(
+        ctx,
         agent,
         receipt.missionId,
-        new AbortController().signal,
+        ['unavailable'],
       )
 
       expect(snapshot.assuranceProviderInvocations).toEqual([expect.objectContaining({
@@ -611,11 +620,9 @@ describe('Assurance Provider startup registration and selection', () => {
         failureCode: 'registration_missing',
         unavailableAt: expect.any(String),
       })])
-      expect(snapshot).toMatchObject({
-        revision: 2,
-        status: 'BLOCKED',
-        roleRuns: [],
-      })
+      expect(snapshot.roleRuns.map(run => run.role)).toEqual(
+        expect.arrayContaining(['planner', 'developer']),
+      )
       expect(factoryCalls).toBe(1)
       expect(assessCalls).toBe(0)
 
@@ -624,7 +631,7 @@ describe('Assurance Provider startup registration and selection', () => {
         request,
         new AbortController().signal,
       )
-      expect(replay).toEqual(receipt)
+      expect(replay).toMatchObject({ missionId: receipt.missionId, attempt: 1 })
       expect(factoryCalls).toBe(1)
       expect(assessCalls).toBe(0)
     } finally {
@@ -661,6 +668,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const firstContext = new Context()
     const firstSubprocessFiber = await firstContext.plugin(LocalSubprocessRuntime)
     const firstSubagentFiber = await firstContext.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(firstContext.subagents)
     const firstServiceFiber = await firstContext.plugin(
       EngineeringControlPlane,
       config(repository, home, [activation]),
@@ -687,6 +695,12 @@ describe('Assurance Provider startup registration and selection', () => {
         agent,
         request,
         new AbortController().signal,
+      )
+      await waitForInvocationState(
+        firstContext,
+        agent,
+        firstReceipt.missionId,
+        ['begun'],
       )
       expect(firstAssessCalls).toBe(1)
     } finally {
@@ -738,7 +752,7 @@ describe('Assurance Provider startup registration and selection', () => {
         new AbortController().signal,
       )
 
-      expect(replay).toEqual(firstReceipt)
+      expect(replay).toMatchObject({ missionId: firstReceipt.missionId, attempt: 1 })
       expect(secondFactoryCalls).toBe(0)
       expect(secondAssessCalls).toBe(0)
       expect(snapshot.assuranceProviderInvocations).toEqual([expect.objectContaining({
@@ -749,7 +763,8 @@ describe('Assurance Provider startup registration and selection', () => {
         state: 'begun',
         begunAt: expect.any(String),
       })])
-      expect(snapshot).toMatchObject({ status: 'BLOCKED', roleRuns: [] })
+      expect(snapshot.status).toBe('BLOCKED')
+      expect(snapshot.roleRuns.map(run => run.role)).toEqual(['planner', 'developer'])
     } finally {
       await secondContributorFiber.dispose()
       await secondServiceFiber.dispose()

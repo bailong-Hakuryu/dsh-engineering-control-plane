@@ -230,12 +230,6 @@ export class EngineeringControlPlane extends Service {
       },
     }, missionAuthority)
     const snapshot = await runtime.kernel.snapshot(receipt.missionId, missionAuthority)
-    if ((snapshot.assuranceProviderInvocations?.length ?? 0) > 0) {
-      return runtime.assuranceInvocations.launch(
-        snapshot,
-        authority('service:assurance-provider', snapshot.repository, ['read', 'orchestrate']),
-      )
-    }
     if (snapshot.writeLease.holderId === this.leaseHolderId) {
       const executionAuthority = this.executionAuthority(missionAuthority, snapshot)
       runtime.runner.launch(snapshot.missionId, executionAuthority, this.host(runtime, agent, snapshot))
@@ -564,6 +558,9 @@ export class EngineeringControlPlane extends Service {
         policy.verification as VerificationProfile,
         current.repository,
         signal,
+      ),
+      runAssuranceProviders: (current, currentAuthority, signal) => (
+        runtime.assuranceInvocations.execute(current, currentAuthority, signal)
       ),
     }
   }

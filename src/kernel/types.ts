@@ -192,6 +192,11 @@ export interface VerificationEvidenceState {
 export interface GateInput {
   readonly requiredEvidence: readonly RequiredEvidenceState[]
   readonly verifications: readonly VerificationEvidenceState[]
+  /** Kernel-owned required Assurance Results; Provider claims never enter the Gate directly. */
+  readonly assuranceResults: readonly {
+    readonly requirementId: string
+    readonly outcome: 'satisfied' | 'failed' | 'indeterminate'
+  }[]
   readonly reviewerFindings: readonly {
     readonly severity: 'blocking' | 'non_blocking'
     readonly code: string
@@ -218,6 +223,68 @@ export interface AttemptAssuranceProviderSelectionV1 {
   readonly schemaVersion: 1
   readonly attempt: number
   readonly providers: readonly FrozenAssuranceProviderSelectionV1[]
+}
+
+/** Post-implementation Git Subject frozen once for one Attempt before external assessment. */
+export interface AttemptAssuranceSubjectV1 {
+  readonly schemaVersion: 1
+  readonly attempt: number
+  readonly subject: AssuranceSubmissionBindingV1['subject']
+  readonly implementationEvidenceRecordId: string
+  readonly frozenAt: string
+}
+
+export type AssuranceEligibilityFailureCode =
+  | 'submission_unreadable'
+  | 'submission_invalid'
+  | 'provider_composition_invalid'
+  | 'provider_policy_invalid'
+  | 'coverage_invalid'
+  | 'source_seal_invalid'
+  | 'provenance_invalid'
+  | 'evidence_missing'
+
+export type AssuranceAssessmentReasonCode =
+  | 'eligible_submission'
+  | AssuranceEligibilityFailureCode
+  | 'provider_unavailable'
+  | 'submission_rejected'
+  | 'submission_import_failed'
+  | 'provider_incomplete'
+
+export type AssuranceProviderEligibilityV1 =
+  | { readonly invocationId: string; readonly kind: 'eligible' }
+  | {
+    readonly invocationId: string
+    readonly kind: 'indeterminate'
+    readonly failureCode: AssuranceEligibilityFailureCode
+  }
+
+/** One Kernel-owned evaluation of a frozen external Provider invocation. */
+export interface AssuranceAssessmentV1 {
+  readonly schemaVersion: 1
+  readonly assessmentId: string
+  readonly requirementId: string
+  readonly invocationId: string
+  readonly attempt: number
+  readonly assessor: {
+    readonly kind: 'machine_provider'
+    readonly provider: FrozenAssuranceProviderSelectionV1['descriptor']
+  }
+  readonly outcome: AssuranceClaimedOutcomeV1
+  readonly reasonCodes: readonly AssuranceAssessmentReasonCode[]
+  readonly evidenceRecordIds: readonly string[]
+  readonly assessedAt: string
+}
+
+/** Deterministic aggregate for one external Provider Requirement in one Attempt. */
+export interface AssuranceResultV1 {
+  readonly schemaVersion: 1
+  readonly requirementId: string
+  readonly attempt: number
+  readonly outcome: AssuranceClaimedOutcomeV1
+  readonly assessmentIds: readonly string[]
+  readonly reasonCodes: readonly AssuranceAssessmentReasonCode[]
 }
 
 interface AssuranceProviderInvocationBaseV1 {
@@ -361,6 +428,12 @@ export type MissionCommand =
     readonly record: EvidenceRecord
   }
   | {
+    readonly kind: 'evaluate_assurance_provider_invocations'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly eligibilities: readonly AssuranceProviderEligibilityV1[]
+  }
+  | {
     readonly kind: 'prepare_role_run'
     readonly missionId: MissionId
     readonly expectedRevision: number
@@ -383,6 +456,13 @@ export type MissionCommand =
     readonly evidenceRecordIds: readonly string[]
     readonly stopReason?: string
     readonly diagnostic?: string
+  }
+  | {
+    readonly kind: 'freeze_assurance_subject'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly subject: AssuranceSubmissionBindingV1['subject']
+    readonly implementationEvidenceRecordId: string
   }
   | {
     readonly kind: 'begin_assurance_provider_invocation'
@@ -443,7 +523,10 @@ export interface MissionSnapshot {
   readonly effectivePolicy: EffectivePolicy
   readonly effectivePolicyDigest: string
   readonly assuranceProviderSelections?: readonly AttemptAssuranceProviderSelectionV1[]
+  readonly assuranceSubjects?: readonly AttemptAssuranceSubjectV1[]
   readonly assuranceProviderInvocations?: readonly AssuranceProviderInvocationRecordV1[]
+  readonly assuranceAssessments?: readonly AssuranceAssessmentV1[]
+  readonly assuranceResults?: readonly AssuranceResultV1[]
   readonly status: MissionStatus
   readonly attempt: number
   readonly inputRecords: readonly MissionInputRecord[]

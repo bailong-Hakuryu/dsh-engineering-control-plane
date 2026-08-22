@@ -39,6 +39,7 @@ const phasesToReview: readonly MissionPhase[] = [
 ]
 
 const failedGateInput: GateInput = {
+  assuranceResults: [],
   requiredEvidence: ['context', 'plan', 'implementation', 'test-report', 'review-report']
     .map(kind => ({ kind, state: 'valid' as const })),
   verifications: [
@@ -151,7 +152,7 @@ describe('ControlPlaneKernel lifecycle', () => {
     })
   })
 
-  it('atomically blocks and refuses Resume while frozen Assurance execution is unavailable', async () => {
+  it('freezes Assurance obligations without blocking the engineering lifecycle at Start', async () => {
     const selectedPolicy: EffectivePolicy = {
       ...policy,
       selectedAssuranceProviders: [{
@@ -176,27 +177,25 @@ describe('ControlPlaneKernel lifecycle', () => {
       input: { objective: 'Preserve the unavailable Assurance boundary' },
     }, authority)
 
-    expect(started).toMatchObject({ revision: 1, status: 'BLOCKED', attempt: 1 })
+    expect(started).toMatchObject({ revision: 1, status: 'CREATED', attempt: 1 })
     await expect(kernel.dispatch({
       kind: 'resume',
       missionId: started.missionId,
       expectedRevision: 1,
     }, authority)).rejects.toMatchObject({
       code: 'illegal_transition',
-      status: 'BLOCKED',
+      status: 'CREATED',
       currentRevision: 1,
     })
     await expect(kernel.snapshot(started.missionId, authority)).resolves.toMatchObject({
       revision: 1,
-      status: 'BLOCKED',
+      status: 'CREATED',
       writeLease: {
         fencingToken: 1,
-        releasedAt: '2026-08-22T14:00:00.000Z',
+        holderId: 'lifecycle-fixture-host',
+        acquiredAt: '2026-08-22T14:00:00.000Z',
       },
-      blocked: {
-        reason: { code: 'assurance_execution_unavailable' },
-        resumeStatus: 'CREATED',
-      },
+      assuranceProviderInvocations: [{ state: 'prepared' }],
     })
   })
 

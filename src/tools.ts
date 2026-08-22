@@ -127,6 +127,25 @@ const STATUS_SCHEMA = {
       ],
       required: true,
     },
+    assuranceResults: {
+      type: 'array',
+      required: true,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          requirementId: { type: 'string', required: true },
+          attempt: { type: 'integer', required: true },
+          outcome: {
+            type: 'string',
+            required: true,
+            enum: ['satisfied', 'failed', 'indeterminate'],
+          },
+          assessmentIds: { type: 'array', required: true, items: { type: 'string' } },
+          reasonCodes: { type: 'array', required: true, items: { type: 'string' } },
+        },
+      },
+    },
     roleRuns: {
       type: 'array',
       required: true,
@@ -166,6 +185,7 @@ const STATUS_SCHEMA = {
     },
     roleRunsTruncated: { type: 'boolean', required: true },
     evidenceTruncated: { type: 'boolean', required: true },
+    assuranceResultsTruncated: { type: 'boolean', required: true },
     legalNextActions: {
       type: 'array',
       required: true,
@@ -204,6 +224,13 @@ type StatusValue = {
     kind: 'approved' | 'rework_required' | 'blocked'
     reasons: { code: string; source: string }[]
   }
+  assuranceResults: {
+    requirementId: string
+    attempt: number
+    outcome: 'satisfied' | 'failed' | 'indeterminate'
+    assessmentIds: string[]
+    reasonCodes: string[]
+  }[]
   roleRuns: {
     runId: string
     attempt: number
@@ -227,11 +254,13 @@ type StatusValue = {
   }[]
   roleRunsTruncated: boolean
   evidenceTruncated: boolean
+  assuranceResultsTruncated: boolean
   legalNextActions: ('mission_status' | 'mission_resume' | 'mission_cancel' | 'mission_rework')[]
 }
 
 const MAX_STATUS_ROLE_RUNS = 64
 const MAX_STATUS_EVIDENCE = 128
+const MAX_STATUS_ASSURANCE_RESULTS = 64
 const MAX_STATUS_TEXT = 4_096
 
 function requireAgent(exec: ToolRunContext, toolName: string): Agent {
@@ -290,9 +319,7 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
     return ['mission_status', 'mission_resume', 'mission_cancel']
   }
   if (snapshot.status === 'REWORK_REQUIRED') {
-    return hasSelectedAssuranceProviders
-      ? ['mission_status', 'mission_cancel']
-      : ['mission_status', 'mission_rework', 'mission_cancel']
+    return ['mission_status', 'mission_rework', 'mission_cancel']
   }
   if (snapshot.status === 'APPROVED' || snapshot.status === 'CANCELLED') return ['mission_status']
   return ['mission_status', 'mission_cancel']
@@ -302,6 +329,8 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
 export function statusValue(snapshot: MissionSnapshot): StatusValue {
   const selectedRoleRuns = snapshot.roleRuns.slice(-MAX_STATUS_ROLE_RUNS)
   const selectedEvidence = snapshot.evidence.records.slice(-MAX_STATUS_EVIDENCE)
+  const selectedAssuranceResults = (snapshot.assuranceResults ?? [])
+    .slice(-MAX_STATUS_ASSURANCE_RESULTS)
   return {
     missionId: snapshot.missionId,
     revision: snapshot.revision,
@@ -339,6 +368,13 @@ export function statusValue(snapshot: MissionSnapshot): StatusValue {
             source: boundedText(reason.source),
           })),
         },
+    assuranceResults: selectedAssuranceResults.map(result => ({
+      requirementId: boundedText(result.requirementId),
+      attempt: result.attempt,
+      outcome: result.outcome,
+      assessmentIds: result.assessmentIds.slice(0, 32),
+      reasonCodes: result.reasonCodes.slice(0, 32).map(boundedText),
+    })),
     roleRuns: selectedRoleRuns.map(run => ({
       runId: run.runId,
       attempt: run.attempt,
@@ -366,6 +402,7 @@ export function statusValue(snapshot: MissionSnapshot): StatusValue {
     })),
     roleRunsTruncated: snapshot.roleRuns.length > selectedRoleRuns.length,
     evidenceTruncated: snapshot.evidence.records.length > selectedEvidence.length,
+    assuranceResultsTruncated: (snapshot.assuranceResults?.length ?? 0) > selectedAssuranceResults.length,
     legalNextActions: legalNextActions(snapshot),
   }
 }

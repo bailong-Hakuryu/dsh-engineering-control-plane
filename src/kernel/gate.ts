@@ -14,10 +14,14 @@ export function evaluateGate(input: GateInput): GateDecision {
     .map(item => ({ code: `verification_${item.outcome}`, source: item.category }))
   const workspaceViolations = input.workspacePolicyViolations
     .map(source => ({ code: 'workspace_policy_violation', source }))
+  const indeterminateAssurance = input.assuranceResults
+    .filter(item => item.outcome === 'indeterminate')
+    .map(item => ({ code: 'assurance_indeterminate', source: item.requirementId }))
   const indeterminate = [
     ...unavailableEvidence,
     ...indeterminateVerifications,
     ...workspaceViolations,
+    ...indeterminateAssurance,
   ]
   if (indeterminate.length > 0) return { kind: 'blocked', reasons: indeterminate }
 
@@ -30,7 +34,15 @@ export function evaluateGate(input: GateInput): GateDecision {
   const implementationFailures = input.implementationSecretCount > 0
     ? [{ code: 'implementation_secret', source: 'implementation' }]
     : []
-  const failed = [...verificationFailures, ...reviewFailures, ...implementationFailures]
+  const assuranceFailures = input.assuranceResults
+    .filter(item => item.outcome === 'failed')
+    .map(item => ({ code: 'assurance_failed', source: item.requirementId }))
+  const failed = [
+    ...verificationFailures,
+    ...reviewFailures,
+    ...implementationFailures,
+    ...assuranceFailures,
+  ]
   if (failed.length > 0) return { kind: 'rework_required', reasons: failed }
   return { kind: 'approved', reasons: [] }
 }

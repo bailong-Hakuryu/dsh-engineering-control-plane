@@ -143,6 +143,48 @@ describe('read-only control-plane doctor', () => {
       idempotencyKey: 'doctor-assurance-reference-start',
       input: { objective: 'Detect a corrupt imported Submission reference' },
     }, authority)
+    const evidenceStore = createFilesystemEvidenceStore({
+      root: join(home, 'control-plane', 'missions'),
+      nextRecordId: (() => {
+        let sequence = 0
+        return () => `doctor-assurance-record-${++sequence}`
+      })(),
+      now: () => '2026-08-22T21:30:00.000Z',
+    })
+    let revision = started.revision
+    for (const to of ['ANALYZING', 'PLANNING', 'IMPLEMENTING'] as const) {
+      revision = (await kernel.dispatch({
+        kind: 'advance',
+        missionId: started.missionId,
+        expectedRevision: revision,
+        to,
+      }, authority)).revision
+    }
+    const implementationEvidence = await evidenceStore.publish({
+      missionId: started.missionId,
+      attempt: 1,
+      kind: 'implementation',
+      schemaVersion: 1,
+      payload: { schemaVersion: 1, fixture: 'doctor-assurance-subject' },
+    })
+    revision = (await kernel.dispatch({
+      kind: 'record_evidence',
+      missionId: started.missionId,
+      expectedRevision: revision,
+      record: implementationEvidence,
+    }, authority)).revision
+    revision = (await kernel.dispatch({
+      kind: 'freeze_assurance_subject',
+      missionId: started.missionId,
+      expectedRevision: revision,
+      implementationEvidenceRecordId: implementationEvidence.recordId,
+      subject: {
+        kind: 'git_worktree',
+        branch: repository.branch,
+        head: repository.head,
+        workspaceFingerprint: repository.workspaceFingerprint,
+      },
+    }, authority)).revision
     const prepared = await kernel.snapshot(started.missionId, authority)
     const invocationId = prepared.assuranceProviderInvocations?.[0]?.invocationId
     if (invocationId === undefined) throw new Error('Fixture Provider invocation is missing')
@@ -152,11 +194,6 @@ describe('read-only control-plane doctor', () => {
       expectedRevision: prepared.revision,
       invocationId,
     }, authority)
-    const evidenceStore = createFilesystemEvidenceStore({
-      root: join(home, 'control-plane', 'missions'),
-      nextRecordId: () => 'doctor-assurance-submission-record',
-      now: () => '2026-08-22T21:30:00.000Z',
-    })
     const submission = sealAssuranceSubmissionV1({
       schemaVersion: 1,
       binding: {
@@ -251,7 +288,7 @@ describe('read-only control-plane doctor', () => {
     const healthySubmissionReport = await inspectControlPlane({ dshHome: home })
     expect(healthySubmissionReport).toMatchObject({
       ok: true,
-      evidence: { indexed: 1, valid: 1, missing: 0, corrupt: 0 },
+      evidence: { indexed: 2, valid: 2, missing: 0, corrupt: 0 },
       issues: [],
     })
 
@@ -276,7 +313,7 @@ describe('read-only control-plane doctor', () => {
     const invalidPayloadReport = await inspectControlPlane({ dshHome: home })
     expect(invalidPayloadReport).toMatchObject({
       ok: false,
-      evidence: { indexed: 1, valid: 1, missing: 0, corrupt: 0 },
+      evidence: { indexed: 2, valid: 2, missing: 0, corrupt: 0 },
       issues: [expect.objectContaining({
         code: 'invalid_assurance_submission_evidence_payload',
         missionId: started.missionId,
@@ -306,7 +343,7 @@ describe('read-only control-plane doctor', () => {
 
     expect(report).toMatchObject({
       ok: false,
-      evidence: { indexed: 1, valid: 1, missing: 0, corrupt: 0 },
+      evidence: { indexed: 2, valid: 2, missing: 0, corrupt: 0 },
       issues: [expect.objectContaining({
         code: 'missing_assurance_submission_evidence_reference',
         missionId: started.missionId,

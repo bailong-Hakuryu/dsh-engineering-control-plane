@@ -122,6 +122,12 @@ describe('MissionRunner happy path', () => {
       },
       captureImplementation: () => Promise.resolve({
         payload: { files: ['src/feature.ts'], patchDigest: 'sha256:implementation-fixture' },
+        subject: {
+          kind: 'git_worktree',
+          branch: repository.branch,
+          head: repository.head,
+          workspaceFingerprint: `sha256:${'a'.repeat(64)}`,
+        },
         implementationSecretCount: 0,
         workspacePolicyViolations: [],
       }),

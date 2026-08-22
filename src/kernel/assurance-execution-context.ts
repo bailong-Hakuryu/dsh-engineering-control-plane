@@ -28,11 +28,18 @@ export function issueAssuranceProviderInvocationV1(
     throw new Error('Assurance Execution Context requires a begun invocation in the current Attempt')
   }
 
+  const frozenSubject = snapshot.assuranceSubjects?.find(record => (
+    record.attempt === snapshot.attempt
+  ))?.subject
+  if (frozenSubject === undefined) {
+    throw new Error('Assurance Execution Context requires a frozen post-implementation Subject')
+  }
+
   const subject = Object.freeze({
     kind: 'git_worktree' as const,
-    branch: snapshot.repository.branch,
-    head: snapshot.repository.head,
-    workspaceFingerprint: snapshot.repository.workspaceFingerprint,
+    branch: frozenSubject.branch,
+    head: frozenSubject.head,
+    workspaceFingerprint: frozenSubject.workspaceFingerprint,
   })
   const context = {
     schemaVersion: 1 as const,

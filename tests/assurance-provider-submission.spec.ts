@@ -19,6 +19,7 @@ import {
   type AssuranceSubmissionV1,
 } from '../src/assurance-provider.ts'
 import type { Config } from '../src/config.ts'
+import { registerScriptedEngineeringProvider } from './fixtures/scripted-engineering-provider.ts'
 
 const run = promisify(execFile)
 const temporaryRoots: string[] = []
@@ -92,8 +93,14 @@ function submissionFor(
   descriptor: AssuranceProviderDescriptorV1,
   claimedOutcome: AssuranceClaimedOutcomeV1 = 'satisfied',
 ): AssuranceSubmissionV1 {
-  return sealAssuranceSubmissionV1({
-    schemaVersion: 1,
+  const evidence = [{
+    artifactId: 'fixture-evidence-1',
+    schemaId: 'fixture/provider-evidence',
+    schemaVersion: 1 as const,
+    value: { check: 'fixture/check', outcome: 'passed' },
+  }]
+  const draft = {
+    schemaVersion: 1 as const,
     binding: {
       invocationId: context.invocationId,
       missionId: context.missionId,
@@ -103,46 +110,74 @@ function submissionFor(
       effectivePolicyDigest: context.effectivePolicyDigest,
     },
     externalAssessment: {
-      state: 'sealed',
+      state: 'sealed' as const,
       assessmentId: 'fixture-assessment-1',
       claimedOutcome,
     },
     providerComposition: {
       artifactId: 'fixture-composition-1',
-      schemaId: 'fixture/provider-composition',
+      schemaId: 'dsh/assurance-provider-composition',
       schemaVersion: 1,
-      value: { engine: 'reference-fake', version: '1.0.0-fixture.1' },
+      value: {
+        schemaVersion: 1,
+        provider: descriptor,
+        components: [{ componentId: 'fixture/reference-fake', componentVersion: '1.0.0-fixture.1' }],
+      },
     },
     providerPolicy: {
       artifactId: 'fixture-policy-1',
-      schemaId: 'fixture/provider-policy',
+      schemaId: 'dsh/assurance-provider-policy',
       schemaVersion: 1,
-      value: { profile: 'fixture-minimum' },
+      value: { schemaVersion: 1, effectivePolicyDigest: context.effectivePolicyDigest },
     },
     coverage: {
       artifactId: 'fixture-coverage-1',
-      schemaId: 'fixture/provider-coverage',
+      schemaId: 'dsh/assurance-provider-coverage',
       schemaVersion: 1,
-      value: { completed: ['fixture/check'] },
-    },
-    sourceSeal: {
-      artifactId: 'fixture-source-seal-1',
-      schemaId: 'fixture/provider-source-seal',
-      schemaVersion: 1,
-      value: { state: 'fixture-sealed', root: 'sha256:' + '1'.repeat(64) },
+      value: {
+        schemaVersion: 1,
+        status: 'complete',
+        dimensions: [{ dimensionId: 'fixture/check', status: 'covered' }],
+      },
     },
     provenance: {
       artifactId: 'fixture-provenance-1',
-      schemaId: 'fixture/provider-provenance',
+      schemaId: 'dsh/assurance-provider-provenance',
       schemaVersion: 1,
-      value: { assessor: 'reference-fake/assessor-1' },
+      value: {
+        schemaVersion: 1,
+        assessor: { kind: 'machine_provider', provider: descriptor },
+      },
     },
-    evidence: [{
-      artifactId: 'fixture-evidence-1',
-      schemaId: 'fixture/provider-evidence',
+    evidence,
+  }
+  const provisional = sealAssuranceSubmissionV1({
+    ...draft,
+    sourceSeal: {
+      artifactId: 'fixture-source-seal-1',
+      schemaId: 'dsh/assurance-provider-source-seal',
       schemaVersion: 1,
-      value: { check: 'fixture/check', outcome: 'passed' },
-    }],
+      value: {
+        schemaVersion: 1,
+        state: 'sealed',
+        subject: context.subject,
+        evidenceDigests: [],
+      },
+    },
+  })
+  return sealAssuranceSubmissionV1({
+    ...draft,
+    sourceSeal: {
+      artifactId: 'fixture-source-seal-1',
+      schemaId: 'dsh/assurance-provider-source-seal',
+      schemaVersion: 1,
+      value: {
+        schemaVersion: 1,
+        state: 'sealed',
+        subject: context.subject,
+        evidenceDigests: provisional.payload.evidence.map(item => item.digest.value),
+      },
+    },
   })
 }
 
@@ -195,6 +230,42 @@ async function waitForAllTerminalInvocations(
   throw new Error(`Assurance Provider invocations did not all reach durable terminal states: ${lastStates.join(',')}`)
 }
 
+async function waitForBlockedMission(
+  ctx: Context,
+  agent: Agent,
+  missionId: string,
+) {
+  const deadline = Date.now() + 4_000
+  while (Date.now() < deadline) {
+    const snapshot = await ctx.engineeringControlPlane.status(
+      agent,
+      missionId,
+      new AbortController().signal,
+    )
+    if (snapshot.status === 'BLOCKED') return snapshot
+    await new Promise(resolve => setTimeout(resolve, 10))
+  }
+  throw new Error('Mission did not reach BLOCKED')
+}
+
+async function waitForGateDecision(
+  ctx: Context,
+  agent: Agent,
+  missionId: string,
+) {
+  const deadline = Date.now() + 4_000
+  while (Date.now() < deadline) {
+    const snapshot = await ctx.engineeringControlPlane.status(
+      agent,
+      missionId,
+      new AbortController().signal,
+    )
+    if (snapshot.gate !== undefined) return snapshot
+    await new Promise(resolve => setTimeout(resolve, 10))
+  }
+  throw new Error('Mission did not persist a Gate decision')
+}
+
 function object(value: unknown): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeError('Fixture expected an object')
@@ -218,8 +289,8 @@ const rejectionCases: readonly {
   {
     name: 'a Submission that exceeds its frozen byte budget',
     failureCode: 'submission_too_large',
-    mutate: () => {},
-    maxRecordBytes: 512,
+    mutate: candidate => { candidate.oversizePadding = 'x'.repeat(32 * 1024) },
+    maxRecordBytes: 16 * 1024,
   },
   {
     name: 'an unknown field',
@@ -387,7 +458,7 @@ const rejectionCases: readonly {
 ]
 
 describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
-  it('imports one valid sealed Reference Fake Submission by value without granting Gate authority', async () => {
+  it('imports one valid sealed Reference Fake Submission before Kernel-owned Gate evaluation', async () => {
     const repository = await cleanRepository()
     const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-submission-home-'))
     temporaryRoots.push(home)
@@ -399,6 +470,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, descriptor))
     await ctx.engineeringControlPlane.whenReady()
 
@@ -451,7 +523,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
           evidenceRecordId: expect.any(String),
         },
       })
-      expect(imported.evidence.records).toEqual([expect.objectContaining({
+      expect(imported.evidence.records).toContainEqual(expect.objectContaining({
         recordId: invocation?.state === 'settled'
           ? invocation.outcome.evidenceRecordId
           : 'unreachable',
@@ -461,18 +533,14 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         schemaVersion: 1,
         digest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/u),
         redacted: false,
-      })])
-      expect(imported).toMatchObject({
-        status: 'BLOCKED',
-        blocked: { reason: { code: 'assurance_execution_unavailable' } },
-      })
-      expect(imported.gate).toBeUndefined()
-
+      }))
       if (invocation?.state !== 'settled') throw new Error('Fixture invocation did not settle')
       expect(invocation.outcome.submissionDigest).toBe(
         object(returnedSubmission?.digest).value,
       )
-      const evidenceRecord = imported.evidence.records[0]
+      const evidenceRecord = imported.evidence.records.find(record => (
+        record.recordId === invocation.outcome.evidenceRecordId
+      ))
       if (evidenceRecord === undefined) throw new Error('Fixture Submission Evidence is missing')
       const evidencePath = join(
         home,
@@ -487,13 +555,14 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         claimedOutcome: 'satisfied',
       })
       expect(object(object(importedSubmission.payload).providerComposition).value).toEqual({
-        engine: 'reference-fake',
-        version: '1.0.0-fixture.1',
+        schemaVersion: 1,
+        provider: descriptor,
+        components: [{ componentId: 'fixture/reference-fake', componentVersion: '1.0.0-fixture.1' }],
       })
       expect(object(importedSubmission.digest).value).toBe(invocation.outcome.submissionDigest)
 
       const durableInvocation = structuredClone(invocation)
-      const durableEvidence = structuredClone(imported.evidence)
+      const durableEvidenceRecord = structuredClone(evidenceRecord)
       const payload = returnedSubmission?.payload as Record<string, unknown>
       const externalAssessment = payload.externalAssessment as Record<string, unknown>
       externalAssessment.claimedOutcome = 'failed'
@@ -505,11 +574,15 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         new AbortController().signal,
       )
       expect(afterCallerMutation.assuranceProviderInvocations?.[0]).toEqual(durableInvocation)
-      expect(afterCallerMutation.evidence).toEqual(durableEvidence)
+      expect(afterCallerMutation.evidence.records).toContainEqual(durableEvidenceRecord)
       expect(JSON.stringify(afterCallerMutation)).not.toContain('callerMutation')
       expect(await readFile(evidencePath, 'utf8')).toBe(importedEnvelopeText)
-      expect(afterCallerMutation.status).toBe('BLOCKED')
-      expect(afterCallerMutation.gate).toBeUndefined()
+      const decided = await waitForGateDecision(ctx, agent, receipt.missionId)
+      expect(decided).toMatchObject({
+        status: 'APPROVED',
+        assuranceResults: [{ outcome: 'satisfied' }],
+        gate: { kind: 'approved', reasons: [] },
+      })
     } finally {
       await contributorFiber.dispose()
       await serviceFiber.dispose()
@@ -530,6 +603,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, descriptor))
     await ctx.engineeringControlPlane.whenReady()
     const contributorFiber = await ctx.plugin({
@@ -574,7 +648,9 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
           evidenceRecordId: expect.any(String),
         },
       })])
-      expect(imported.evidence.records).toHaveLength(1)
+      expect(imported.evidence.records.filter(record => (
+        record.kind === 'assurance-provider-submission'
+      ))).toHaveLength(1)
       expect(JSON.stringify(imported)).not.toContain('mutated-after-resolution')
     } finally {
       await contributorFiber.dispose()
@@ -584,7 +660,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     }
   })
 
-  it('distinguishes a local Evidence publication failure from Provider rejection', async () => {
+  it('does not invoke a Provider before implementation Evidence can be published', async () => {
     const repository = await cleanRepository()
     const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-publication-failure-home-'))
     temporaryRoots.push(home)
@@ -598,6 +674,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(EngineeringControlPlane, config(repository, home, descriptor))
     await ctx.engineeringControlPlane.whenReady()
     const contributorFiber = await ctx.plugin({
@@ -628,17 +705,17 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         idempotencyKey: 'publication-failure:start:1',
         objective: 'Preserve operational indeterminacy when local Evidence publication fails',
       }, new AbortController().signal)
-      const failed = await waitForTerminalInvocation(ctx, agent, receipt.missionId)
+      const failed = await waitForBlockedMission(ctx, agent, receipt.missionId)
 
       expect(failed.assuranceProviderInvocations).toEqual([expect.objectContaining({
         descriptor,
-        state: 'import_failed',
-        failedAt: expect.any(String),
-        failureCode: 'evidence_store_failure',
+        state: 'prepared',
       })])
-      expect(failed.evidence.records).toEqual([])
+      expect(failed.evidence.records.some(record => (
+        record.kind === 'assurance-provider-submission'
+      ))).toBe(false)
       expect(failed.status).toBe('BLOCKED')
-      expect(failed.gate).toBeUndefined()
+      expect(failed.assuranceSubjects ?? []).toEqual([])
     } finally {
       await contributorFiber.dispose()
       await serviceFiber.dispose()
@@ -666,6 +743,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(
       EngineeringControlPlane,
       configForDescriptors(repository, home, descriptors),
@@ -716,10 +794,11 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
       expect(settled.assuranceProviderInvocations?.map(record => (
         record.state === 'settled' ? record.outcome.claimedOutcome : 'not-settled'
       ))).toEqual(['failed', 'indeterminate'])
-      expect(settled.evidence.records).toHaveLength(2)
-      expect(new Set(settled.evidence.records.map(record => record.recordId)).size).toBe(2)
-      expect(settled.status).toBe('BLOCKED')
-      expect(settled.gate).toBeUndefined()
+      const imported = settled.evidence.records.filter(record => (
+        record.kind === 'assurance-provider-submission'
+      ))
+      expect(imported).toHaveLength(2)
+      expect(new Set(imported.map(record => record.recordId)).size).toBe(2)
     } finally {
       await contributorFiber.dispose()
       await serviceFiber.dispose()
@@ -745,6 +824,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const firstContext = new Context()
     const firstSubprocessFiber = await firstContext.plugin(LocalSubprocessRuntime)
     const firstSubagentFiber = await firstContext.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(firstContext.subagents)
     const firstServiceFiber = await firstContext.plugin(
       EngineeringControlPlane,
       config(repository, home, descriptor),
@@ -782,7 +862,8 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         idempotencyKey: 'persisted-submission:start:1',
         objective: 'Persist one imported Submission without retaining its Provider runtime',
       }, new AbortController().signal)
-      const snapshot = await waitForTerminalInvocation(firstContext, agent, receipt.missionId)
+      await waitForTerminalInvocation(firstContext, agent, receipt.missionId)
+      const snapshot = await waitForGateDecision(firstContext, agent, receipt.missionId)
       persisted = {
         missionId: receipt.missionId,
         revision: snapshot.revision,
@@ -814,8 +895,8 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
       expect(restored.revision).toBe(persisted.revision)
       expect(restored.assuranceProviderInvocations?.[0]).toEqual(persisted.invocation)
       expect(restored.evidence).toEqual(persisted.evidence)
-      expect(restored.status).toBe('BLOCKED')
-      expect(restored.gate).toBeUndefined()
+      expect(restored.status).toBe('APPROVED')
+      expect(restored.gate).toEqual({ kind: 'approved', reasons: [] })
       expect(assessCalls).toBe(1)
     } finally {
       await secondServiceFiber.dispose()
@@ -842,6 +923,7 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
     const serviceFiber = await ctx.plugin(
       EngineeringControlPlane,
       config(repository, home, descriptor, maxRecordBytes),
@@ -893,9 +975,9 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
         rejectedAt: expect.any(String),
         failureCode,
       })])
-      expect(rejected.evidence.records).toEqual([])
-      expect(rejected.status).toBe('BLOCKED')
-      expect(rejected.gate).toBeUndefined()
+      expect(rejected.evidence.records.some(record => (
+        record.kind === 'assurance-provider-submission'
+      ))).toBe(false)
     } finally {
       await contributorFiber.dispose()
       await serviceFiber.dispose()

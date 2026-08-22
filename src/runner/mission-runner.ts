@@ -1,11 +1,15 @@
 import { randomUUID } from 'node:crypto'
 import type { EvidenceJson, PublishEvidenceInput } from '../evidence/filesystem-store.js'
+import type { AssuranceExecutionSubjectV1 } from '../assurance-provider/contracts.js'
+import { evaluateAssuranceSubmissionEligibilityV1 } from '../assurance-provider/eligibility.js'
+import { validateAssuranceSubmissionV1 } from '../assurance-provider/submission.js'
 import type { EvidenceRecord } from '../kernel/types.js'
 import type { MissionStore } from '../kernel/memory-store.js'
 import { MissionError } from '../kernel/errors.js'
 import { evaluateGate } from '../kernel/gate.js'
 import { isMissionPhase } from '../kernel/state-machine.js'
 import type {
+  AssuranceProviderEligibilityV1,
   ControlPlaneKernel,
   GateInput,
   MissionAuthority,
@@ -66,6 +70,7 @@ export interface RoleExecutor {
 /** Host-observed implementation facts; Developer prose is never authoritative for these fields. */
 export interface ImplementationCapture {
   readonly payload: unknown
+  readonly subject: AssuranceExecutionSubjectV1
   readonly implementationSecretCount: number
   readonly workspacePolicyViolations: readonly string[]
 }
@@ -82,6 +87,11 @@ export interface MissionExecutionHost {
   readonly roleExecutor: RoleExecutor
   captureImplementation(snapshot: MissionSnapshot, signal: AbortSignal): Promise<ImplementationCapture>
   runVerifications(snapshot: MissionSnapshot, signal: AbortSignal): Promise<VerificationCapture>
+  runAssuranceProviders?(
+    snapshot: MissionSnapshot,
+    authority: MissionAuthority,
+    signal: AbortSignal,
+  ): Promise<MissionSnapshot>
 }
 
 /** Construction dependencies for the plugin-owned Mission execution runtime. */
@@ -178,6 +188,12 @@ function reportKind(role: RoleName, output: RoleOutput): string {
 
 function needsInput(output: RoleOutput): output is RoleOutput & { readonly outcome: 'needs_input'; readonly question: string } {
   return output.outcome === 'needs_input'
+}
+
+function hasSelectedAssuranceProviders(snapshot: MissionSnapshot): boolean {
+  return (snapshot.assuranceProviderSelections
+    ?.find(selection => selection.attempt === snapshot.attempt)
+    ?.providers.length ?? 0) > 0
 }
 
 /** Process-local execution owner over durable Kernel state; deliberately not a Harness Job. */
@@ -350,17 +366,38 @@ export class MissionRunner {
         if (!Number.isSafeInteger(capture.implementationSecretCount) || capture.implementationSecretCount < 0) {
           throw new Error('Implementation Capture secret count is invalid')
         }
-        snapshot = (await this.publishEvidence(snapshot, authority, host.evidenceStore, 'implementation', {
+        const publishedImplementation = await this.publishEvidence(
+          snapshot,
+          authority,
+          host.evidenceStore,
+          'implementation',
+          {
           schemaVersion: 1,
           capture: capture.payload,
           gateFacts: {
             implementationSecretCount: capture.implementationSecretCount,
             workspacePolicyViolations: [...capture.workspacePolicyViolations],
           },
-        })).snapshot
+          },
+        )
+        snapshot = publishedImplementation.snapshot
         if (capture.workspacePolicyViolations.length > 0) {
           await this.block(snapshot, authority, 'policy_violation', capture.workspacePolicyViolations.join(', '))
           return
+        }
+        if (hasSelectedAssuranceProviders(snapshot)) {
+          const frozen = await this.options.kernel.dispatch({
+            kind: 'freeze_assurance_subject',
+            missionId: snapshot.missionId,
+            expectedRevision: snapshot.revision,
+            subject: capture.subject,
+            implementationEvidenceRecordId: publishedImplementation.record.recordId,
+          }, authority)
+          snapshot = await this.options.kernel.snapshot(frozen.missionId, authority)
+          if (host.runAssuranceProviders === undefined) {
+            throw new Error('Mission host omitted Assurance Provider execution')
+          }
+          snapshot = await host.runAssuranceProviders(snapshot, authority, signal)
         }
       }
       snapshot = await this.advance(snapshot, authority, 'VERIFYING')
@@ -392,6 +429,18 @@ export class MissionRunner {
         snapshot = reviewer.snapshot
         if (reviewer.paused) return
       }
+      if (
+        hasSelectedAssuranceProviders(snapshot)
+        && !(snapshot.assuranceResults ?? []).some(result => result.attempt === snapshot.attempt)
+      ) {
+        const evaluated = await this.options.kernel.dispatch({
+          kind: 'evaluate_assurance_provider_invocations',
+          missionId: snapshot.missionId,
+          expectedRevision: snapshot.revision,
+          eligibilities: await this.assuranceEligibilities(snapshot, host.evidenceStore),
+        }, authority)
+        snapshot = await this.options.kernel.snapshot(evaluated.missionId, authority)
+      }
       if (latestRecord(snapshot, 'final-report') === undefined) {
         const preliminaryInput = await this.buildGateInput(snapshot, host.evidenceStore, false)
         const preliminaryDecision = evaluateGate(preliminaryInput)
@@ -400,6 +449,10 @@ export class MissionRunner {
           missionId: snapshot.missionId,
           attempt: snapshot.attempt,
           decision: preliminaryDecision,
+          assuranceAssessments: (snapshot.assuranceAssessments ?? [])
+            .filter(assessment => assessment.attempt === snapshot.attempt),
+          assuranceResults: (snapshot.assuranceResults ?? [])
+            .filter(result => result.attempt === snapshot.attempt),
           evidenceRecordIds: snapshot.evidence.records
             .filter(record => record.attempt === snapshot.attempt)
             .map(record => record.recordId),
@@ -789,10 +842,74 @@ export class MissionRunner {
     return {
       requiredEvidence: kinds.map(kind => states.get(kind) ?? { kind, state: 'missing' }),
       verifications,
+      assuranceResults: (snapshot.assuranceResults ?? [])
+        .filter(result => result.attempt === snapshot.attempt)
+        .map(result => ({ requirementId: result.requirementId, outcome: result.outcome })),
       reviewerFindings,
       implementationSecretCount,
       workspacePolicyViolations,
     }
+  }
+
+  private async assuranceEligibilities(
+    snapshot: MissionSnapshot,
+    store: RunnerEvidenceStore,
+  ): Promise<AssuranceProviderEligibilityV1[]> {
+    const subject = snapshot.assuranceSubjects?.find(item => item.attempt === snapshot.attempt)?.subject
+    if (subject === undefined) throw new Error('Assurance evaluation requires a frozen Subject')
+    const maxSubmissionBytes = snapshot.effectivePolicy.artifactBudgets?.maxRecordBytes
+      ?? 16 * 1024 * 1024
+    const eligibilities: AssuranceProviderEligibilityV1[] = []
+    for (const invocation of snapshot.assuranceProviderInvocations ?? []) {
+      if (invocation.attempt !== snapshot.attempt || invocation.state !== 'settled') continue
+      const evidence = snapshot.evidence.records.find(record => (
+        record.recordId === invocation.outcome.evidenceRecordId
+        && record.attempt === snapshot.attempt
+        && record.kind === 'assurance-provider-submission'
+      ))
+      if (evidence === undefined || evidence.redacted) {
+        eligibilities.push({
+          invocationId: invocation.invocationId,
+          kind: 'indeterminate' as const,
+          failureCode: 'submission_unreadable' as const,
+        })
+        continue
+      }
+      try {
+        if ((await store.inspect(evidence)).state !== 'valid') throw new Error()
+        const validated = validateAssuranceSubmissionV1(
+          await store.read(evidence),
+          {
+            invocationId: invocation.invocationId,
+            missionId: snapshot.missionId,
+            attempt: snapshot.attempt,
+            provider: invocation.descriptor,
+            subject,
+            effectivePolicyDigest: snapshot.effectivePolicyDigest,
+          },
+          maxSubmissionBytes,
+        )
+        if (
+          validated.submissionDigest !== invocation.outcome.submissionDigest
+          || validated.claimedOutcome !== invocation.outcome.claimedOutcome
+        ) throw new Error()
+        const eligibility = evaluateAssuranceSubmissionEligibilityV1(validated.submission)
+        eligibilities.push(eligibility.kind === 'eligible'
+          ? { invocationId: invocation.invocationId, kind: 'eligible' }
+          : {
+              invocationId: invocation.invocationId,
+              kind: 'indeterminate',
+              failureCode: eligibility.failureCode,
+            })
+      } catch {
+        eligibilities.push({
+          invocationId: invocation.invocationId,
+          kind: 'indeterminate' as const,
+          failureCode: 'submission_invalid' as const,
+        })
+      }
+    }
+    return eligibilities
   }
 }
 
