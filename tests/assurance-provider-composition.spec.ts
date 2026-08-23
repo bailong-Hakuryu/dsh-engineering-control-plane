@@ -91,6 +91,32 @@ async function waitForMissionStatus(
   )
 }
 
+async function cancelMissionAtLatestRevision(
+  ctx: Context,
+  agent: Agent,
+  missionId: string,
+  reason: string,
+) {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const current = await ctx.engineeringControlPlane.status(
+      agent,
+      missionId,
+      new AbortController().signal,
+    )
+    try {
+      return await ctx.engineeringControlPlane.cancel(agent, {
+        missionId,
+        expectedRevision: current.revision,
+        reason,
+      }, new AbortController().signal)
+    } catch (error) {
+      if ((error as { code?: unknown }).code === 'revision_conflict') continue
+      throw error
+    }
+  }
+  throw new Error('Mission revision did not stabilize for cancellation')
+}
+
 function satisfiedSubmissionFor(
   context: AssuranceExecutionContext,
   descriptor: AssuranceProviderDescriptorV1,
@@ -992,11 +1018,12 @@ describe('Assurance Provider startup registration and selection', () => {
       }, new AbortController().signal)
       const begun = await waitForInvocationState(ctx, agent, receipt.missionId, ['begun'])
 
-      await ctx.engineeringControlPlane.cancel(agent, {
-        missionId: begun.missionId,
-        expectedRevision: begun.revision,
-        reason: 'The operator explicitly canceled this governed Mission.',
-      }, new AbortController().signal)
+      await cancelMissionAtLatestRevision(
+        ctx,
+        agent,
+        begun.missionId,
+        'The operator explicitly canceled this governed Mission.',
+      )
       const canceled = await ctx.engineeringControlPlane.status(
         agent,
         begun.missionId,
@@ -1020,4 +1047,155 @@ describe('Assurance Provider startup registration and selection', () => {
       await subprocessFiber.dispose()
     }
   })
+
+  it('reconciles an external cancellation committed before Provider termination after restart', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-cancel-restart-home-'))
+    temporaryRoots.push(home)
+    const descriptor: AssuranceProviderDescriptorV1 = {
+      schemaVersion: 1,
+      providerId: 'fixture/cancel-restart-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const activation: AssuranceProviderActivationConfig = {
+      providerId: descriptor.providerId,
+      providerVersion: descriptor.providerVersion,
+      activation: 'required',
+    }
+    const agent = {
+      id: 'agent-provider-cancel-restart-fixture',
+      session: { header: { cwd: repository } },
+    } as unknown as Agent
+    let externalState: 'running' | 'canceled' = 'running'
+    let cancelCalls = 0
+    const contributor = (name: string) => ({
+      name,
+      inject: ['engineeringControlPlane'],
+      apply(contributorContext: Context) {
+        return contributorContext.engineeringControlPlane.registerAssuranceProvider(
+          descriptor,
+          normalizedDescriptor => ({
+            descriptor: normalizedDescriptor,
+            assess(_context, _request, options) {
+              return new Promise<never>((_resolve, reject) => {
+                const signal = options?.signal
+                if (signal === undefined) return
+                const rejectAbort = () => reject(signal.reason ?? new Error('Provider invocation aborted'))
+                if (signal.aborted) rejectAbort()
+                else signal.addEventListener('abort', rejectAbort, { once: true })
+              })
+            },
+            async cancel() {
+              cancelCalls++
+              if (externalState === 'running') {
+                externalState = 'canceled'
+                throw new Error('Simulated host crash after external cancellation committed')
+              }
+              return {
+                kind: 'external_assessment_terminal' as const,
+                externalAssessmentId: 'fixture-cancel-restart-assessment-1',
+                terminalState: 'canceled' as const,
+              }
+            },
+          }),
+        )
+      },
+    })
+
+    const firstContext = new Context()
+    const firstSubprocessFiber = await firstContext.plugin(LocalSubprocessRuntime)
+    const firstSubagentFiber = await firstContext.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(firstContext.subagents)
+    const firstServiceFiber = await firstContext.plugin(
+      EngineeringControlPlane,
+      config(repository, home, [activation]),
+    )
+    await firstContext.engineeringControlPlane.whenReady()
+    const firstContributorFiber = await firstContext.plugin(contributor('cancel-restart-provider-first-host'))
+
+    let missionId: string
+    try {
+      const receipt = await firstContext.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-cancel-restart:start:1',
+        objective: 'Recover a cancellation whose external effect committed before local termination',
+      }, new AbortController().signal)
+      missionId = receipt.missionId
+      const begun = await waitForInvocationState(firstContext, agent, missionId, ['begun'])
+
+      await expect(cancelMissionAtLatestRevision(
+        firstContext,
+        agent,
+        begun.missionId,
+        'Simulate loss of the first host after the external cancellation effect.',
+      )).rejects.toThrow('Simulated host crash')
+      const quarantined = await firstContext.engineeringControlPlane.status(
+        agent,
+        missionId,
+        new AbortController().signal,
+      )
+      expect(externalState).toBe('canceled')
+      expect(quarantined).toMatchObject({
+        status: 'BLOCKED',
+        blocked: { reason: { code: 'evidence_incomplete' } },
+        assuranceProviderInvocations: [{ state: 'begun' }],
+      })
+    } finally {
+      await firstContributorFiber.dispose()
+      await firstServiceFiber.dispose()
+      await firstSubagentFiber.dispose()
+      await firstSubprocessFiber.dispose()
+    }
+
+    const restartedContext = new Context()
+    const restartedSubprocessFiber = await restartedContext.plugin(LocalSubprocessRuntime)
+    const restartedSubagentFiber = await restartedContext.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(restartedContext.subagents)
+    const restartedServiceFiber = await restartedContext.plugin(
+      EngineeringControlPlane,
+      config(repository, home, [activation]),
+    )
+    await restartedContext.engineeringControlPlane.whenReady()
+    const restartedContributorFiber = await restartedContext.plugin(
+      contributor('cancel-restart-provider-second-host'),
+    )
+
+    try {
+      const recovered = await restartedContext.engineeringControlPlane.status(
+        agent,
+        missionId!,
+        new AbortController().signal,
+      )
+      expect(recovered.assuranceProviderInvocations?.[0]?.state).toBe('begun')
+      await cancelMissionAtLatestRevision(
+        restartedContext,
+        agent,
+        missionId!,
+        'Reconcile the already canceled external Assessment after host restart.',
+      )
+      const canceled = await restartedContext.engineeringControlPlane.status(
+        agent,
+        missionId!,
+        new AbortController().signal,
+      )
+
+      expect(cancelCalls).toBe(2)
+      expect(canceled).toMatchObject({
+        status: 'CANCELLED',
+        assuranceProviderInvocations: [{
+          descriptor,
+          state: 'terminated',
+          outcome: {
+            kind: 'external_assessment_terminal',
+            externalAssessmentId: 'fixture-cancel-restart-assessment-1',
+            terminalState: 'canceled',
+          },
+        }],
+      })
+    } finally {
+      await restartedContributorFiber.dispose()
+      await restartedServiceFiber.dispose()
+      await restartedSubagentFiber.dispose()
+      await restartedSubprocessFiber.dispose()
+    }
+  }, 15_000)
 })

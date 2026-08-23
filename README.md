@@ -212,6 +212,11 @@ monotonic `terminated` Invocation before final repository capture and Mission
 cancellation. Missing registration, missing cancellation support, malformed
 proof, or timeout fails closed in Cancellation Quarantine; host unload never
 calls `cancel()` and therefore cannot turn restart recovery into cancellation.
+If external cancellation commits before the Kernel records `terminated`, the
+Invocation remains `begun`. A later explicit `mission_cancel` resolves the same
+exact Provider again; an already-terminal external Assessment is valid
+quiescence proof, after which the Kernel can record `terminated` and complete
+Mission cancellation. Startup itself never performs this semantic retry.
 
 One fulfilled `sealed_submission` is detached and strictly checked for exact
 schema, Invocation, Mission, Attempt, Provider, Subject, and Effective Policy
@@ -245,9 +250,10 @@ post-implementation Subject and assessment before the next Gate decision.
 `mission_rework` after an external-assurance failure.
 
 The closure is proven with Reference Fake Providers through the public Cordis
-seam. The real DSH Security Assurance `control-plane-provider` Adapter and the
-legal `external_failure` Provider outcome remain separate follow-up slices; no
-Security plugin runtime is implied by installing this package alone.
+seam and with the optional real DSH Security Assurance
+`control-plane-provider` Adapter. Installing this package alone still implies
+no Security plugin runtime. The legal `external_failure` Provider outcome
+remains a separate follow-up slice.
 
 ## Read-only doctor
 
