@@ -53,6 +53,8 @@ function receipt(snapshot: MissionSnapshot): MissionReceipt {
 export class AssuranceProviderInvocationCoordinator {
   private readonly active = new Map<string, AbortController>()
   private readonly admissions = new Map<string, Promise<void>>()
+  private readonly recoveryAdmissions = new Map<string, Promise<void>>()
+  private readonly recoveryAttempted = new Set<string>()
   private readonly executions = new Map<string, Promise<void>>()
   private disposed = false
 
@@ -97,9 +99,13 @@ export class AssuranceProviderInvocationCoordinator {
     signal: AbortSignal,
   ): Promise<MissionSnapshot> {
     const invocationIds = (initial.assuranceProviderInvocations ?? [])
-      .filter(record => record.attempt === initial.attempt && record.state === 'prepared')
+      .filter(record => (
+        record.attempt === initial.attempt
+        && (record.state === 'prepared' || record.state === 'begun')
+      ))
       .map(record => record.invocationId)
     await this.launch(initial, authority)
+    await this.recoverBegun(initial.missionId, invocationIds, authority)
 
     while (!this.disposed) {
       const current = await this.options.kernel.snapshot(initial.missionId, authority)
@@ -178,6 +184,99 @@ export class AssuranceProviderInvocationCoordinator {
     )
   }
 
+  /** Re-enter only durably begun work, and only through a Provider's explicit recovery seam. */
+  private async recoverBegun(
+    missionId: string,
+    invocationIds: readonly string[],
+    authority: MissionAuthority,
+  ): Promise<void> {
+    for (const invocationId of invocationIds) {
+      if (this.disposed || this.active.has(invocationId) || this.recoveryAttempted.has(invocationId)) continue
+      let admission = this.recoveryAdmissions.get(invocationId)
+      const ownsAdmission = admission === undefined
+      if (admission === undefined) {
+        this.recoveryAttempted.add(invocationId)
+        admission = this.admitRecovery(missionId, invocationId, authority)
+        this.recoveryAdmissions.set(invocationId, admission)
+      }
+      try {
+        await admission
+      } finally {
+        if (ownsAdmission && this.recoveryAdmissions.get(invocationId) === admission) {
+          this.recoveryAdmissions.delete(invocationId)
+        }
+      }
+    }
+  }
+
+  private async admitRecovery(
+    missionId: string,
+    invocationId: string,
+    authority: MissionAuthority,
+  ): Promise<void> {
+    const current = await this.options.kernel.snapshot(missionId, authority)
+    if (this.disposed) return
+    const invocation = current.assuranceProviderInvocations?.find(record => (
+      record.invocationId === invocationId
+    ))
+    if (invocation === undefined || invocation.state !== 'begun') return
+
+    const invocationDescriptor = parseAssuranceProviderDescriptorV1(invocation.descriptor)
+    let provider: AssuranceProviderV1
+    try {
+      provider = this.options.registry.resolveExact(invocationDescriptor)
+    } catch (error) {
+      const failureCode = error instanceof AssuranceProviderResolutionError
+        ? error.code
+        : 'factory_failed'
+      this.report(
+        `Assurance Provider invocation '${invocation.invocationId}' cannot be recovered (${failureCode})`,
+      )
+      await this.markUnavailableWithRetry(
+        current.missionId,
+        invocation.invocationId,
+        'begun',
+        failureCode,
+        authority,
+      )
+      return
+    }
+    if (typeof provider.recover !== 'function') {
+      this.report(
+        `Assurance Provider invocation '${invocation.invocationId}' has no recovery operation`,
+      )
+      await this.markUnavailableWithRetry(
+        current.missionId,
+        invocation.invocationId,
+        'begun',
+        'invalid_provider',
+        authority,
+      )
+      return
+    }
+    if (!this.options.registry.isRegisteredExact(invocationDescriptor)) {
+      await this.markUnavailableWithRetry(
+        current.missionId,
+        invocation.invocationId,
+        'begun',
+        'registration_missing',
+        authority,
+      )
+      return
+    }
+
+    const issued = issueAssuranceProviderInvocationV1(current, invocation.invocationId)
+    this.invoke(
+      invocation.invocationId,
+      invocationDescriptor,
+      provider,
+      issued.context,
+      issued.request,
+      authority,
+      'recover',
+    )
+  }
+
   /** Abort process-local work without treating a tool-call signal as Mission ownership. */
   dispose(): void {
     if (this.disposed) return
@@ -195,13 +294,16 @@ export class AssuranceProviderInvocationCoordinator {
     context: AssuranceExecutionContext,
     request: AssuranceRequestV1,
     authority: MissionAuthority,
+    operation: 'assess' | 'recover' = 'assess',
   ): void {
     if (this.disposed) return
     const controller = new AbortController()
     this.active.set(invocationId, controller)
     let outcome: Promise<AssuranceProviderOutcomeV1>
     try {
-      outcome = Promise.resolve(provider.assess(context, request, { signal: controller.signal }))
+      const execute = operation === 'assess' ? provider.assess : provider.recover
+      if (execute === undefined) throw new Error('Provider recovery operation is unavailable')
+      outcome = Promise.resolve(execute.call(provider, context, request, { signal: controller.signal }))
     } catch {
       this.active.delete(invocationId)
       this.report(`Assurance Provider invocation '${invocationId}' failed after it began`)

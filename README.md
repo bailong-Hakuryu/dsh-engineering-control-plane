@@ -188,10 +188,14 @@ host resolve the frozen exact ID and version, durably change the invocation from
 and non-serializable. It exposes Mission, Attempt, Effective Policy digest, and
 the frozen Subject identity, but no repository path, Store, Gate, Ledger,
 process, or network capability. A lost or invalid registration becomes
-`unavailable`; there is no version fallback, substitution, or replay of an
-invocation that already reached `begun`, including after host restart. Service
-disposal sends an independent abort signal to live Provider work; the
-originating tool-call signal does not own that work.
+`unavailable`; there is no version fallback or substitution. Host restart never
+replays `assess()` for an invocation that already reached `begun`: startup
+blocks the Mission without calling the Provider. A later explicit Mission
+resume may call the exact Provider's optional `recover()` operation, which must
+reconcile the same external assessment. A missing recovery operation fails
+closed as an invalid Provider. Service disposal sends an independent abort
+signal to live Provider work; the originating tool-call signal does not own
+that work.
 Concurrent replay admission joins one process-local promise before Provider
 factory resolution, so every replay waits for the same durable result; the
 `prepared → begun` compare-and-swap remains the cross-process authority for

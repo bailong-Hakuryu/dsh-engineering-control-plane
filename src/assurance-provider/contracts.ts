@@ -275,6 +275,17 @@ export interface AssuranceProviderV1 {
     request: AssuranceRequestV1,
     options?: ProviderInvocationOptions,
   ): Promise<AssuranceProviderOutcomeV1>
+
+  /**
+   * Reconcile an invocation that was durably begun by an earlier host process.
+   * Implementations must recover the same external assessment and must not start
+   * a replacement assessment under this operation.
+   */
+  recover?(
+    context: AssuranceExecutionContext,
+    request: AssuranceRequestV1,
+    options?: ProviderInvocationOptions,
+  ): Promise<AssuranceProviderOutcomeV1>
 }
 
 export type AssuranceProviderFactoryV1 = (

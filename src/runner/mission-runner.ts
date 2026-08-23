@@ -400,6 +400,16 @@ export class MissionRunner {
           snapshot = await host.runAssuranceProviders(snapshot, authority, signal)
         }
       }
+      const pendingProviderInvocation = (snapshot.assuranceProviderInvocations ?? []).some(record => (
+        record.attempt === snapshot.attempt
+        && (record.state === 'prepared' || record.state === 'begun')
+      ))
+      if (pendingProviderInvocation) {
+        if (host.runAssuranceProviders === undefined) {
+          throw new Error('Mission host omitted Assurance Provider execution')
+        }
+        snapshot = await host.runAssuranceProviders(snapshot, authority, signal)
+      }
       snapshot = await this.advance(snapshot, authority, 'VERIFYING')
     }
 

@@ -15,9 +15,10 @@ import type {
   AssuranceProviderDescriptorV1,
   AssuranceProviderFactoryV1,
   AssuranceRequestV1,
+  AssuranceSubmissionArtifactDraftV1,
   ProviderInvocationOptions,
 } from '../src/assurance-provider.ts'
-import { parseAssuranceProviderDescriptorV1 } from '../src/assurance-provider.ts'
+import { parseAssuranceProviderDescriptorV1, sealAssuranceSubmissionV1 } from '../src/assurance-provider.ts'
 import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
 import * as clientPlugin from '../src/client.ts'
 import * as toolsPlugin from '../src/tools.ts'
@@ -61,6 +62,120 @@ async function waitForInvocationState(
     await new Promise(resolve => setTimeout(resolve, 10))
   }
   throw new Error(`Provider invocation did not reach ${expected.join('/')} (last state: ${lastState ?? 'missing'})`)
+}
+
+async function waitForMissionStatus(
+  ctx: Context,
+  agent: Agent,
+  missionId: string,
+  expected: readonly string[],
+) {
+  const deadline = Date.now() + 6_000
+  let lastStatus: string | undefined
+  let lastInvocationState: string | undefined
+  let lastDetails: unknown
+  while (Date.now() < deadline) {
+    const snapshot = await ctx.engineeringControlPlane.status(
+      agent,
+      missionId,
+      new AbortController().signal,
+    )
+    lastStatus = snapshot.status
+    lastInvocationState = snapshot.assuranceProviderInvocations?.[0]?.state
+    lastDetails = { blocked: snapshot.blocked, assuranceResults: snapshot.assuranceResults }
+    if (expected.includes(lastStatus)) return snapshot
+    await new Promise(resolve => setTimeout(resolve, 10))
+  }
+  throw new Error(
+    `Mission did not reach ${expected.join('/')} (last status: ${lastStatus ?? 'missing'}, Provider: ${lastInvocationState ?? 'missing'}, details: ${JSON.stringify(lastDetails)})`,
+  )
+}
+
+function satisfiedSubmissionFor(
+  context: AssuranceExecutionContext,
+  descriptor: AssuranceProviderDescriptorV1,
+) {
+  const evidence: readonly AssuranceSubmissionArtifactDraftV1[] = [{
+    artifactId: 'restart-fixture-evidence-1',
+    schemaId: 'fixture/security-evidence',
+    schemaVersion: 1,
+    value: { check: 'fixture/security-check', outcome: 'satisfied' },
+  }]
+  const draft = {
+    schemaVersion: 1 as const,
+    binding: {
+      invocationId: context.invocationId,
+      missionId: context.missionId,
+      attempt: context.attempt,
+      provider: descriptor,
+      subject: context.subject,
+      effectivePolicyDigest: context.effectivePolicyDigest,
+    },
+    externalAssessment: {
+      state: 'sealed' as const,
+      assessmentId: 'restart-fixture-assessment-1',
+      claimedOutcome: 'satisfied' as const,
+    },
+    providerComposition: {
+      artifactId: 'restart-fixture-composition-1',
+      schemaId: 'dsh/assurance-provider-composition',
+      schemaVersion: 1 as const,
+      value: {
+        schemaVersion: 1,
+        provider: descriptor,
+        components: [{ componentId: 'fixture/recovery-engine', componentVersion: '1.0.0' }],
+      },
+    },
+    providerPolicy: {
+      artifactId: 'restart-fixture-policy-1',
+      schemaId: 'dsh/assurance-provider-policy',
+      schemaVersion: 1 as const,
+      value: { schemaVersion: 1, effectivePolicyDigest: context.effectivePolicyDigest },
+    },
+    coverage: {
+      artifactId: 'restart-fixture-coverage-1',
+      schemaId: 'dsh/assurance-provider-coverage',
+      schemaVersion: 1 as const,
+      value: {
+        schemaVersion: 1,
+        status: 'complete',
+        dimensions: [{ dimensionId: 'fixture/security-check', status: 'covered' }],
+      },
+    },
+    provenance: {
+      artifactId: 'restart-fixture-provenance-1',
+      schemaId: 'dsh/assurance-provider-provenance',
+      schemaVersion: 1 as const,
+      value: {
+        schemaVersion: 1,
+        assessor: { kind: 'machine_provider', provider: descriptor },
+      },
+    },
+    evidence,
+  }
+  const provisional = sealAssuranceSubmissionV1({
+    ...draft,
+    sourceSeal: {
+      artifactId: 'restart-fixture-source-seal-1',
+      schemaId: 'dsh/assurance-provider-source-seal',
+      schemaVersion: 1,
+      value: { schemaVersion: 1, state: 'sealed', subject: context.subject, evidenceDigests: [] },
+    },
+  })
+  return sealAssuranceSubmissionV1({
+    ...draft,
+    sourceSeal: {
+      artifactId: 'restart-fixture-source-seal-1',
+      schemaId: 'dsh/assurance-provider-source-seal',
+      schemaVersion: 1,
+      value: {
+        schemaVersion: 1,
+        state: 'sealed',
+        subject: context.subject,
+        evidenceDigests: provisional.payload.evidence.map(item => item.digest.value),
+      },
+    },
+  })
 }
 
 function config(
@@ -651,7 +766,7 @@ describe('Assurance Provider startup registration and selection', () => {
     }
   })
 
-  it('does not replay a begun Provider invocation after a host restart', async () => {
+  it('recovers a begun Provider invocation only after an explicit Mission resume without replaying assess', async () => {
     const repository = await cleanRepository()
     const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-restart-home-'))
     temporaryRoots.push(home)
@@ -722,6 +837,7 @@ describe('Assurance Provider startup registration and selection', () => {
     const secondContext = new Context()
     const secondSubprocessFiber = await secondContext.plugin(LocalSubprocessRuntime)
     const secondSubagentFiber = await secondContext.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(secondContext.subagents)
     const secondServiceFiber = await secondContext.plugin(
       EngineeringControlPlane,
       config(repository, home, [activation]),
@@ -729,6 +845,7 @@ describe('Assurance Provider startup registration and selection', () => {
     await secondContext.engineeringControlPlane.whenReady()
     let secondFactoryCalls = 0
     let secondAssessCalls = 0
+    let secondRecoverCalls = 0
     const secondContributorFiber = await secondContext.plugin({
       name: 'restart-reference-assurance-provider',
       inject: ['engineeringControlPlane'],
@@ -742,6 +859,13 @@ describe('Assurance Provider startup registration and selection', () => {
               assess() {
                 secondAssessCalls++
                 return new Promise<never>(() => {})
+              },
+              async recover(context: AssuranceExecutionContext) {
+                secondRecoverCalls++
+                return {
+                  kind: 'sealed_submission' as const,
+                  submission: satisfiedSubmissionFor(context, normalizedDescriptor),
+                }
               },
             }
           },
@@ -774,11 +898,35 @@ describe('Assurance Provider startup registration and selection', () => {
       })])
       expect(snapshot.status).toBe('BLOCKED')
       expect(snapshot.roleRuns.map(run => run.role)).toEqual(['planner', 'developer'])
+
+      await secondContext.engineeringControlPlane.resume(agent, {
+        missionId: snapshot.missionId,
+        expectedRevision: snapshot.revision,
+        supplementalContext: 'Explicitly reconcile the durable Provider invocation after restart.',
+      }, new AbortController().signal)
+      const recovered = await waitForMissionStatus(
+        secondContext,
+        agent,
+        snapshot.missionId,
+        ['APPROVED', 'REWORK_REQUIRED'],
+      )
+
+      expect(secondFactoryCalls).toBe(1)
+      expect(secondAssessCalls).toBe(0)
+      expect(secondRecoverCalls).toBe(1)
+      expect(recovered.status).toBe('APPROVED')
+      expect(recovered.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        state: 'settled',
+        outcome: expect.objectContaining({
+          kind: 'sealed_submission',
+          claimedOutcome: 'satisfied',
+        }),
+      })])
     } finally {
       await secondContributorFiber.dispose()
       await secondServiceFiber.dispose()
       await secondSubagentFiber.dispose()
       await secondSubprocessFiber.dispose()
     }
-  })
+  }, 10_000)
 })
