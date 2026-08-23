@@ -3,6 +3,7 @@ import type { MissionStore } from './memory-store.js'
 import { MissionError } from './errors.js'
 import { isMissionPhase, mayAdvance } from './state-machine.js'
 import { evaluateGate } from './gate.js'
+import { parseExternalAssessmentFailureV1 } from '../assurance-provider/contracts.js'
 import type {
   AssuranceProviderCancellationOutcomeV1,
   AssuranceProviderUnavailableCode,
@@ -880,6 +881,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
           terminalOutcome.kind !== 'sealed_submission'
           && terminalOutcome.kind !== 'rejected_submission'
           && terminalOutcome.kind !== 'import_failed'
+          && terminalOutcome.kind !== 'external_failure'
         ) throw new TypeError('Assurance Provider terminal outcome kind is invalid')
         if (
           terminalOutcome.kind === 'rejected_submission'
@@ -891,6 +893,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
           terminalOutcome.kind === 'import_failed'
           && terminalOutcome.failureCode !== 'evidence_store_failure'
         ) throw new TypeError('Assurance Submission import failureCode is invalid')
+        const externalFailure = terminalOutcome.kind === 'external_failure'
+          ? parseExternalAssessmentFailureV1(terminalOutcome.failure)
+          : undefined
         const result = await options.store.update(command.missionId, command.expectedRevision, current => {
           requireRepository(current, authority)
           const invocationIndex = begunAssuranceProviderInvocationIndex(current, command.invocationId)
@@ -956,6 +961,24 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                       state: 'import_failed' as const,
                       failedAt: terminalAt,
                       failureCode: terminalOutcome.failureCode,
+                    }
+                  : record
+              )),
+              updatedAt: terminalAt,
+            }
+          }
+          if (terminalOutcome.kind === 'external_failure') {
+            if (externalFailure === undefined) throw new Error('Unreachable External Assessment Failure')
+            return {
+              ...current,
+              revision: current.revision + 1,
+              assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+                index === invocationIndex
+                  ? {
+                      ...begunInvocation,
+                      state: 'external_failed' as const,
+                      failedAt: terminalAt,
+                      failure: { ...externalFailure },
                     }
                   : record
               )),
@@ -1083,6 +1106,8 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               reasonCodes = ['submission_rejected']
             } else if (invocation.state === 'import_failed') {
               reasonCodes = ['submission_import_failed']
+            } else if (invocation.state === 'external_failed') {
+              reasonCodes = [`external_assessment_${invocation.failure.reason}`]
             } else {
               reasonCodes = ['provider_incomplete']
             }

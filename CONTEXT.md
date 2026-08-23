@@ -296,6 +296,10 @@ _Avoid_: Assurance Result, installation presence, automatic fallback
 An immutable, digest-bound Provider export that binds an external assessment to its subject, policy, coverage, outcome, Evidence, and provenance for validation and import into the Mission Evidence Store.
 _Avoid_: Shared database row, report path, Provider-owned Gate decision
 
+**External Assessment Failure**:
+A strict provider-neutral statement that an Assurance Provider cannot supply a sealed Submission, carrying only a bounded reason and audit code and no claimed Assurance outcome or Evidence.
+_Avoid_: Security Verdict, failed Finding, free-form Provider error
+
 **Attempt Assurance Subject**:
 The immutable, path-free Git branch, HEAD, and Workspace Fingerprint frozen only after one Attempt's implementation Evidence is published and used to bind every external assessment for that Attempt.
 _Avoid_: Mission baseline, repository path, mutable checkout, Provider-selected subject

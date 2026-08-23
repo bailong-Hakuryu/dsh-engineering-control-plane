@@ -1,4 +1,7 @@
-import { parseAssuranceProviderDescriptorV1 } from './contracts.js'
+import {
+  parseAssuranceProviderDescriptorV1,
+  parseExternalAssessmentFailureV1,
+} from './contracts.js'
 import type {
   AssuranceProviderDescriptorV1,
   AssuranceProviderCancellationOutcomeV1,
@@ -9,6 +12,7 @@ import type {
   AssuranceExecutionContext,
   AssuranceSubmissionBindingV1,
   AssuranceSubmissionRejectionCode,
+  ExternalAssessmentFailureV1,
 } from './contracts.js'
 import {
   AssuranceSubmissionValidationError,
@@ -58,6 +62,7 @@ export class AssuranceProviderInvocationCoordinator {
   private readonly recoveryAdmissions = new Map<string, Promise<void>>()
   private readonly recoveryAttempted = new Set<string>()
   private readonly executions = new Map<string, Promise<void>>()
+  private readonly cancellationReserved = new Set<string>()
   private disposed = false
 
   constructor(private readonly options: AssuranceProviderInvocationCoordinatorOptions) {}
@@ -126,6 +131,15 @@ export class AssuranceProviderInvocationCoordinator {
     return this.options.kernel.snapshot(initial.missionId, authority)
   }
 
+  /** Reserve terminal settlement for explicit cancellation before process-local work is aborted. */
+  reserveCancellation(initial: MissionSnapshot): void {
+    for (const invocation of initial.assuranceProviderInvocations ?? []) {
+      if (invocation.attempt === initial.attempt && invocation.state === 'begun') {
+        this.cancellationReserved.add(invocation.invocationId)
+      }
+    }
+  }
+
   /** Explicitly quiesce every begun external assessment before Mission cancellation commits. */
   async cancel(
     initial: MissionSnapshot,
@@ -133,6 +147,7 @@ export class AssuranceProviderInvocationCoordinator {
     signal: AbortSignal,
   ): Promise<MissionSnapshot> {
     if (this.disposed) throw new Error('Assurance Provider invocation coordinator is disposing')
+    this.reserveCancellation(initial)
     const cancellationSignal = AbortSignal.any([
       signal,
       AbortSignal.timeout(this.options.cancellationTimeoutMs ?? 30_000),
@@ -146,7 +161,10 @@ export class AssuranceProviderInvocationCoordinator {
       const invocation = current.assuranceProviderInvocations?.find(record => (
         record.invocationId === invocationId
       ))
-      if (invocation === undefined || invocation.state !== 'begun') continue
+      if (invocation === undefined || invocation.state !== 'begun') {
+        this.cancellationReserved.delete(invocationId)
+        continue
+      }
       const descriptor = parseAssuranceProviderDescriptorV1(invocation.descriptor)
       let provider: AssuranceProviderV1
       try {
@@ -168,6 +186,7 @@ export class AssuranceProviderInvocationCoordinator {
       )
       const validated = this.validateCancellationOutcome(outcome)
       await this.terminateWithRetry(current.missionId, invocationId, validated, authority)
+      this.cancellationReserved.delete(invocationId)
     }
     return this.options.kernel.snapshot(initial.missionId, authority)
   }
@@ -418,6 +437,7 @@ export class AssuranceProviderInvocationCoordinator {
       controller.abort(new Error('Engineering Control Plane disposed'))
     }
     this.active.clear()
+    this.cancellationReserved.clear()
   }
 
   private invoke(
@@ -534,27 +554,45 @@ export class AssuranceProviderInvocationCoordinator {
   ): Promise<void> {
     if (!this.owns(invocationId, controller)) return
     let submission: unknown
+    let externalFailure: ExternalAssessmentFailureV1 | undefined
     try {
       if (typeof outcome !== 'object' || outcome === null || Array.isArray(outcome)) {
         throw new TypeError('Provider outcome must be an object')
       }
       const kind = Reflect.get(outcome, 'kind')
       if (kind === 'external_failure') {
-        this.report(`Assurance Provider invocation '${invocationId}' returned no sealed Submission`)
-        return
+        const keys = Object.keys(outcome)
+        if (keys.length !== 2 || !keys.includes('kind') || !keys.includes('failure')) {
+          throw new TypeError('External Assessment Failure outcome contains unknown or missing fields')
+        }
+        externalFailure = parseExternalAssessmentFailureV1(Reflect.get(outcome, 'failure'))
+      } else {
+        if (kind !== 'sealed_submission') throw new TypeError('Provider outcome kind is invalid')
+        const keys = Object.keys(outcome)
+        if (keys.length !== 2 || !keys.includes('kind') || !keys.includes('submission')) {
+          throw new TypeError('Sealed Submission outcome contains unknown or missing fields')
+        }
+        submission = Reflect.get(outcome, 'submission')
       }
-      if (kind !== 'sealed_submission') throw new TypeError('Provider outcome kind is invalid')
-      const keys = Object.keys(outcome)
-      if (keys.length !== 2 || !keys.includes('kind') || !keys.includes('submission')) {
-        throw new TypeError('Sealed Submission outcome contains unknown or missing fields')
-      }
-      submission = Reflect.get(outcome, 'submission')
     } catch {
       this.report(`Assurance Provider invocation '${invocationId}' returned a malformed outcome`)
       await this.settleRejected(
         invocationId,
         context,
         'malformed_submission',
+        authority,
+        controller,
+      )
+      return
+    }
+    if (externalFailure !== undefined) {
+      this.report(
+        `Assurance Provider invocation '${invocationId}' returned External Assessment Failure (${externalFailure.reason}:${externalFailure.code})`,
+      )
+      await this.settleWithRetry(
+        invocationId,
+        context,
+        { kind: 'external_failure', failure: externalFailure },
         authority,
         controller,
       )
@@ -704,7 +742,9 @@ export class AssuranceProviderInvocationCoordinator {
   }
 
   private owns(invocationId: string, controller: AbortController): boolean {
-    return !this.disposed && this.active.get(invocationId) === controller
+    return !this.disposed
+      && !this.cancellationReserved.has(invocationId)
+      && this.active.get(invocationId) === controller
   }
 
   private async waitForOwnedExecutions(

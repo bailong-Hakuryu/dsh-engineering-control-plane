@@ -272,6 +272,7 @@ export class EngineeringControlPlane extends Service {
     const missionAuthority = await this.controlAuthority(runtime, agent, ['read', 'cancel', 'orchestrate'], signal)
     const before = await runtime.kernel.snapshot(request.missionId, missionAuthority)
     assertExpectedRevision(before, request.expectedRevision)
+    runtime.assuranceInvocations.reserveCancellation(before)
     await runtime.runner.quiesceForCancellation(before.missionId)
     let cancellationSnapshot: MissionSnapshot
     try {

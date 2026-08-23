@@ -5,6 +5,7 @@ import type {
   AssuranceProviderUnavailableCode,
   AssuranceSubmissionBindingV1,
   AssuranceSubmissionRejectionCode,
+  ExternalAssessmentFailureV1,
   FrozenAssuranceProviderSelectionV1,
 } from '../assurance-provider/contracts.js'
 
@@ -252,6 +253,9 @@ export type AssuranceAssessmentReasonCode =
   | 'submission_rejected'
   | 'submission_import_failed'
   | 'provider_incomplete'
+  | 'external_assessment_blocked'
+  | 'external_assessment_canceled'
+  | 'external_assessment_failed'
 
 export type AssuranceProviderEligibilityV1 =
   | { readonly invocationId: string; readonly kind: 'eligible' }
@@ -336,6 +340,12 @@ export type AssuranceProviderInvocationRecordV1 =
     readonly begunAt: string
     readonly failedAt: string
     readonly failureCode: 'evidence_store_failure'
+  }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'external_failed'
+    readonly begunAt: string
+    readonly failedAt: string
+    readonly failure: ExternalAssessmentFailureV1
   }
   | AssuranceProviderInvocationBaseV1 & {
     readonly state: 'terminated'
@@ -506,6 +516,10 @@ export type MissionCommand =
       | {
         readonly kind: 'import_failed'
         readonly failureCode: 'evidence_store_failure'
+      }
+      | {
+        readonly kind: 'external_failure'
+        readonly failure: ExternalAssessmentFailureV1
       }
   }
   | {

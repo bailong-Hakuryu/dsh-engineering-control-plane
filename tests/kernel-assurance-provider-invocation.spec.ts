@@ -9,6 +9,7 @@ import {
   type MissionReceipt,
   type RepositoryIdentity,
 } from '../src/kernel/index.ts'
+import { parseExternalAssessmentFailureV1 } from '../src/assurance-provider.ts'
 
 const descriptor = {
   schemaVersion: 1 as const,
@@ -295,6 +296,80 @@ describe('ControlPlaneKernel Assurance Provider terminal outcomes', () => {
   })
 
   it.each([
+    { reason: 'blocked' as const, reasonCode: 'external_assessment_blocked' },
+    { reason: 'canceled' as const, reasonCode: 'external_assessment_canceled' },
+    { reason: 'failed' as const, reasonCode: 'external_assessment_failed' },
+  ])('derives indeterminate assurance from an external $reason failure', async ({ reason, reasonCode }) => {
+    const kernel = createControlPlaneKernel({
+      store: createInMemoryMissionStore(),
+      nextMissionId: () => `mission-kernel-external-${reason}`,
+      now: () => '2026-08-23T03:45:00.000Z',
+      resolveEffectivePolicy: () => policy,
+    })
+    const started = await kernel.dispatch({
+      kind: 'start',
+      idempotencyKey: `kernel-external-${reason}`,
+      input: { objective: `Derive indeterminate assurance from external ${reason}` },
+    }, authority)
+    let snapshot = await freezePostImplementationSubject(kernel, started)
+    const invocationId = snapshot.assuranceProviderInvocations?.[0]?.invocationId
+    if (invocationId === undefined) throw new Error('Fixture Invocation is missing')
+    await kernel.dispatch({
+      kind: 'begin_assurance_provider_invocation',
+      missionId: snapshot.missionId,
+      expectedRevision: snapshot.revision,
+      invocationId,
+    }, authority)
+    snapshot = await kernel.snapshot(snapshot.missionId, authority)
+    await kernel.dispatch({
+      kind: 'settle_assurance_provider_invocation',
+      missionId: snapshot.missionId,
+      expectedRevision: snapshot.revision,
+      invocationId,
+      outcome: {
+        kind: 'external_failure',
+        failure: parseExternalAssessmentFailureV1({
+          schemaVersion: 1,
+          reason,
+          code: `fixture_${reason}`,
+        }),
+      },
+    }, authority)
+    snapshot = await kernel.snapshot(snapshot.missionId, authority)
+    for (const to of ['VERIFYING', 'REVIEWING'] as const) {
+      await kernel.dispatch({
+        kind: 'advance',
+        missionId: snapshot.missionId,
+        expectedRevision: snapshot.revision,
+        to,
+      }, authority)
+      snapshot = await kernel.snapshot(snapshot.missionId, authority)
+    }
+    await kernel.dispatch({
+      kind: 'evaluate_assurance_provider_invocations',
+      missionId: snapshot.missionId,
+      expectedRevision: snapshot.revision,
+      eligibilities: [],
+    }, authority)
+
+    await expect(kernel.snapshot(snapshot.missionId, authority)).resolves.toMatchObject({
+      assuranceProviderInvocations: [{
+        state: 'external_failed',
+        failure: { schemaVersion: 1, reason, code: `fixture_${reason}` },
+      }],
+      assuranceAssessments: [{
+        outcome: 'indeterminate',
+        reasonCodes: [reasonCode],
+        evidenceRecordIds: [],
+      }],
+      assuranceResults: [{
+        outcome: 'indeterminate',
+        reasonCodes: [reasonCode],
+      }],
+    })
+  })
+
+  it.each([
     {
       name: 'an unknown terminal kind',
       outcome: { kind: 'unknown_terminal', failureCode: 'malformed_submission' },
@@ -304,6 +379,14 @@ describe('ControlPlaneKernel Assurance Provider terminal outcomes', () => {
       name: 'an unknown import failure code',
       outcome: { kind: 'import_failed', failureCode: 'provider_claimed_failure' },
       message: 'Assurance Submission import failureCode is invalid',
+    },
+    {
+      name: 'a malformed external assessment failure',
+      outcome: {
+        kind: 'external_failure',
+        failure: { schemaVersion: 1, reason: 'blocked', code: 'INVALID_CODE' },
+      },
+      message: 'External Assessment Failure code is invalid',
     },
   ])('rejects $name before mutating the begun Invocation', async ({ outcome, message }) => {
     const kernel = createControlPlaneKernel({

@@ -18,7 +18,11 @@ import type {
   AssuranceSubmissionArtifactDraftV1,
   ProviderInvocationOptions,
 } from '../src/assurance-provider.ts'
-import { parseAssuranceProviderDescriptorV1, sealAssuranceSubmissionV1 } from '../src/assurance-provider.ts'
+import {
+  parseAssuranceProviderDescriptorV1,
+  parseExternalAssessmentFailureV1,
+  sealAssuranceSubmissionV1,
+} from '../src/assurance-provider.ts'
 import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
 import * as clientPlugin from '../src/client.ts'
 import * as toolsPlugin from '../src/tools.ts'
@@ -286,6 +290,7 @@ describe('Assurance Provider startup registration and selection', () => {
     expect(Object.keys(assuranceProviderEntry)).toEqual([
       'parseAssuranceProviderConfigurationV1',
       'parseAssuranceProviderDescriptorV1',
+      'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
     ])
     expect('registerAssuranceProvider' in toolsPlugin).toBe(false)
@@ -311,6 +316,24 @@ describe('Assurance Provider startup registration and selection', () => {
     expect(normalized).not.toBe(descriptor)
     expect(normalized).toEqual(descriptor)
     expect(Object.isFrozen(normalized)).toBe(true)
+
+    const failureCandidate = {
+      schemaVersion: 1,
+      reason: 'blocked',
+      code: 'fixture_backend_unavailable',
+    } as const
+    const failure = parseExternalAssessmentFailureV1(failureCandidate)
+    expect(failure).not.toBe(failureCandidate)
+    expect(failure).toEqual(failureCandidate)
+    expect(Object.isFrozen(failure)).toBe(true)
+    expect(() => parseExternalAssessmentFailureV1({
+      ...failureCandidate,
+      detail: 'must-not-cross-the-provider-seam',
+    })).toThrow('External Assessment Failure contains unknown or missing fields')
+    expect(() => parseExternalAssessmentFailureV1({
+      ...failureCandidate,
+      code: 'INVALID_CODE',
+    })).toThrow('External Assessment Failure code is invalid')
 
     try {
       const contributorFiber = await ctx.plugin(referenceProviderContributor(
@@ -988,12 +1011,19 @@ describe('Assurance Provider startup registration and selection', () => {
           normalizedDescriptor => ({
             descriptor: normalizedDescriptor,
             assess(_context, _request, options) {
-              return new Promise<never>((_resolve, reject) => {
+              return new Promise(resolve => {
                 const signal = options?.signal
                 if (signal === undefined) return
-                const rejectAbort = () => reject(signal.reason ?? new Error('Provider invocation aborted'))
-                if (signal.aborted) rejectAbort()
-                else signal.addEventListener('abort', rejectAbort, { once: true })
+                const resolveAbort = () => resolve({
+                  kind: 'external_failure' as const,
+                  failure: parseExternalAssessmentFailureV1({
+                    schemaVersion: 1,
+                    reason: 'canceled',
+                    code: 'fixture_assessment_canceled',
+                  }),
+                })
+                if (signal.aborted) resolveAbort()
+                else signal.addEventListener('abort', resolveAbort, { once: true })
               })
             },
             async cancel() {
@@ -1040,6 +1070,112 @@ describe('Assurance Provider startup registration and selection', () => {
           externalAssessmentId: 'fixture-canceled-assessment-1',
         },
       })])
+    } finally {
+      await contributorFiber.dispose()
+      await serviceFiber.dispose()
+      await subagentFiber.dispose()
+      await subprocessFiber.dispose()
+    }
+  })
+
+  it('persists External Assessment Failure as indeterminate assurance instead of leaving Provider begun', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-external-failure-home-'))
+    temporaryRoots.push(home)
+    const descriptor: AssuranceProviderDescriptorV1 = {
+      schemaVersion: 1,
+      providerId: 'fixture/external-failure-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const activation: AssuranceProviderActivationConfig = {
+      providerId: descriptor.providerId,
+      providerVersion: descriptor.providerVersion,
+      activation: 'required',
+    }
+    const ctx = new Context()
+    const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
+    const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
+    const serviceFiber = await ctx.plugin(
+      EngineeringControlPlane,
+      config(repository, home, [activation]),
+    )
+    await ctx.engineeringControlPlane.whenReady()
+    const contributorFiber = await ctx.plugin({
+      name: 'external-failure-reference-assurance-provider',
+      inject: ['engineeringControlPlane'],
+      apply(contributorContext: Context) {
+        return contributorContext.engineeringControlPlane.registerAssuranceProvider(
+          descriptor,
+          normalizedDescriptor => ({
+            descriptor: normalizedDescriptor,
+            async assess() {
+              return {
+                kind: 'external_failure' as const,
+                failure: parseExternalAssessmentFailureV1({
+                  schemaVersion: 1,
+                  reason: 'blocked',
+                  code: 'fixture_backend_unavailable',
+                }),
+              }
+            },
+          }),
+        )
+      },
+    })
+
+    try {
+      const agent = {
+        id: 'agent-provider-external-failure-fixture',
+        session: { header: { cwd: repository } },
+      } as unknown as Agent
+      const receipt = await ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-external-failure:start:1',
+        objective: 'Persist a structured external assessment failure and block the Gate',
+      }, new AbortController().signal)
+      const deadline = Date.now() + 8_000
+      let blocked = await ctx.engineeringControlPlane.status(
+        agent,
+        receipt.missionId,
+        new AbortController().signal,
+      )
+      while ((blocked.status !== 'BLOCKED' || blocked.gate?.kind !== 'blocked') && Date.now() < deadline) {
+        await new Promise(resolve => setTimeout(resolve, 10))
+        blocked = await ctx.engineeringControlPlane.status(
+          agent,
+          receipt.missionId,
+          new AbortController().signal,
+        )
+      }
+
+      expect(blocked).toMatchObject({
+        status: 'BLOCKED',
+        assuranceProviderInvocations: [{
+          descriptor,
+          state: 'external_failed',
+          failure: {
+            schemaVersion: 1,
+            reason: 'blocked',
+            code: 'fixture_backend_unavailable',
+          },
+        }],
+        assuranceAssessments: [{
+          outcome: 'indeterminate',
+          reasonCodes: ['external_assessment_blocked'],
+          evidenceRecordIds: [],
+        }],
+        assuranceResults: [{
+          outcome: 'indeterminate',
+          reasonCodes: ['external_assessment_blocked'],
+        }],
+        gate: {
+          kind: 'blocked',
+          reasons: [{
+            code: 'assurance_indeterminate',
+            source: `external-provider:${descriptor.providerId}@${descriptor.providerVersion}`,
+          }],
+        },
+      })
     } finally {
       await contributorFiber.dispose()
       await serviceFiber.dispose()

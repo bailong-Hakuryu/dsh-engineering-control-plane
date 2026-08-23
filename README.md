@@ -30,8 +30,11 @@ The v0.1 package exposes five entry points:
 - Missing, corrupt, redacted, truncated or indeterminate decision Evidence fails
   closed.
 - Cancellation first quiesces child execution and every begun external
-  Assurance Provider, captures final Git/index/worktree state, then atomically
-  indexes that Evidence and marks the Mission cancelled.
+Assurance Provider, captures final Git/index/worktree state, then atomically
+indexes that Evidence and marks the Mission cancelled. Cancellation reserves
+terminal Invocation settlement before aborting process-local Provider work, so
+an abort-triggered assessment failure cannot replace the Provider's separate
+quiescence proof.
 
 Durable state is stored under `$DSH_HOME/control-plane`:
 
@@ -229,6 +232,15 @@ public `sealAssuranceSubmissionV1()` constructor creates the provider-neutral
 credential-free transport envelope; its Submission Digest is not the
 Provider's Source Seal. A local Evidence publication failure is recorded as
 operational `import_failed`, not misclassified as a Provider rejection.
+
+A Provider that cannot supply a sealed Submission returns the strict public
+`ExternalAssessmentFailureV1` value instead. The Control Plane detaches and
+revalidates that value, durably settles the Invocation as `external_failed`,
+and derives an `indeterminate` Assurance Assessment without importing any
+Provider Evidence. `blocked`, `canceled`, and `failed` external reasons all
+block the Gate: absence of sealed proof is never converted into Rework or
+approval. The bounded Provider code remains audit detail and does not control
+Gate policy.
 
 After transport import, the Runner re-reads the Control Plane Evidence copy and
 applies the provider-neutral V1 eligibility profile. Composition, policy,

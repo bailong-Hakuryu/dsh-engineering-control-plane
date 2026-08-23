@@ -90,6 +90,7 @@ describe('source plugin Loader contracts', () => {
     expect(Object.keys(assuranceProviderPlugin)).toEqual([
       'parseAssuranceProviderConfigurationV1',
       'parseAssuranceProviderDescriptorV1',
+      'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
     ])
   })

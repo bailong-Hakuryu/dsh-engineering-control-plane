@@ -7,6 +7,7 @@ const PROVIDER_ID = /^[a-z0-9](?:[a-z0-9._-]{0,62})(?:\/[a-z0-9](?:[a-z0-9._-]{0
 const PROVIDER_VERSION = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/
 const PROVIDER_CONFIGURATION_KEY = /^[a-z][A-Za-z0-9]{0,63}$/
 const PROVIDER_CONFIGURATION_VALUE = /^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,255}$/
+const EXTERNAL_ASSESSMENT_FAILURE_CODE = /^[a-z][a-z0-9_]{0,127}$/
 const SENSITIVE_CONFIGURATION_KEY = /(?:auth|cookie|credential|key|password|secret|token)/iu
 const SENSITIVE_CONFIGURATION_VALUE = /^(?:github_pat_|gh[pousr]_|[rs]k-|xox[baprs]-|bearer)/iu
 
@@ -244,12 +245,36 @@ export type AssuranceSubmissionRejectionCode =
   | 'redacted_submission'
   | 'submission_too_large'
 
-/** Opaque until the Provider-invocation slice publishes its strict failure parser. */
+/** Bounded Provider-neutral reason that no sealed external Assessment could be supplied. */
 export interface ExternalAssessmentFailureV1 {
   readonly schemaVersion: 1
   readonly reason: 'blocked' | 'canceled' | 'failed'
   readonly code: string
   readonly [externalAssessmentFailureBrand]: true
+}
+
+/** Strictly detach and brand one JSON-safe External Assessment Failure. */
+export function parseExternalAssessmentFailureV1(candidate: unknown): ExternalAssessmentFailureV1 {
+  const value = record(candidate, 'External Assessment Failure')
+  const allowed = new Set(['schemaVersion', 'reason', 'code'])
+  const unknown = Object.keys(value).find(key => !allowed.has(key))
+  if (unknown !== undefined || Object.keys(value).length !== allowed.size) {
+    throw new TypeError('External Assessment Failure contains unknown or missing fields')
+  }
+  if (value.schemaVersion !== 1) {
+    throw new TypeError('External Assessment Failure schemaVersion must be 1')
+  }
+  if (value.reason !== 'blocked' && value.reason !== 'canceled' && value.reason !== 'failed') {
+    throw new TypeError('External Assessment Failure reason is invalid')
+  }
+  if (typeof value.code !== 'string' || !EXTERNAL_ASSESSMENT_FAILURE_CODE.test(value.code)) {
+    throw new TypeError('External Assessment Failure code is invalid')
+  }
+  return Object.freeze({
+    schemaVersion: 1,
+    reason: value.reason,
+    code: value.code,
+  }) as ExternalAssessmentFailureV1
 }
 
 export interface ProviderInvocationOptions {
