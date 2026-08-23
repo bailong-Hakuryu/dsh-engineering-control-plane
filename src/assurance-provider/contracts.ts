@@ -266,6 +266,21 @@ export type AssuranceProviderOutcomeV1 =
     readonly failure: ExternalAssessmentFailureV1
   }
 
+/** Provider-neutral proof that explicit Mission cancellation left no live external work. */
+export type AssuranceProviderCancellationOutcomeV1 =
+  | {
+    readonly kind: 'external_assessment_canceled'
+    readonly externalAssessmentId: string
+  }
+  | {
+    readonly kind: 'external_assessment_terminal'
+    readonly externalAssessmentId: string
+    readonly terminalState: 'sealed' | 'canceled'
+  }
+  | {
+    readonly kind: 'external_assessment_not_started'
+  }
+
 /** Deep Provider Interface hiding its private assessment lifecycle behind one operation. */
 export interface AssuranceProviderV1 {
   readonly descriptor: AssuranceProviderDescriptorV1
@@ -286,6 +301,13 @@ export interface AssuranceProviderV1 {
     request: AssuranceRequestV1,
     options?: ProviderInvocationOptions,
   ): Promise<AssuranceProviderOutcomeV1>
+
+  /** Explicitly quiesce external work; host disposal never calls this operation. */
+  cancel?(
+    context: AssuranceExecutionContext,
+    request: AssuranceRequestV1,
+    options?: ProviderInvocationOptions,
+  ): Promise<AssuranceProviderCancellationOutcomeV1>
 }
 
 export type AssuranceProviderFactoryV1 = (

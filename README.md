@@ -29,8 +29,9 @@ The v0.1 package exposes five entry points:
 - Only the deterministic Gate can produce `APPROVED`.
 - Missing, corrupt, redacted, truncated or indeterminate decision Evidence fails
   closed.
-- Cancellation first quiesces child execution, captures final Git/index/worktree
-  state, then atomically indexes that Evidence and marks the Mission cancelled.
+- Cancellation first quiesces child execution and every begun external
+  Assurance Provider, captures final Git/index/worktree state, then atomically
+  indexes that Evidence and marks the Mission cancelled.
 
 Durable state is stored under `$DSH_HOME/control-plane`:
 
@@ -202,6 +203,15 @@ factory resolution, so every replay waits for the same durable result; the
 calling `assess()`. If a registration disappears
 during admission, the begun Invocation becomes `unavailable` without calling
 the detached instance.
+
+Explicit Mission cancellation is a separate operation from Service disposal.
+After the Runner is stopped, every still-`begun` exact Provider must implement
+`cancel()` and return a bounded proof that its external Assessment was canceled,
+was already terminal, or never started. The Kernel records that proof as a
+monotonic `terminated` Invocation before final repository capture and Mission
+cancellation. Missing registration, missing cancellation support, malformed
+proof, or timeout fails closed in Cancellation Quarantine; host unload never
+calls `cancel()` and therefore cannot turn restart recovery into cancellation.
 
 One fulfilled `sealed_submission` is detached and strictly checked for exact
 schema, Invocation, Mission, Attempt, Provider, Subject, and Effective Policy

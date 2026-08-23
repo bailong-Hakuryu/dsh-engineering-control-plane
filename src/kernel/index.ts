@@ -4,6 +4,7 @@ import { MissionError } from './errors.js'
 import { isMissionPhase, mayAdvance } from './state-machine.js'
 import { evaluateGate } from './gate.js'
 import type {
+  AssuranceProviderCancellationOutcomeV1,
   AssuranceProviderUnavailableCode,
   AssuranceSubmissionBindingV1,
   AssuranceSubmissionRejectionCode,
@@ -47,6 +48,22 @@ const ASSURANCE_SUBMISSION_REJECTION_CODES = new Set<AssuranceSubmissionRejectio
 ])
 
 const SHA256 = /^sha256:[0-9a-f]{64}$/u
+const EXTERNAL_ASSESSMENT_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/u
+
+function validProviderCancellationOutcome(
+  outcome: AssuranceProviderCancellationOutcomeV1,
+): boolean {
+  if (outcome.kind === 'external_assessment_not_started') {
+    return Object.keys(outcome).length === 1
+  }
+  if (!EXTERNAL_ASSESSMENT_ID.test(outcome.externalAssessmentId)) return false
+  if (outcome.kind === 'external_assessment_canceled') {
+    return Object.keys(outcome).length === 2
+  }
+  return outcome.kind === 'external_assessment_terminal'
+    && (outcome.terminalState === 'sealed' || outcome.terminalState === 'canceled')
+    && Object.keys(outcome).length === 3
+}
 
 const ASSURANCE_ELIGIBILITY_FAILURE_CODES = new Set<AssuranceEligibilityFailureCode>([
   'submission_unreadable',
@@ -160,6 +177,35 @@ function begunAssuranceProviderInvocationIndex(
     throw new MissionError(
       'illegal_transition',
       `Mission '${snapshot.missionId}' cannot settle Assurance Provider invocation '${invocationId}'`,
+      {
+        missionId: snapshot.missionId,
+        status: snapshot.status,
+        currentRevision: snapshot.revision,
+      },
+    )
+  }
+  return index
+}
+
+function terminableAssuranceProviderInvocationIndex(
+  snapshot: MissionSnapshot,
+  invocationId: string,
+): number {
+  const index = snapshot.assuranceProviderInvocations?.findIndex(record => (
+    record.invocationId === invocationId
+  )) ?? -1
+  const invocation = snapshot.assuranceProviderInvocations?.[index]
+  if (
+    (!mayExecuteAssurance(snapshot) && snapshot.status !== 'BLOCKED')
+    || currentAssuranceSubject(snapshot) === undefined
+    || invocation === undefined
+    || invocation.attempt !== snapshot.attempt
+    || invocation.state !== 'begun'
+    || invocationId.trim().length === 0
+  ) {
+    throw new MissionError(
+      'illegal_transition',
+      `Mission '${snapshot.missionId}' cannot terminate Assurance Provider invocation '${invocationId}'`,
       {
         missionId: snapshot.missionId,
         status: snapshot.status,
@@ -930,6 +976,37 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 : record
             )),
             updatedAt: terminalAt,
+          }
+        })
+        if (result.kind !== 'updated') return updateError(result, command.missionId)
+        return receipt(result.snapshot)
+      }
+
+      if (command.kind === 'terminate_assurance_provider_invocation') {
+        requireAction(authority, 'orchestrate')
+        if (!validProviderCancellationOutcome(command.outcome)) {
+          throw new TypeError('Assurance Provider cancellation outcome is invalid')
+        }
+        const result = await options.store.update(command.missionId, command.expectedRevision, current => {
+          requireRepository(current, authority)
+          const invocationIndex = terminableAssuranceProviderInvocationIndex(current, command.invocationId)
+          const begunInvocation = current.assuranceProviderInvocations?.[invocationIndex]
+          if (begunInvocation?.state !== 'begun') throw new Error('Unreachable begun invocation')
+          const terminatedAt = options.now()
+          return {
+            ...current,
+            revision: current.revision + 1,
+            assuranceProviderInvocations: current.assuranceProviderInvocations!.map((record, index) => (
+              index === invocationIndex
+                ? {
+                    ...begunInvocation,
+                    state: 'terminated' as const,
+                    terminatedAt,
+                    outcome: { ...command.outcome },
+                  }
+                : record
+            )),
+            updatedAt: terminatedAt,
           }
         })
         if (result.kind !== 'updated') return updateError(result, command.missionId)

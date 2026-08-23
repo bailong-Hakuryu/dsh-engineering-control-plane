@@ -929,4 +929,95 @@ describe('Assurance Provider startup registration and selection', () => {
       await secondSubprocessFiber.dispose()
     }
   }, 10_000)
+
+  it('records external Provider quiescence before committing explicit Mission cancellation', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-cancel-home-'))
+    temporaryRoots.push(home)
+    const descriptor: AssuranceProviderDescriptorV1 = {
+      schemaVersion: 1,
+      providerId: 'fixture/cancel-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const activation: AssuranceProviderActivationConfig = {
+      providerId: descriptor.providerId,
+      providerVersion: descriptor.providerVersion,
+      activation: 'required',
+    }
+    const ctx = new Context()
+    const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
+    const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
+    const serviceFiber = await ctx.plugin(
+      EngineeringControlPlane,
+      config(repository, home, [activation]),
+    )
+    await ctx.engineeringControlPlane.whenReady()
+    const contributorFiber = await ctx.plugin({
+      name: 'cancel-reference-assurance-provider',
+      inject: ['engineeringControlPlane'],
+      apply(contributorContext: Context) {
+        return contributorContext.engineeringControlPlane.registerAssuranceProvider(
+          descriptor,
+          normalizedDescriptor => ({
+            descriptor: normalizedDescriptor,
+            assess(_context, _request, options) {
+              return new Promise<never>((_resolve, reject) => {
+                const signal = options?.signal
+                if (signal === undefined) return
+                const rejectAbort = () => reject(signal.reason ?? new Error('Provider invocation aborted'))
+                if (signal.aborted) rejectAbort()
+                else signal.addEventListener('abort', rejectAbort, { once: true })
+              })
+            },
+            async cancel() {
+              return {
+                kind: 'external_assessment_canceled' as const,
+                externalAssessmentId: 'fixture-canceled-assessment-1',
+              }
+            },
+          }),
+        )
+      },
+    })
+
+    try {
+      const agent = {
+        id: 'agent-provider-cancel-fixture',
+        session: { header: { cwd: repository } },
+      } as unknown as Agent
+      const receipt = await ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-cancel:start:1',
+        objective: 'Prove external Provider quiescence before Mission cancellation',
+      }, new AbortController().signal)
+      const begun = await waitForInvocationState(ctx, agent, receipt.missionId, ['begun'])
+
+      await ctx.engineeringControlPlane.cancel(agent, {
+        missionId: begun.missionId,
+        expectedRevision: begun.revision,
+        reason: 'The operator explicitly canceled this governed Mission.',
+      }, new AbortController().signal)
+      const canceled = await ctx.engineeringControlPlane.status(
+        agent,
+        begun.missionId,
+        new AbortController().signal,
+      )
+
+      expect(canceled.status).toBe('CANCELLED')
+      expect(canceled.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        descriptor,
+        state: 'terminated',
+        terminatedAt: expect.any(String),
+        outcome: {
+          kind: 'external_assessment_canceled',
+          externalAssessmentId: 'fixture-canceled-assessment-1',
+        },
+      })])
+    } finally {
+      await contributorFiber.dispose()
+      await serviceFiber.dispose()
+      await subagentFiber.dispose()
+      await subprocessFiber.dispose()
+    }
+  })
 })

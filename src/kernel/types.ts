@@ -1,6 +1,7 @@
 import type {
   AssuranceClaimedOutcomeV1,
   AssuranceProviderActivationPolicyV1,
+  AssuranceProviderCancellationOutcomeV1,
   AssuranceProviderUnavailableCode,
   AssuranceSubmissionBindingV1,
   AssuranceSubmissionRejectionCode,
@@ -336,6 +337,12 @@ export type AssuranceProviderInvocationRecordV1 =
     readonly failedAt: string
     readonly failureCode: 'evidence_store_failure'
   }
+  | AssuranceProviderInvocationBaseV1 & {
+    readonly state: 'terminated'
+    readonly begunAt: string
+    readonly terminatedAt: string
+    readonly outcome: AssuranceProviderCancellationOutcomeV1
+  }
 
 /** Immutable reference to one completely published canonical Evidence envelope. */
 export interface EvidenceRecord {
@@ -500,6 +507,13 @@ export type MissionCommand =
         readonly kind: 'import_failed'
         readonly failureCode: 'evidence_store_failure'
       }
+  }
+  | {
+    readonly kind: 'terminate_assurance_provider_invocation'
+    readonly missionId: MissionId
+    readonly expectedRevision: number
+    readonly invocationId: string
+    readonly outcome: AssuranceProviderCancellationOutcomeV1
   }
 
 /** Durable acknowledgement of an accepted Mission command. */

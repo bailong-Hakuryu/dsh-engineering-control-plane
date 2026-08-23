@@ -10,6 +10,7 @@ export type {
   AssuranceProviderActivation,
   AssuranceProviderActivationPolicyV1,
   AssuranceProviderConfigurationV1,
+  AssuranceProviderCancellationOutcomeV1,
   AssuranceProviderDescriptorV1,
   AssuranceProviderDisposer,
   AssuranceProviderFactoryV1,

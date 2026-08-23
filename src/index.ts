@@ -273,16 +273,23 @@ export class EngineeringControlPlane extends Service {
     const before = await runtime.kernel.snapshot(request.missionId, missionAuthority)
     assertExpectedRevision(before, request.expectedRevision)
     await runtime.runner.quiesceForCancellation(before.missionId)
-    const host = this.host(runtime, agent, before)
+    let cancellationSnapshot: MissionSnapshot
+    try {
+      cancellationSnapshot = await runtime.assuranceInvocations.cancel(before, missionAuthority, signal)
+    } catch (error) {
+      await this.blockAfterCancellationFailure(runtime, missionAuthority, before.missionId, error)
+      throw error
+    }
+    const host = this.host(runtime, agent, cancellationSnapshot)
     let finalRepositoryEvidence: EvidenceRecord
     try {
-      const capture = await host.captureImplementation(before, signal)
+      const capture = await host.captureImplementation(cancellationSnapshot, signal)
       if (!Number.isSafeInteger(capture.implementationSecretCount) || capture.implementationSecretCount < 0) {
         throw new Error('Cancellation repository capture secret count is invalid')
       }
       finalRepositoryEvidence = await host.evidenceStore.publish({
-        missionId: before.missionId,
-        attempt: before.attempt,
+        missionId: cancellationSnapshot.missionId,
+        attempt: cancellationSnapshot.attempt,
         kind: 'cancellation-repository-state',
         schemaVersion: 1,
         payload: {
@@ -302,8 +309,8 @@ export class EngineeringControlPlane extends Service {
     try {
       return await runtime.kernel.dispatch({
         kind: 'cancel',
-        missionId: before.missionId,
-        expectedRevision: request.expectedRevision,
+        missionId: cancellationSnapshot.missionId,
+        expectedRevision: cancellationSnapshot.revision,
         finalRepositoryEvidence,
         ...request.reason === undefined ? {} : { reason: request.reason },
       }, missionAuthority)
@@ -425,6 +432,7 @@ export class EngineeringControlPlane extends Service {
         registry: this.assuranceProviders,
         evidenceStore,
         maxSubmissionBytes: deployment.artifactBudgets.maxRecordBytes,
+        cancellationTimeoutMs: deployment.terminationGraceMs,
         onError: message => this.ctx.logger.warn(`engineering control plane assurance: ${message}`),
       })
       await runner.recoverAfterRestart()
@@ -474,7 +482,7 @@ export class EngineeringControlPlane extends Service {
     }
   }
 
-  /** Seal a quiesced child and fail closed if final cancellation Evidence cannot be committed. */
+  /** Fail closed if external quiescence or final cancellation Evidence cannot be committed. */
   private async blockAfterCancellationFailure(
     runtime: ControlPlaneRuntime,
     missionAuthority: MissionAuthority,
@@ -490,7 +498,7 @@ export class EngineeringControlPlane extends Service {
         expectedRevision: current.revision,
         reason: {
           code: 'evidence_incomplete',
-          detail: `Cancellation could not record final repository Evidence: ${errorMessage(failure)}`.slice(0, 4_096),
+          detail: `Cancellation could not prove quiescence and record final Evidence: ${errorMessage(failure)}`.slice(0, 4_096),
         },
         sealLiveRoleRuns: {
           stopReason: 'cancellation-evidence-failed',

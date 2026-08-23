@@ -1,6 +1,7 @@
 import { parseAssuranceProviderDescriptorV1 } from './contracts.js'
 import type {
   AssuranceProviderDescriptorV1,
+  AssuranceProviderCancellationOutcomeV1,
   AssuranceProviderOutcomeV1,
   AssuranceProviderUnavailableCode,
   AssuranceProviderV1,
@@ -36,6 +37,7 @@ export interface AssuranceProviderInvocationCoordinatorOptions {
   readonly registry: AssuranceProviderRegistry
   readonly evidenceStore: Pick<FilesystemEvidenceStore, 'publish'>
   readonly maxSubmissionBytes: number
+  readonly cancellationTimeoutMs?: number
   readonly onError: (message: string) => void
 }
 
@@ -124,6 +126,52 @@ export class AssuranceProviderInvocationCoordinator {
     return this.options.kernel.snapshot(initial.missionId, authority)
   }
 
+  /** Explicitly quiesce every begun external assessment before Mission cancellation commits. */
+  async cancel(
+    initial: MissionSnapshot,
+    authority: MissionAuthority,
+    signal: AbortSignal,
+  ): Promise<MissionSnapshot> {
+    if (this.disposed) throw new Error('Assurance Provider invocation coordinator is disposing')
+    const cancellationSignal = AbortSignal.any([
+      signal,
+      AbortSignal.timeout(this.options.cancellationTimeoutMs ?? 30_000),
+    ])
+    const invocationIds = (initial.assuranceProviderInvocations ?? [])
+      .filter(record => record.attempt === initial.attempt && record.state === 'begun')
+      .map(record => record.invocationId)
+    for (const invocationId of invocationIds) {
+      if (cancellationSignal.aborted) throw this.cancellationAbort(cancellationSignal.reason)
+      const current = await this.options.kernel.snapshot(initial.missionId, authority)
+      const invocation = current.assuranceProviderInvocations?.find(record => (
+        record.invocationId === invocationId
+      ))
+      if (invocation === undefined || invocation.state !== 'begun') continue
+      const descriptor = parseAssuranceProviderDescriptorV1(invocation.descriptor)
+      let provider: AssuranceProviderV1
+      try {
+        provider = this.options.registry.resolveExact(descriptor)
+      } catch (error) {
+        const code = error instanceof AssuranceProviderResolutionError ? error.code : 'factory_failed'
+        throw new Error(`Assurance Provider invocation '${invocationId}' cannot be canceled (${code})`)
+      }
+      if (typeof provider.cancel !== 'function') {
+        throw new Error(`Assurance Provider invocation '${invocationId}' has no cancellation operation`)
+      }
+      if (!this.options.registry.isRegisteredExact(descriptor)) {
+        throw new Error(`Assurance Provider invocation '${invocationId}' lost registration before cancellation`)
+      }
+      const issued = issueAssuranceProviderInvocationV1(current, invocationId)
+      const outcome = await this.awaitProviderCancellation(
+        provider.cancel.call(provider, issued.context, issued.request, { signal: cancellationSignal }),
+        cancellationSignal,
+      )
+      const validated = this.validateCancellationOutcome(outcome)
+      await this.terminateWithRetry(current.missionId, invocationId, validated, authority)
+    }
+    return this.options.kernel.snapshot(initial.missionId, authority)
+  }
+
   private async admit(
     missionId: string,
     invocationId: string,
@@ -182,6 +230,91 @@ export class AssuranceProviderInvocationCoordinator {
       issued.request,
       authority,
     )
+  }
+
+  private async terminateWithRetry(
+    missionId: string,
+    invocationId: string,
+    outcome: AssuranceProviderCancellationOutcomeV1,
+    authority: MissionAuthority,
+  ): Promise<void> {
+    while (true) {
+      if (this.disposed) {
+        throw new Error('Assurance Provider invocation coordinator disposed before cancellation was recorded')
+      }
+      const current = await this.options.kernel.snapshot(missionId, authority)
+      const invocation = current.assuranceProviderInvocations?.find(record => (
+        record.invocationId === invocationId
+      ))
+      if (invocation?.state !== 'begun') return
+      try {
+        await this.options.kernel.dispatch({
+          kind: 'terminate_assurance_provider_invocation',
+          missionId: current.missionId,
+          expectedRevision: current.revision,
+          invocationId,
+          outcome,
+        }, authority)
+        return
+      } catch (error) {
+        if (error instanceof MissionError && error.code === 'revision_conflict') continue
+        throw error
+      }
+    }
+  }
+
+  private validateCancellationOutcome(candidate: unknown): AssuranceProviderCancellationOutcomeV1 {
+    if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
+      throw new TypeError('Assurance Provider cancellation outcome must be an object')
+    }
+    const value = candidate as Record<string, unknown>
+    if (value.kind === 'external_assessment_not_started') {
+      if (Object.keys(value).length !== 1) throw new TypeError('Provider cancellation outcome has unknown fields')
+      return Object.freeze({ kind: 'external_assessment_not_started' })
+    }
+    if (
+      typeof value.externalAssessmentId !== 'string'
+      || !/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/u.test(value.externalAssessmentId)
+    ) throw new TypeError('Provider cancellation outcome has an invalid external Assessment ID')
+    if (value.kind === 'external_assessment_canceled') {
+      if (Object.keys(value).length !== 2) throw new TypeError('Provider cancellation outcome has unknown fields')
+      return Object.freeze({
+        kind: 'external_assessment_canceled',
+        externalAssessmentId: value.externalAssessmentId,
+      })
+    }
+    if (
+      value.kind === 'external_assessment_terminal'
+      && (value.terminalState === 'sealed' || value.terminalState === 'canceled')
+      && Object.keys(value).length === 3
+    ) {
+      return Object.freeze({
+        kind: 'external_assessment_terminal',
+        externalAssessmentId: value.externalAssessmentId,
+        terminalState: value.terminalState,
+      })
+    }
+    throw new TypeError('Provider cancellation outcome kind is invalid')
+  }
+
+  private async awaitProviderCancellation(
+    cancellation: Promise<AssuranceProviderCancellationOutcomeV1>,
+    signal: AbortSignal,
+  ): Promise<AssuranceProviderCancellationOutcomeV1> {
+    if (signal.aborted) throw this.cancellationAbort(signal.reason)
+    let rejectAbort!: (reason: unknown) => void
+    const aborted = new Promise<never>((_resolve, reject) => { rejectAbort = reject })
+    const onAbort = () => rejectAbort(this.cancellationAbort(signal.reason))
+    signal.addEventListener('abort', onAbort, { once: true })
+    try {
+      return await Promise.race([cancellation, aborted])
+    } finally {
+      signal.removeEventListener('abort', onAbort)
+    }
+  }
+
+  private cancellationAbort(reason: unknown): Error {
+    return reason instanceof Error ? reason : new Error('Assurance Provider cancellation aborted')
   }
 
   /** Re-enter only durably begun work, and only through a Provider's explicit recovery seam. */
