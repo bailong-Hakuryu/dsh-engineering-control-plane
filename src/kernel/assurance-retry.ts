@@ -41,6 +41,10 @@ export function retryableExternalAssuranceInvocations(
       AssuranceProviderInvocationRecordV1,
       { readonly state: 'external_failed' }
     > => invocation.state === 'external_failed'
+      && (
+        invocation.failure.reason === 'blocked'
+        || invocation.failure.reason === 'canceled'
+      )
       && indeterminateRequirements.has(assessmentRequirements.get(invocation.invocationId) ?? ''),
   )
 }

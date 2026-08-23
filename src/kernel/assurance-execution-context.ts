@@ -50,6 +50,15 @@ export function issueAssuranceProviderInvocationV1(
     effectivePolicyDigest: snapshot.effectivePolicyDigest,
     subject,
   }
+  Object.defineProperty(context, 'matchesCanonicalRepository', {
+    configurable: false,
+    enumerable: false,
+    writable: false,
+    value: Object.freeze((candidateCanonicalRoot: string): boolean => (
+      typeof candidateCanonicalRoot === 'string'
+      && candidateCanonicalRoot === snapshot.repository.canonicalRoot
+    )),
+  })
   Object.defineProperty(context, 'toJSON', {
     configurable: false,
     enumerable: false,

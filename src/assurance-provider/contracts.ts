@@ -132,6 +132,8 @@ export interface AssuranceExecutionContext {
   readonly attempt: number
   readonly effectivePolicyDigest: string
   readonly subject: AssuranceExecutionSubjectV1
+  /** Compare one independently Host-canonicalized root without disclosing this Mission's root. */
+  readonly matchesCanonicalRepository: (candidateCanonicalRoot: string) => boolean
   readonly [assuranceExecutionContextBrand]: true
 }
 

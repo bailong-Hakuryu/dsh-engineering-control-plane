@@ -15,8 +15,11 @@ a new Invocation identity. Only the active successor is executed and evaluated;
 the latest Result per requirement is authoritative for the next Gate decision,
 while all earlier records remain immutable history.
 
-Assurance Retry is explicit and never runs during startup. It does not replay
-`assess()` on a settled identity, invoke `recover()` for a different identity,
-or create a Rework Attempt. Rework remains reserved for an eligible failed
-Assurance Result that requires implementation changes. Repeated Gate rounds
-publish distinct immutable Final Report records and versioned human views.
+Only `blocked` and `canceled` External Assessment Failures are retryable;
+`failed` is terminal for the frozen Provider composition and does not advertise
+Mission Resume. Assurance Retry is explicit and never runs during startup. It
+does not replay `assess()` on a settled identity, invoke `recover()` for a
+different identity, or create a Rework Attempt. Rework remains reserved for an
+eligible failed Assurance Result that requires implementation changes.
+Repeated Gate rounds publish distinct immutable Final Report records and
+versioned human views.

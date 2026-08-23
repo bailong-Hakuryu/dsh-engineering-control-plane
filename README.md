@@ -200,6 +200,15 @@ reconcile the same external assessment. A missing recovery operation fails
 closed as an invalid Provider. Service disposal sends an independent abort
 signal to live Provider work; the originating tool-call signal does not own
 that work.
+
+The Context also exposes one non-enumerable, process-local
+`matchesCanonicalRepository()` assertion. An Adapter can compare a canonical
+root resolved inside its own Host-owned Repository Registry without receiving
+the Mission path. The root, matcher, and comparison result never enter Provider
+configuration, SQLite, Evidence, Submission, model tools, or Remote. A Provider
+whose configured Repository does not match the Mission Repository must fail
+before starting its external assessment.
+
 Concurrent replay admission joins one process-local promise before Provider
 factory resolution, so every replay waits for the same durable result; the
 `prepared → begun` compare-and-swap remains the cross-process authority for
@@ -242,8 +251,9 @@ block the Gate: absence of sealed proof is never converted into Rework or
 approval. The bounded Provider code remains audit detail and does not control
 Gate policy.
 
-When that indeterminate result blocks the Gate, `mission_status` advertises
-`mission_resume`. An exact-revision Resume is the only Assurance Retry trigger:
+When a `blocked` or `canceled` external result blocks the Gate,
+`mission_status` advertises `mission_resume`. An exact-revision Resume is the
+only Assurance Retry trigger:
 the Kernel preserves the failed Invocation, Assessment, Result, and Gate
 decision, then atomically prepares a successor Invocation against the same
 Attempt and frozen Subject. The Runner invokes `assess()` only for that new
@@ -252,6 +262,9 @@ replays or rewrites the failed Invocation, silently retries during startup, or
 turns an operational external failure into a new Rework Attempt. Repeated Gate
 rounds also publish immutable versioned Final Report views while keeping the
 first `final-report.md` path stable.
+An external `failed` reason remains indeterminate and blocks the Gate, but is
+terminal for the frozen Provider composition: Status advertises cancellation,
+not a same-Attempt retry that cannot repair invalid frozen configuration.
 
 After transport import, the Runner re-reads the Control Plane Evidence copy and
 applies the provider-neutral V1 eligibility profile. Composition, policy,

@@ -470,7 +470,7 @@ export function apply(ctx: Context): void {
   ctx.tools.register(strictTool(defineTool({
     name: 'mission_resume',
     description:
-      'Resume an exact BLOCKED Mission revision in the same Attempt. A Gate-blocking External Assessment Failure gets a new Provider Invocation; quality rework and stale revisions are never retried.',
+      'Resume an exact BLOCKED Mission revision in the same Attempt. A retryable blocked or canceled external assessment gets a new Provider Invocation; terminal failure, quality rework, and stale revisions are never retried.',
     parameters: {
       missionId: { type: 'string', required: true },
       expectedRevision: { type: 'integer', required: true },

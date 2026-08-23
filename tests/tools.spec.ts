@@ -245,7 +245,7 @@ describe('Mission tool Adapter', () => {
     ])
   })
 
-  it('advertises Resume for a Gate-blocking External Assessment Failure', () => {
+  it('advertises Resume only for a retryable Gate-blocking External Assessment Failure', () => {
     const descriptor = {
       schemaVersion: 1 as const,
       providerId: 'fixture/security',
@@ -302,6 +302,22 @@ describe('Mission tool Adapter', () => {
     expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
       'mission_status',
       'mission_resume',
+      'mission_cancel',
+    ])
+
+    const terminalFailure = {
+      ...blocked,
+      assuranceProviderInvocations: [{
+        ...blocked.assuranceProviderInvocations![0]!,
+        failure: parseExternalAssessmentFailureV1({
+          schemaVersion: 1,
+          reason: 'failed',
+          code: 'repository_binding_mismatch',
+        }),
+      }],
+    } as MissionSnapshot
+    expect(missionTools.statusValue(terminalFailure).legalNextActions).toEqual([
+      'mission_status',
       'mission_cancel',
     ])
   })

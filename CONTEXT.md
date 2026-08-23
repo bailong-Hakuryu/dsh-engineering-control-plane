@@ -333,12 +333,16 @@ A strict provider-neutral outcome showing that no sealed Assurance Submission wa
 _Avoid_: Assurance Submission, Security Verdict, failed Assurance Result, free-form Provider error
 
 **Assurance Retry**:
-An explicit Resume continuation that replaces a Gate-blocking External Assessment Failure with a successor Provider Invocation against the same frozen Attempt Assurance Subject while preserving the failed Invocation and Result as history.
+An explicit Resume continuation that replaces a Gate-blocking `blocked` or `canceled` External Assessment Failure with a successor Provider Invocation against the same frozen Attempt Assurance Subject while preserving the failed Invocation and Result as history.
 _Avoid_: Automatic retry, reusing an Invocation, Rework Attempt
 
 **Assurance Execution Context**:
 The Kernel-issued bounded environment through which an external Provider receives the frozen Attempt Assurance Subject and its exact Mission, Attempt, Provider, and Effective Policy bindings without repository paths or Kernel capabilities.
 _Avoid_: Evidence Store writer, arbitrary repository access, Provider-owned permission
+
+**Repository Binding Assertion**:
+A process-local equality proof that one Provider-resolved canonical repository is the Mission Repository Identity without returning, serializing, or persisting either repository path.
+_Avoid_: Repository ID alone, path hash, Subject claim
 
 **Assurance Execution Budget**:
 The frozen limits on Assurance Role Runs, replacement Assignments, concurrency, time, and model usage; exhaustion blocks rather than silently dropping a proof obligation.
