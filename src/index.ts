@@ -23,6 +23,7 @@ import {
   type FilesystemEvidenceStore,
 } from './evidence/filesystem-store.js'
 import { createControlPlaneKernel, MissionError } from './kernel/index.js'
+import { retryableExternalAssuranceInvocations } from './kernel/assurance-retry.js'
 import type {
   ControlPlaneKernel,
   EffectivePolicy,
@@ -471,6 +472,12 @@ export class EngineeringControlPlane extends Service {
     )
     if (observed.branch !== snapshot.repository.branch || observed.head !== snapshot.repository.head) {
       throw new Error('Mission cannot continue because its frozen Git branch or HEAD changed')
+    }
+    if (retryableExternalAssuranceInvocations(snapshot).length > 0) {
+      const subject = snapshot.assuranceSubjects?.find(item => item.attempt === snapshot.attempt)?.subject
+      if (subject === undefined || observed.workspaceFingerprint !== subject.workspaceFingerprint) {
+        throw new Error('Mission cannot retry Assurance because its frozen Attempt Subject changed')
+      }
     }
     if (snapshot.blocked?.reason.code === 'host_restarted') {
       const expected = snapshot.blocked.workspaceFingerprint

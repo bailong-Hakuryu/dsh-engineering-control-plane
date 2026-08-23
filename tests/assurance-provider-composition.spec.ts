@@ -1184,6 +1184,158 @@ describe('Assurance Provider startup registration and selection', () => {
     }
   })
 
+  it('retries External Assessment Failure only through explicit Resume and a new Provider Invocation', async () => {
+    const repository = await cleanRepository()
+    const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-external-retry-home-'))
+    temporaryRoots.push(home)
+    const descriptor: AssuranceProviderDescriptorV1 = {
+      schemaVersion: 1,
+      providerId: 'fixture/external-retry-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const activation: AssuranceProviderActivationConfig = {
+      providerId: descriptor.providerId,
+      providerVersion: descriptor.providerVersion,
+      activation: 'required',
+    }
+    const invocationIds: string[] = []
+    const subjects: AssuranceExecutionContext['subject'][] = []
+    let assessCalls = 0
+    const ctx = new Context()
+    const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
+    const subagentFiber = await ctx.plugin(SubagentRuntime)
+    registerScriptedEngineeringProvider(ctx.subagents)
+    const serviceFiber = await ctx.plugin(
+      EngineeringControlPlane,
+      config(repository, home, [activation]),
+    )
+    await ctx.engineeringControlPlane.whenReady()
+    const contributorFiber = await ctx.plugin({
+      name: 'external-retry-reference-assurance-provider',
+      inject: ['engineeringControlPlane'],
+      apply(contributorContext: Context) {
+        return contributorContext.engineeringControlPlane.registerAssuranceProvider(
+          descriptor,
+          normalizedDescriptor => ({
+            descriptor: normalizedDescriptor,
+            async assess(context) {
+              assessCalls++
+              invocationIds.push(context.invocationId)
+              subjects.push(context.subject)
+              if (assessCalls === 1) {
+                return {
+                  kind: 'external_failure' as const,
+                  failure: parseExternalAssessmentFailureV1({
+                    schemaVersion: 1,
+                    reason: 'blocked',
+                    code: 'fixture_backend_unavailable',
+                  }),
+                }
+              }
+              return {
+                kind: 'sealed_submission' as const,
+                submission: satisfiedSubmissionFor(context, normalizedDescriptor),
+              }
+            },
+          }),
+        )
+      },
+    })
+
+    try {
+      const agent = {
+        id: 'agent-provider-external-retry-fixture',
+        session: { header: { cwd: repository } },
+      } as unknown as Agent
+      const receipt = await ctx.engineeringControlPlane.start(agent, {
+        idempotencyKey: 'provider-external-retry:start:1',
+        objective: 'Retry external assurance without rewriting its failed history',
+      }, new AbortController().signal)
+      const blocked = await waitForMissionStatus(ctx, agent, receipt.missionId, ['BLOCKED'])
+      expect(blocked.gate?.kind).toBe('blocked')
+      expect(blocked.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        state: 'external_failed',
+      })])
+      expect(assessCalls).toBe(1)
+      const failedInvocationId = blocked.assuranceProviderInvocations?.[0]?.invocationId
+      if (failedInvocationId === undefined) throw new Error('Failed Provider Invocation is missing')
+
+      const mutation = join(repository, 'retry-subject-mutation.txt')
+      await writeFile(mutation, 'must not enter the frozen Attempt Subject\n', 'utf8')
+      await expect(ctx.engineeringControlPlane.resume(agent, {
+        missionId: blocked.missionId,
+        expectedRevision: blocked.revision,
+        supplementalContext: 'This retry must be rejected because the workspace changed.',
+      }, new AbortController().signal)).rejects.toThrow(
+        'Mission cannot retry Assurance because its frozen Attempt Subject changed',
+      )
+      expect(assessCalls).toBe(1)
+      const unchanged = await ctx.engineeringControlPlane.status(
+        agent,
+        blocked.missionId,
+        new AbortController().signal,
+      )
+      expect(unchanged.revision).toBe(blocked.revision)
+      expect(unchanged.assuranceProviderInvocations).toHaveLength(1)
+      await rm(mutation)
+
+      await ctx.engineeringControlPlane.resume(agent, {
+        missionId: blocked.missionId,
+        expectedRevision: blocked.revision,
+        supplementalContext: 'The external assessment backend is available again.',
+      }, new AbortController().signal)
+      const approved = await waitForMissionStatus(ctx, agent, blocked.missionId, ['APPROVED'])
+
+      expect(assessCalls).toBe(2)
+      expect(invocationIds).toHaveLength(2)
+      expect(invocationIds[1]).not.toBe(invocationIds[0])
+      expect(subjects[1]).toEqual(subjects[0])
+      expect(approved.attempt).toBe(1)
+      expect(approved.assuranceProviderInvocations).toEqual([
+        expect.objectContaining({
+          invocationId: failedInvocationId,
+          state: 'external_failed',
+        }),
+        expect.objectContaining({
+          replacementForInvocationId: failedInvocationId,
+          state: 'settled',
+          outcome: expect.objectContaining({ claimedOutcome: 'satisfied' }),
+        }),
+      ])
+      expect(approved.assuranceAssessments).toEqual([
+        expect.objectContaining({
+          invocationId: failedInvocationId,
+          outcome: 'indeterminate',
+          reasonCodes: ['external_assessment_blocked'],
+        }),
+        expect.objectContaining({
+          invocationId: invocationIds[1],
+          outcome: 'satisfied',
+          reasonCodes: ['eligible_submission'],
+        }),
+      ])
+      expect(approved.assuranceResults).toEqual([
+        expect.objectContaining({ outcome: 'indeterminate' }),
+        expect.objectContaining({ outcome: 'satisfied' }),
+      ])
+      expect(approved.gateHistory).toEqual([
+        expect.objectContaining({
+          attempt: 1,
+          decision: expect.objectContaining({ kind: 'blocked', reasons: expect.any(Array) }),
+        }),
+        expect.objectContaining({
+          attempt: 1,
+          decision: expect.objectContaining({ kind: 'approved' }),
+        }),
+      ])
+    } finally {
+      await contributorFiber.dispose()
+      await serviceFiber.dispose()
+      await subagentFiber.dispose()
+      await subprocessFiber.dispose()
+    }
+  }, 15_000)
+
   it('reconciles an external cancellation committed before Provider termination after restart', async () => {
     const repository = await cleanRepository()
     const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-cancel-restart-home-'))

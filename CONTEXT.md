@@ -296,10 +296,6 @@ _Avoid_: Assurance Result, installation presence, automatic fallback
 An immutable, digest-bound Provider export that binds an external assessment to its subject, policy, coverage, outcome, Evidence, and provenance for validation and import into the Mission Evidence Store.
 _Avoid_: Shared database row, report path, Provider-owned Gate decision
 
-**External Assessment Failure**:
-A strict provider-neutral statement that an Assurance Provider cannot supply a sealed Submission, carrying only a bounded reason and audit code and no claimed Assurance outcome or Evidence.
-_Avoid_: Security Verdict, failed Finding, free-form Provider error
-
 **Attempt Assurance Subject**:
 The immutable, path-free Git branch, HEAD, and Workspace Fingerprint frozen only after one Attempt's implementation Evidence is published and used to bind every external assessment for that Attempt.
 _Avoid_: Mission baseline, repository path, mutable checkout, Provider-selected subject
@@ -333,8 +329,12 @@ A non-Agent Assessor whose frozen Provider Composition may satisfy only the mach
 _Avoid_: Reviewer Role Run, anonymous scanner, human review
 
 **External Assessment Failure**:
-A structured Provider outcome showing that no eligible Assurance Submission was produced because external assessment remained blocked, was canceled, or failed before sealing.
-_Avoid_: Assurance Submission, failed Assurance Result, missing response
+A strict provider-neutral outcome showing that no sealed Assurance Submission was produced because external assessment remained blocked, was canceled, or failed, carrying no claimed Assurance outcome or Evidence.
+_Avoid_: Assurance Submission, Security Verdict, failed Assurance Result, free-form Provider error
+
+**Assurance Retry**:
+An explicit Resume continuation that replaces a Gate-blocking External Assessment Failure with a successor Provider Invocation against the same frozen Attempt Assurance Subject while preserving the failed Invocation and Result as history.
+_Avoid_: Automatic retry, reusing an Invocation, Rework Attempt
 
 **Assurance Execution Context**:
 The Kernel-issued bounded environment through which an external Provider receives the frozen Attempt Assurance Subject and its exact Mission, Attempt, Provider, and Effective Policy bindings without repository paths or Kernel capabilities.

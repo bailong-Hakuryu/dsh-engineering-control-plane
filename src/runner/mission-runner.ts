@@ -8,6 +8,10 @@ import type { MissionStore } from '../kernel/memory-store.js'
 import { MissionError } from '../kernel/errors.js'
 import { evaluateGate } from '../kernel/gate.js'
 import { isMissionPhase } from '../kernel/state-machine.js'
+import {
+  activeAssuranceProviderInvocations,
+  latestAssuranceResults,
+} from '../kernel/assurance-retry.js'
 import type {
   AssuranceProviderEligibilityV1,
   ControlPlaneKernel,
@@ -194,6 +198,14 @@ function hasSelectedAssuranceProviders(snapshot: MissionSnapshot): boolean {
   return (snapshot.assuranceProviderSelections
     ?.find(selection => selection.attempt === snapshot.attempt)
     ?.providers.length ?? 0) > 0
+}
+
+function needsFinalReport(snapshot: MissionSnapshot): boolean {
+  const reportCount = snapshot.evidence.records.filter(record => (
+    record.attempt === snapshot.attempt && record.kind === 'final-report'
+  )).length
+  const gateDecisionCount = snapshot.gateHistory.filter(record => record.attempt === snapshot.attempt).length
+  return reportCount <= gateDecisionCount
 }
 
 /** Process-local execution owner over durable Kernel state; deliberately not a Harness Job. */
@@ -433,6 +445,15 @@ export class MissionRunner {
     }
 
     if (snapshot.status === 'REVIEWING') {
+      const pendingProviderInvocation = activeAssuranceProviderInvocations(snapshot).some(record => (
+        record.state === 'prepared' || record.state === 'begun'
+      ))
+      if (pendingProviderInvocation) {
+        if (host.runAssuranceProviders === undefined) {
+          throw new Error('Mission host omitted Assurance Provider execution')
+        }
+        snapshot = await host.runAssuranceProviders(snapshot, authority, signal)
+      }
       const priorReviewer = await this.readRoleOutput(snapshot, host.evidenceStore, 'review-report', 'reviewer')
       if (priorReviewer?.outcome !== 'reviewed') {
         const reviewer = await this.executeRole(snapshot, authority, host, 'reviewer', signal)
@@ -441,7 +462,12 @@ export class MissionRunner {
       }
       if (
         hasSelectedAssuranceProviders(snapshot)
-        && !(snapshot.assuranceResults ?? []).some(result => result.attempt === snapshot.attempt)
+        && activeAssuranceProviderInvocations(snapshot).some(invocation => (
+          !(snapshot.assuranceAssessments ?? []).some(assessment => (
+            assessment.attempt === snapshot.attempt
+            && assessment.invocationId === invocation.invocationId
+          ))
+        ))
       ) {
         const evaluated = await this.options.kernel.dispatch({
           kind: 'evaluate_assurance_provider_invocations',
@@ -451,21 +477,24 @@ export class MissionRunner {
         }, authority)
         snapshot = await this.options.kernel.snapshot(evaluated.missionId, authority)
       }
-      if (latestRecord(snapshot, 'final-report') === undefined) {
+      if (needsFinalReport(snapshot)) {
         const preliminaryInput = await this.buildGateInput(snapshot, host.evidenceStore, false)
         const preliminaryDecision = evaluateGate(preliminaryInput)
+        const currentResults = latestAssuranceResults(snapshot)
+        const currentAssessmentIds = new Set(currentResults.flatMap(result => result.assessmentIds))
         snapshot = (await this.publishEvidence(snapshot, authority, host.evidenceStore, 'final-report', {
           schemaVersion: 1,
           missionId: snapshot.missionId,
           attempt: snapshot.attempt,
           decision: preliminaryDecision,
           assuranceAssessments: (snapshot.assuranceAssessments ?? [])
-            .filter(assessment => assessment.attempt === snapshot.attempt),
-          assuranceResults: (snapshot.assuranceResults ?? [])
-            .filter(result => result.attempt === snapshot.attempt),
+            .filter(assessment => currentAssessmentIds.has(assessment.assessmentId)),
+          assuranceResults: currentResults,
           evidenceRecordIds: snapshot.evidence.records
             .filter(record => record.attempt === snapshot.attempt)
             .map(record => record.recordId),
+        }, {
+          viewOrdinal: snapshot.gateHistory.filter(record => record.attempt === snapshot.attempt).length + 1,
         })).snapshot
       }
       const input = await this.buildGateInput(snapshot, host.evidenceStore, true)
@@ -596,6 +625,7 @@ export class MissionRunner {
     store: RunnerEvidenceStore,
     kind: string,
     payload: unknown,
+    options: { readonly viewOrdinal?: number } = {},
   ): Promise<{ readonly snapshot: MissionSnapshot; readonly record: EvidenceRecord }> {
     const record = await store.publish({
       missionId: snapshot.missionId,
@@ -603,6 +633,7 @@ export class MissionRunner {
       kind,
       schemaVersion: 1,
       payload,
+      ...options.viewOrdinal === undefined ? {} : { viewOrdinal: options.viewOrdinal },
     })
     const indexed = await this.options.kernel.dispatch({
       kind: 'record_evidence',
@@ -852,8 +883,7 @@ export class MissionRunner {
     return {
       requiredEvidence: kinds.map(kind => states.get(kind) ?? { kind, state: 'missing' }),
       verifications,
-      assuranceResults: (snapshot.assuranceResults ?? [])
-        .filter(result => result.attempt === snapshot.attempt)
+      assuranceResults: latestAssuranceResults(snapshot)
         .map(result => ({ requirementId: result.requirementId, outcome: result.outcome })),
       reviewerFindings,
       implementationSecretCount,
@@ -870,8 +900,11 @@ export class MissionRunner {
     const maxSubmissionBytes = snapshot.effectivePolicy.artifactBudgets?.maxRecordBytes
       ?? 16 * 1024 * 1024
     const eligibilities: AssuranceProviderEligibilityV1[] = []
-    for (const invocation of snapshot.assuranceProviderInvocations ?? []) {
-      if (invocation.attempt !== snapshot.attempt || invocation.state !== 'settled') continue
+    const assessedInvocationIds = new Set((snapshot.assuranceAssessments ?? [])
+      .filter(assessment => assessment.attempt === snapshot.attempt)
+      .map(assessment => assessment.invocationId))
+    for (const invocation of activeAssuranceProviderInvocations(snapshot)) {
+      if (invocation.state !== 'settled' || assessedInvocationIds.has(invocation.invocationId)) continue
       const evidence = snapshot.evidence.records.find(record => (
         record.recordId === invocation.outcome.evidenceRecordId
         && record.attempt === snapshot.attempt

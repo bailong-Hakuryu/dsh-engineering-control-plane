@@ -242,6 +242,17 @@ block the Gate: absence of sealed proof is never converted into Rework or
 approval. The bounded Provider code remains audit detail and does not control
 Gate policy.
 
+When that indeterminate result blocks the Gate, `mission_status` advertises
+`mission_resume`. An exact-revision Resume is the only Assurance Retry trigger:
+the Kernel preserves the failed Invocation, Assessment, Result, and Gate
+decision, then atomically prepares a successor Invocation against the same
+Attempt and frozen Subject. The Runner invokes `assess()` only for that new
+identity and evaluates a new current Result for the requirement. It never
+replays or rewrites the failed Invocation, silently retries during startup, or
+turns an operational external failure into a new Rework Attempt. Repeated Gate
+rounds also publish immutable versioned Final Report views while keeping the
+first `final-report.md` path stable.
+
 After transport import, the Runner re-reads the Control Plane Evidence copy and
 applies the provider-neutral V1 eligibility profile. Composition, policy,
 coverage, Source Seal, provenance, Evidence, and exact Subject bindings must use
@@ -258,14 +269,17 @@ Rework preserves the prior Attempt's Subject, Submission, Assessment, Result,
 and Gate history. It copies the frozen Provider obligations into the new
 Attempt, prepares fresh invocation identities, and requires a new
 post-implementation Subject and assessment before the next Gate decision.
-`mission_status` exposes bounded Assurance Result summaries and advertises
-`mission_rework` after an external-assurance failure.
+`mission_status` exposes bounded Assurance Result history and advertises
+`mission_rework` after an eligible failed Assurance Result; a Gate-blocking
+External Assessment Failure instead advertises `mission_resume` for the
+same-Attempt Assurance Retry described above.
 
 The closure is proven with Reference Fake Providers through the public Cordis
 seam and with the optional real DSH Security Assurance
 `control-plane-provider` Adapter. Installing this package alone still implies
-no Security plugin runtime. The legal `external_failure` Provider outcome
-remains a separate follow-up slice.
+no Security plugin runtime. Conformance covers a provider-neutral
+`external_failure`, explicit same-Attempt retry through a new Invocation, and a
+real Adapter retry that starts a distinct Security Assessment.
 
 ## Read-only doctor
 
@@ -286,7 +300,8 @@ an integrity or availability issue, and `2` means invocation failed.
 
 - `mission_start` atomically accepts one Mission for the calling Agent's cwd.
 - `mission_status` returns a bounded authoritative snapshot and current revision.
-- `mission_resume` resumes only `BLOCKED`, in the same Attempt.
+- `mission_resume` resumes only `BLOCKED`, in the same Attempt, and is the
+  explicit trigger for a retryable External Assessment Failure.
 - `mission_cancel` quiesces and terminally cancels an exact revision.
 - `mission_rework` starts a new Attempt only from `REWORK_REQUIRED`.
 

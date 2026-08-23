@@ -3,6 +3,7 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime, { type ToolExecutionResult } from '@deepseek-ai/dsh-tools'
 import { describe, expect, it } from 'vitest'
+import { parseExternalAssessmentFailureV1 } from '../src/assurance-provider.ts'
 import type {
   MissionId,
   MissionReceipt,
@@ -240,6 +241,67 @@ describe('Mission tool Adapter', () => {
 
     expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
       'mission_status',
+      'mission_cancel',
+    ])
+  })
+
+  it('advertises Resume for a Gate-blocking External Assessment Failure', () => {
+    const descriptor = {
+      schemaVersion: 1 as const,
+      providerId: 'fixture/security',
+      providerVersion: '1.0.0',
+    }
+    const requirementId = 'external-provider:fixture/security@1.0.0'
+    const blocked: MissionSnapshot = {
+      ...snapshot(),
+      status: 'BLOCKED',
+      assuranceProviderSelections: [{
+        schemaVersion: 1,
+        attempt: 2,
+        providers: [{ schemaVersion: 1, descriptor, activation: 'required' }],
+      }],
+      assuranceProviderInvocations: [{
+        schemaVersion: 1,
+        invocationId: 'invocation-external-failed-1',
+        attempt: 2,
+        descriptor,
+        state: 'external_failed',
+        preparedAt: '2026-08-22T20:00:00.000Z',
+        begunAt: '2026-08-22T20:00:01.000Z',
+        failedAt: '2026-08-22T20:00:02.000Z',
+        failure: parseExternalAssessmentFailureV1({
+          schemaVersion: 1,
+          reason: 'blocked',
+          code: 'backend_unavailable',
+        }),
+      }],
+      assuranceAssessments: [{
+        schemaVersion: 1,
+        assessmentId: 'assessment-external-failed-1',
+        requirementId,
+        invocationId: 'invocation-external-failed-1',
+        attempt: 2,
+        assessor: { kind: 'machine_provider', provider: descriptor },
+        outcome: 'indeterminate',
+        reasonCodes: ['external_assessment_blocked'],
+        evidenceRecordIds: [],
+        assessedAt: '2026-08-22T20:00:02.000Z',
+      }],
+      gate: {
+        kind: 'blocked',
+        reasons: [{ code: 'assurance_indeterminate', source: requirementId }],
+      },
+      blocked: {
+        reason: { code: 'evidence_incomplete' },
+        resumeStatus: 'REVIEWING',
+        blockedAt: '2026-08-22T20:00:03.000Z',
+      },
+      writeLease: { fencingToken: 1, releasedAt: '2026-08-22T20:00:03.000Z' },
+    }
+
+    expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
+      'mission_status',
+      'mission_resume',
       'mission_cancel',
     ])
   })

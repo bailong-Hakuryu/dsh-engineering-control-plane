@@ -3,6 +3,11 @@ import type { MissionStore } from './memory-store.js'
 import { MissionError } from './errors.js'
 import { isMissionPhase, mayAdvance } from './state-machine.js'
 import { evaluateGate } from './gate.js'
+import {
+  activeAssuranceProviderInvocations,
+  latestAssuranceResults,
+  retryableExternalAssuranceInvocations,
+} from './assurance-retry.js'
 import { parseExternalAssessmentFailureV1 } from '../assurance-provider/contracts.js'
 import type {
   AssuranceProviderCancellationOutcomeV1,
@@ -646,12 +651,30 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             throw unavailableAssuranceExecutionError(current)
           }
           const resumedAt = options.now()
+          const retryableInvocations = retryableExternalAssuranceInvocations(current)
+          const currentAttemptInvocationCount = (current.assuranceProviderInvocations ?? [])
+            .filter(invocation => invocation.attempt === current.attempt).length
           const { blocked, ...unblocked } = current
           return {
             ...unblocked,
             revision: current.revision + 1,
             status: blocked.resumeStatus,
             writeLease: activateWriteLease(current, authority, resumedAt),
+            assuranceProviderInvocations: [
+              ...(current.assuranceProviderInvocations ?? []),
+              ...retryableInvocations.map((invocation, index) => ({
+                schemaVersion: 1 as const,
+                invocationId: `${current.missionId}:assurance:${current.attempt}:${currentAttemptInvocationCount + index + 1}`,
+                replacementForInvocationId: invocation.invocationId,
+                attempt: current.attempt,
+                descriptor: { ...invocation.descriptor },
+                ...invocation.configuration === undefined
+                  ? {}
+                  : { configuration: { ...invocation.configuration } },
+                state: 'prepared' as const,
+                preparedAt: resumedAt,
+              })),
+            ],
             inputRecords: [
               ...current.inputRecords,
               {
@@ -1055,14 +1078,14 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
         const result = await options.store.update(command.missionId, command.expectedRevision, current => {
           requireRepository(current, authority)
           requireWriteLease(current, authority)
-          const invocations = (current.assuranceProviderInvocations ?? [])
-            .filter(invocation => invocation.attempt === current.attempt)
+          const assessedInvocationIds = new Set((current.assuranceAssessments ?? [])
+            .filter(assessment => assessment.attempt === current.attempt)
+            .map(assessment => assessment.invocationId))
+          const invocations = activeAssuranceProviderInvocations(current)
+            .filter(invocation => !assessedInvocationIds.has(invocation.invocationId))
           const settledIds = new Set(invocations
             .filter(invocation => invocation.state === 'settled')
             .map(invocation => invocation.invocationId))
-          const alreadyEvaluated = (current.assuranceAssessments ?? [])
-            .some(assessment => assessment.attempt === current.attempt)
-            || (current.assuranceResults ?? []).some(item => item.attempt === current.attempt)
           const completeEligibility = eligibilityByInvocation.size === settledIds.size
             && [...eligibilityByInvocation.keys()].every(id => settledIds.has(id))
           if (
@@ -1070,7 +1093,6 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             || !hasSelectedAssuranceProviders(current)
             || currentAssuranceSubject(current) === undefined
             || invocations.length === 0
-            || alreadyEvaluated
             || !completeEligibility
           ) {
             throw new MissionError(
@@ -1300,8 +1322,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               },
             )
           }
-          const persistedAssurance = (current.assuranceResults ?? [])
-            .filter(item => item.attempt === current.attempt)
+          const persistedAssurance = latestAssuranceResults(current)
           const gateAssurance = new Map(command.input.assuranceResults.map(item => [item.requirementId, item]))
           const exactAssuranceResults = gateAssurance.size === command.input.assuranceResults.length
             && persistedAssurance.length === command.input.assuranceResults.length

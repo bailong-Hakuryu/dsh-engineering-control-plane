@@ -295,6 +295,8 @@ export interface AssuranceResultV1 {
 interface AssuranceProviderInvocationBaseV1 {
   readonly schemaVersion: 1
   readonly invocationId: string
+  /** Present only when explicit Assurance Retry created this immutable successor. */
+  readonly replacementForInvocationId?: string
   readonly attempt: number
   readonly descriptor: FrozenAssuranceProviderSelectionV1['descriptor']
   readonly configuration?: FrozenAssuranceProviderSelectionV1['configuration']

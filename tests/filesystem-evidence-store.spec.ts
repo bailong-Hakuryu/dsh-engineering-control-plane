@@ -98,6 +98,45 @@ describe('FilesystemEvidenceStore', () => {
     expect(view).toContain('Non-authoritative Evidence View')
   })
 
+  it('publishes immutable versioned Final Report views for repeated Gate decisions', async () => {
+    const root = await temporaryEvidenceRoot()
+    const recordIds = ['record-final-1', 'record-final-2']
+    const store = createFilesystemEvidenceStore({
+      root,
+      nextRecordId: () => recordIds.shift() ?? 'unexpected-record',
+      now: () => '2026-08-22T17:00:00.000Z',
+    })
+    await store.publish({
+      missionId: 'mission-final-report-retry',
+      attempt: 1,
+      kind: 'final-report',
+      schemaVersion: 1,
+      viewOrdinal: 1,
+      payload: { decision: { kind: 'blocked' } },
+    })
+    await store.publish({
+      missionId: 'mission-final-report-retry',
+      attempt: 1,
+      kind: 'final-report',
+      schemaVersion: 1,
+      viewOrdinal: 2,
+      payload: { decision: { kind: 'approved' } },
+    })
+
+    const first = await readFile(
+      join(root, 'mission-final-report-retry', 'attempt-0001', 'final-report.md'),
+      'utf8',
+    )
+    const second = await readFile(
+      join(root, 'mission-final-report-retry', 'attempt-0001', 'final-report-0002.md'),
+      'utf8',
+    )
+    expect(first).toContain('record-final-1')
+    expect(first).toContain('blocked')
+    expect(second).toContain('record-final-2')
+    expect(second).toContain('approved')
+  })
+
   it('reports corrupt when a published Evidence envelope is changed', async () => {
     const root = await temporaryEvidenceRoot()
     const store = createFilesystemEvidenceStore({

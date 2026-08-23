@@ -21,6 +21,8 @@ export interface PublishEvidenceInput {
   readonly kind: string
   readonly schemaVersion: number
   readonly payload: unknown
+  /** One-based immutable human-view ordinal; currently valid only for repeatable Final Reports. */
+  readonly viewOrdinal?: number
 }
 
 export interface CanonicalizeEvidenceOptions {
@@ -375,6 +377,14 @@ export class FilesystemEvidenceStore {
     if (!Number.isSafeInteger(input.schemaVersion) || input.schemaVersion < 1) {
       throw invalid('schemaVersion must be a positive integer')
     }
+    if (
+      input.viewOrdinal !== undefined
+      && (
+        input.kind !== 'final-report'
+        || !Number.isSafeInteger(input.viewOrdinal)
+        || input.viewOrdinal < 1
+      )
+    ) throw invalid('viewOrdinal is invalid')
 
     const recordId = this.nextRecordId()
     assertSafeSegment(recordId, 'recordId')
@@ -422,7 +432,10 @@ export class FilesystemEvidenceStore {
       recordId,
       `Evidence Record '${recordId}' already exists`,
     )
-    const viewName = EVIDENCE_VIEW_NAMES[input.kind]
+    const defaultViewName = EVIDENCE_VIEW_NAMES[input.kind]
+    const viewName = input.kind === 'final-report' && input.viewOrdinal !== undefined && input.viewOrdinal > 1
+      ? `final-report-${String(input.viewOrdinal).padStart(4, '0')}.md`
+      : defaultViewName
     if (viewBytes !== undefined && viewName !== undefined) {
       const viewRelativePath = posix.join(
         input.missionId,

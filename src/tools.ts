@@ -11,6 +11,7 @@ import type {
   MissionSnapshot,
   MissionStatus,
 } from './kernel/index.js'
+import { retryableExternalAssuranceInvocations } from './kernel/assurance-retry.js'
 import type {} from './index.js'
 
 export const name = 'engineering-control-plane-tools'
@@ -312,7 +313,7 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
   if (snapshot.status === 'BLOCKED') {
     if (
       snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
-      || hasSelectedAssuranceProviders
+      || (hasSelectedAssuranceProviders && retryableExternalAssuranceInvocations(snapshot).length === 0)
     ) {
       return ['mission_status', 'mission_cancel']
     }
@@ -469,7 +470,7 @@ export function apply(ctx: Context): void {
   ctx.tools.register(strictTool(defineTool({
     name: 'mission_resume',
     description:
-      'Resume an exact BLOCKED Mission revision in the same Attempt. It never starts quality rework and never retries a stale revision.',
+      'Resume an exact BLOCKED Mission revision in the same Attempt. A Gate-blocking External Assessment Failure gets a new Provider Invocation; quality rework and stale revisions are never retried.',
     parameters: {
       missionId: { type: 'string', required: true },
       expectedRevision: { type: 'integer', required: true },
