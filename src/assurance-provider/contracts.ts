@@ -5,6 +5,10 @@ declare const externalAssessmentFailureBrand: unique symbol
 
 const PROVIDER_ID = /^[a-z0-9](?:[a-z0-9._-]{0,62})(?:\/[a-z0-9](?:[a-z0-9._-]{0,62})){1,7}$/
 const PROVIDER_VERSION = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/
+const PROVIDER_CONFIGURATION_KEY = /^[a-z][A-Za-z0-9]{0,63}$/
+const PROVIDER_CONFIGURATION_VALUE = /^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,255}$/
+const SENSITIVE_CONFIGURATION_KEY = /(?:auth|cookie|credential|key|password|secret|token)/iu
+const SENSITIVE_CONFIGURATION_VALUE = /^(?:github_pat_|gh[pousr]_|[rs]k-|xox[baprs]-|bearer)/iu
 
 /** Namespaced and versioned registration/selection key; not executable identity. */
 export interface AssuranceProviderDescriptorV1 {
@@ -12,6 +16,9 @@ export interface AssuranceProviderDescriptorV1 {
   readonly providerId: string
   readonly providerVersion: string
 }
+
+/** Bounded public identifiers only; Provider credentials must remain process-local. */
+export type AssuranceProviderConfigurationV1 = Readonly<Record<string, string>>
 
 /** Host-owned activation choice; registration or installation grants no authority. */
 export type AssuranceProviderActivation = 'disabled' | 'when-available' | 'required'
@@ -21,6 +28,7 @@ export interface AssuranceProviderActivationPolicyV1 {
   readonly schemaVersion: 1
   readonly descriptor: AssuranceProviderDescriptorV1
   readonly activation: AssuranceProviderActivation
+  readonly configuration?: AssuranceProviderConfigurationV1
 }
 
 /**
@@ -31,6 +39,7 @@ export interface FrozenAssuranceProviderSelectionV1 {
   readonly schemaVersion: 1
   readonly descriptor: AssuranceProviderDescriptorV1
   readonly activation: Exclude<AssuranceProviderActivation, 'disabled'>
+  readonly configuration?: AssuranceProviderConfigurationV1
 }
 
 /** Stable fail-closed classifications for exact runtime Provider resolution. */
@@ -81,6 +90,31 @@ export function parseAssuranceProviderDescriptorV1(candidate: unknown): Assuranc
   })
 }
 
+/** Strictly validate and detach non-secret Host configuration carried to one Provider. */
+export function parseAssuranceProviderConfigurationV1(
+  candidate: unknown,
+): AssuranceProviderConfigurationV1 {
+  const value = record(candidate, 'Assurance Provider configuration')
+  const entries = Object.entries(value)
+  if (entries.length > 32) throw new TypeError('Assurance Provider configuration exceeds 32 fields')
+  const configuration: Record<string, string> = {}
+  for (const [key, item] of entries.sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)) {
+    if (!PROVIDER_CONFIGURATION_KEY.test(key) || SENSITIVE_CONFIGURATION_KEY.test(key)) {
+      throw new TypeError(`Assurance Provider configuration key '${key}' is not allowed`)
+    }
+    if (
+      typeof item !== 'string'
+      || item !== item.trim()
+      || !PROVIDER_CONFIGURATION_VALUE.test(item)
+      || SENSITIVE_CONFIGURATION_VALUE.test(item)
+    ) {
+      throw new TypeError(`Assurance Provider configuration value '${key}' is not a public identifier`)
+    }
+    configuration[key] = item
+  }
+  return Object.freeze(configuration)
+}
+
 /** Frozen Git Subject metadata exposed without a host filesystem path. */
 export interface AssuranceExecutionSubjectV1 {
   readonly kind: 'git_worktree'
@@ -103,6 +137,7 @@ export interface AssuranceExecutionContext {
 /** Opaque until the Kernel execution-context slice publishes its strict constructor. */
 export interface AssuranceRequestV1 {
   readonly schemaVersion: 1
+  readonly configuration?: AssuranceProviderConfigurationV1
   readonly [assuranceRequestBrand]: true
 }
 

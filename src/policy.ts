@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto'
 import type { AgentOptions } from '@deepseek-ai/dsh-agent'
 import type { HarnessRolePolicy } from './adapters/harness-role-executor.js'
-import { parseAssuranceProviderDescriptorV1 } from './assurance-provider/contracts.js'
+import {
+  parseAssuranceProviderConfigurationV1,
+  parseAssuranceProviderDescriptorV1,
+} from './assurance-provider/contracts.js'
 import type {
   AssuranceProviderActivationPolicyV1,
   FrozenAssuranceProviderSelectionV1,
@@ -52,6 +55,7 @@ const ASSURANCE_PROVIDER_ACTIVATION_KEYS = new Set([
   'providerId',
   'providerVersion',
   'activation',
+  'configuration',
 ])
 
 export interface ResolvedDeploymentConfig {
@@ -225,6 +229,9 @@ export function resolveAssuranceProviderActivations(
         `repositories[].assuranceProviders[${index}].activation must be disabled, when-available, or required`,
       )
     }
+    const configuration = candidate.configuration === undefined
+      ? undefined
+      : parseAssuranceProviderConfigurationV1(candidate.configuration)
     return {
       schemaVersion: 1 as const,
       descriptor: parseAssuranceProviderDescriptorV1({
@@ -233,6 +240,9 @@ export function resolveAssuranceProviderActivations(
         providerVersion: candidate.providerVersion,
       }),
       activation: candidate.activation,
+      ...configuration === undefined || Object.keys(configuration).length === 0
+        ? {}
+        : { configuration },
     }
   }).sort((left, right) => {
     const leftKey = activationKey(left)
@@ -333,11 +343,15 @@ export function createEffectivePolicy(
       schemaVersion: 1 as const,
       descriptor: { ...policy.descriptor },
       activation: policy.activation,
+      ...policy.configuration === undefined ? {} : { configuration: { ...policy.configuration } },
     })),
     selectedAssuranceProviders: selectedAssuranceProviders.map(selection => ({
       schemaVersion: 1 as const,
       descriptor: { ...selection.descriptor },
       activation: selection.activation,
+      ...selection.configuration === undefined
+        ? {}
+        : { configuration: { ...selection.configuration } },
     })),
     subagentProvider: deployment.subagentProvider,
     maxSubagentDepth: deployment.maxSubagentDepth,

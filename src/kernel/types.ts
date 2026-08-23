@@ -292,6 +292,7 @@ interface AssuranceProviderInvocationBaseV1 {
   readonly invocationId: string
   readonly attempt: number
   readonly descriptor: FrozenAssuranceProviderSelectionV1['descriptor']
+  readonly configuration?: FrozenAssuranceProviderSelectionV1['configuration']
   readonly preparedAt: string
 }
 

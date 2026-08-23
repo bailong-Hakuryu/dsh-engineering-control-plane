@@ -143,6 +143,7 @@ function invokingReferenceProviderContributor(
 describe('Assurance Provider startup registration and selection', () => {
   it('admits detached frozen descriptors only during pre-Mission contributor composition', async () => {
     expect(Object.keys(assuranceProviderEntry)).toEqual([
+      'parseAssuranceProviderConfigurationV1',
       'parseAssuranceProviderDescriptorV1',
       'sealAssuranceSubmissionV1',
     ])
@@ -437,6 +438,9 @@ describe('Assurance Provider startup registration and selection', () => {
       providerId: 'fixture/invoked-provider',
       providerVersion: '1.0.0-fixture.1',
     }
+    const providerConfiguration = {
+      repositoryId: 'repo-11111111-1111-4111-8111-111111111111',
+    }
     const ctx = new Context()
     const subprocessFiber = await ctx.plugin(LocalSubprocessRuntime)
     const subagentFiber = await ctx.plugin(SubagentRuntime)
@@ -445,6 +449,7 @@ describe('Assurance Provider startup registration and selection', () => {
       providerId: descriptor.providerId,
       providerVersion: descriptor.providerVersion,
       activation: 'required',
+      configuration: providerConfiguration,
     }]))
     await ctx.engineeringControlPlane.whenReady()
 
@@ -532,8 +537,12 @@ describe('Assurance Provider startup registration and selection', () => {
       expect(Object.isFrozen(context.subject)).toBe(true)
       expect(() => JSON.stringify(context)).toThrow('Assurance Execution Context cannot be serialized')
       expect(() => structuredClone(context)).toThrow()
-      expect(invocation!.request).toEqual({ schemaVersion: 1 })
+      expect(invocation!.request).toEqual({
+        schemaVersion: 1,
+        configuration: providerConfiguration,
+      })
       expect(Object.isFrozen(invocation!.request)).toBe(true)
+      expect(Object.isFrozen(invocation!.request.configuration)).toBe(true)
       expect(invocation!.signal).toBeInstanceOf(AbortSignal)
       expect(invocation!.signal).not.toBe(toolController.signal)
       expect(invocation!.signal?.aborted).toBe(false)

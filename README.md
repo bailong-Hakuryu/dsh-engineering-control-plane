@@ -161,9 +161,11 @@ activation policy:
 
 ```yaml
 assuranceProviders:
-  - providerId: fixture/example-provider
-    providerVersion: 1.0.0-fixture.1
+  - providerId: dsh/security-assurance
+    providerVersion: 0.0.0-development
     activation: required
+    configuration:
+      repositoryId: repo-00000000-0000-4000-8000-000000000000
 ```
 
 `disabled` never selects a Provider. `when-available` selects only the exact
@@ -172,6 +174,10 @@ when that exact registration is absent. Selected registration keys are copied
 by value into Effective Policy and Attempt 1 history. The same atomic Start
 prepares one durable invocation identity per selected Provider; no factory,
 Provider object, credential, Registry handle, or Execution Context is persisted.
+Optional `configuration` is limited to bounded public identifier strings. It is
+detached and frozen into Effective Policy, Attempt selection, and the durable
+Invocation before being exposed on `AssuranceRequestV1`; credential-shaped keys
+and known credential value prefixes are rejected before Mission acceptance.
 
 Mission Start freezes the obligation and durable invocation identity, but does
 not assess the baseline checkout or block engineering execution. After the

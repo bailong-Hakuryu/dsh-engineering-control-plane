@@ -371,6 +371,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               schemaVersion: 1 as const,
               descriptor: { ...selection.descriptor },
               activation: selection.activation,
+              ...selection.configuration === undefined
+                ? {}
+                : { configuration: { ...selection.configuration } },
             }))
             return {
               missionId: acceptedMissionId,
@@ -397,6 +400,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 invocationId: `${acceptedMissionId}:assurance:1:${index + 1}`,
                 attempt: 1,
                 descriptor: { ...selection.descriptor },
+                ...selection.configuration === undefined
+                  ? {}
+                  : { configuration: { ...selection.configuration } },
                 state: 'prepared' as const,
                 preparedAt: acceptedAt,
               })),
@@ -646,6 +652,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             schemaVersion: 1 as const,
             descriptor: { ...provider.descriptor },
             activation: provider.activation,
+            ...provider.configuration === undefined
+              ? {}
+              : { configuration: { ...provider.configuration } },
           }))
           return {
             ...current,
@@ -664,6 +673,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 invocationId: `${current.missionId}:assurance:${nextAttempt}:${index + 1}`,
                 attempt: nextAttempt,
                 descriptor: { ...provider.descriptor },
+                ...provider.configuration === undefined
+                  ? {}
+                  : { configuration: { ...provider.configuration } },
                 state: 'prepared' as const,
                 preparedAt: submittedAt,
               })),

@@ -53,6 +53,7 @@ describe('Effective Policy', () => {
         providerId: 'fixture/a-provider',
         providerVersion: '1.0.0-fixture.1',
         activation: 'required',
+        configuration: { repositoryId: 'repo-11111111-1111-4111-8111-111111111111' },
       },
     ]
     const resolved = resolveAssuranceProviderActivations(configured)
@@ -63,8 +64,13 @@ describe('Effective Policy', () => {
     ])
     expect(Object.isFrozen(resolved)).toBe(true)
     expect(Object.isFrozen(resolved[0])).toBe(true)
+    expect(Object.isFrozen(resolved[0]!.configuration)).toBe(true)
     configured[0]!.providerId = 'caller/mutated'
+    configured[1]!.configuration!.repositoryId = 'repo-22222222-2222-4222-8222-222222222222'
     expect(resolved[1]!.descriptor.providerId).toBe('fixture/z-provider')
+    expect(resolved[0]!.configuration?.repositoryId).toBe(
+      'repo-11111111-1111-4111-8111-111111111111',
+    )
 
     expect(() => resolveAssuranceProviderActivations([
       {
@@ -90,6 +96,13 @@ describe('Effective Policy', () => {
     expect(() => resolveAssuranceProviderActivations([unknownField])).toThrow(
       "repositories[].assuranceProviders[0] contains unknown field 'fallbackVersion'",
     )
+
+    expect(() => resolveAssuranceProviderActivations([{
+      providerId: 'fixture/credential-provider',
+      providerVersion: '1.0.0-fixture.1',
+      activation: 'required',
+      configuration: { accessToken: 'rk-not-persisted' },
+    }])).toThrow("Assurance Provider configuration key 'accessToken' is not allowed")
   })
 
   it('materializes and freezes the complete redacted execution policy with a stable digest', () => {

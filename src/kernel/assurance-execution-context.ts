@@ -2,6 +2,7 @@ import type {
   AssuranceExecutionContext,
   AssuranceRequestV1,
 } from '../assurance-provider/contracts.js'
+import { parseAssuranceProviderConfigurationV1 } from '../assurance-provider/contracts.js'
 import type { MissionSnapshot } from './types.js'
 
 export interface IssuedAssuranceProviderInvocationV1 {
@@ -61,6 +62,11 @@ export function issueAssuranceProviderInvocationV1(
   const frozenContext = Object.freeze(context)
   return {
     context: new Proxy(frozenContext, {}) as unknown as AssuranceExecutionContext,
-    request: Object.freeze({ schemaVersion: 1 }) as AssuranceRequestV1,
+    request: Object.freeze({
+      schemaVersion: 1,
+      ...invocation.configuration === undefined
+        ? {}
+        : { configuration: parseAssuranceProviderConfigurationV1(invocation.configuration) },
+    }) as AssuranceRequestV1,
   }
 }

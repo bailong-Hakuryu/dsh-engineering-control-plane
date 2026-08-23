@@ -88,6 +88,7 @@ describe('source plugin Loader contracts', () => {
     expect('default' in invariantPlugin).toBe(false)
     expect('default' in assuranceProviderPlugin).toBe(false)
     expect(Object.keys(assuranceProviderPlugin)).toEqual([
+      'parseAssuranceProviderConfigurationV1',
       'parseAssuranceProviderDescriptorV1',
       'sealAssuranceSubmissionV1',
     ])

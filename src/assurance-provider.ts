@@ -1,4 +1,7 @@
-export { parseAssuranceProviderDescriptorV1 } from './assurance-provider/contracts.js'
+export {
+  parseAssuranceProviderConfigurationV1,
+  parseAssuranceProviderDescriptorV1,
+} from './assurance-provider/contracts.js'
 export { sealAssuranceSubmissionV1 } from './assurance-provider/submission.js'
 export type {
   AssuranceClaimedOutcomeV1,
@@ -6,6 +9,7 @@ export type {
   AssuranceExecutionSubjectV1,
   AssuranceProviderActivation,
   AssuranceProviderActivationPolicyV1,
+  AssuranceProviderConfigurationV1,
   AssuranceProviderDescriptorV1,
   AssuranceProviderDisposer,
   AssuranceProviderFactoryV1,

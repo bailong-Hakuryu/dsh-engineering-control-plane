@@ -8,6 +8,7 @@ import type {
   FrozenAssuranceProviderSelectionV1,
 } from './contracts.js'
 import { parseAssuranceProviderDescriptorV1 } from './contracts.js'
+import { parseAssuranceProviderConfigurationV1 } from './contracts.js'
 
 interface AssuranceProviderEntry {
   readonly descriptor: AssuranceProviderDescriptorV1
@@ -84,6 +85,9 @@ export class AssuranceProviderRegistry {
         schemaVersion: 1,
         descriptor: parseAssuranceProviderDescriptorV1(entry.descriptor),
         activation: policy.activation,
+        ...policy.configuration === undefined
+          ? {}
+          : { configuration: parseAssuranceProviderConfigurationV1(policy.configuration) },
       }))
     }
     return Object.freeze(selections)

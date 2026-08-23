@@ -15,6 +15,7 @@ export interface AssuranceProviderActivationConfig {
   providerId: string
   providerVersion: string
   activation: AssuranceProviderActivation
+  configuration?: Record<string, string>
 }
 
 export interface DatabaseConfig {
@@ -88,6 +89,7 @@ const assuranceProviderActivation = z.object({
   providerId: z.string().required(),
   providerVersion: z.string().required(),
   activation: z.union(['disabled', 'when-available', 'required'] as const).required(),
+  configuration: z.dict(z.string()),
 })
 
 /** Schemastery configuration surface; every execution/gate choice is host-owned. */
