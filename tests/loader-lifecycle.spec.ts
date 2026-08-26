@@ -92,6 +92,7 @@ describe('source plugin Loader contracts', () => {
       'parseAssuranceProviderDescriptorV1',
       'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
+      'validateAssuranceSubmissionV1',
     ])
   })
 

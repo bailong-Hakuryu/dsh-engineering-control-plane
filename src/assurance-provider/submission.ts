@@ -37,7 +37,7 @@ const KNOWN_CREDENTIAL_VALUES = [
 ] as const
 const COMPACT_JOSE = /[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/u
 
-/** Package-private validation result safe to publish without retaining Provider object identity. */
+/** Detached public validation result retaining no Provider object identity or Kernel capability. */
 export interface ValidatedAssuranceSubmissionV1 {
   readonly submission: AssuranceSubmissionV1
   readonly binding: AssuranceSubmissionBindingV1

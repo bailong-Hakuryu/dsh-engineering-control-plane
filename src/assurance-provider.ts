@@ -3,7 +3,11 @@ export {
   parseAssuranceProviderDescriptorV1,
   parseExternalAssessmentFailureV1,
 } from './assurance-provider/contracts.js'
-export { sealAssuranceSubmissionV1 } from './assurance-provider/submission.js'
+export {
+  sealAssuranceSubmissionV1,
+  validateAssuranceSubmissionV1,
+} from './assurance-provider/submission.js'
+export type { ValidatedAssuranceSubmissionV1 } from './assurance-provider/submission.js'
 export type {
   AssuranceClaimedOutcomeV1,
   AssuranceExecutionContext,

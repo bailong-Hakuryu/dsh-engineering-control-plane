@@ -293,6 +293,7 @@ describe('Assurance Provider startup registration and selection', () => {
       'parseAssuranceProviderDescriptorV1',
       'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
+      'validateAssuranceSubmissionV1',
     ])
     expect('registerAssuranceProvider' in toolsPlugin).toBe(false)
     expect('registerAssuranceProvider' in clientPlugin).toBe(false)
