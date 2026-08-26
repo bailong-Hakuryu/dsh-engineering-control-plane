@@ -1,0 +1,1 @@
+{"nodes": [{"id": "adr_0004", "label": "ADR-0004: Cancellation Never Rewrites Workspace", "file_type": "document", "source_file": "docs/adr/0004-cancellation-never-rewrites-the-workspace.md"}], "edges": [], "hyperedges": []}

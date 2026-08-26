@@ -1,0 +1,865 @@
+{
+  "nodes": [
+    {
+      "id": "cordis_patch_dsh_engineering_control_plane_plugin_composition",
+      "label": "DSH Engineering Control Plane Plugin Composition",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 1-15",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Repository authority and verification policy are deployment-owned, so the bundle installs disabled rows that must not be activated until a complete Service configuration is supplied."
+    },
+    {
+      "id": "cordis_patch_engineering_control_plane_service",
+      "label": "Engineering Control Plane Service",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cordis_patch_engineering_control_plane_tools",
+      "label": "Engineering Control Plane Tools Plugin",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 9-11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cordis_patch_engineering_control_plane_invariant",
+      "label": "Engineering Control Plane Invariant Plugin",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 13-15",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+      "label": "Plugin-Owned Mission Runtime",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Harness Jobs have process-local or shared-unowned lifecycle semantics that do not match durable repository-authorized Missions, so the Control Plane must own cancellation and recovery."
+    },
+    {
+      "id": "docs_adr_0006_mission_runtime_is_not_a_harness_job_plugin_owned_mission_runner",
+      "label": "Plugin-Owned Mission Runner",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0006_mission_runtime_is_not_a_harness_job_harness_jobs",
+      "label": "Harness Jobs",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0006_mission_runtime_is_not_a_harness_job_ctx_subagents_execution_adapter",
+      "label": "ctx.subagents Execution Adapter",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+      "label": "Host-Derived Mission Authority",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Authority is derived from the caller and host policy so model text cannot mint or replay a bearer capability, while Repository Identity prevents cross-repository control."
+    },
+    {
+      "id": "docs_adr_0008_mission_authority_is_host_derived_engineering_control_plane_service_capability",
+      "label": "EngineeringControlPlane Service Capability",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0008_mission_authority_is_host_derived_kernel_mission_authority",
+      "label": "Kernel MissionAuthority Authorization",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0008_mission_authority_is_host_derived_repository_identity",
+      "label": "Repository Identity",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0009_git_history_remains_user_owned_user_owned_git_history",
+      "label": "User-Owned Git History",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0009-git-history-remains-user-owned.md",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Preserving branch and HEAD prevents autonomous Role Runs from rewriting history or making attribution-bearing commits while keeping implementation changes reviewable."
+    },
+    {
+      "id": "docs_adr_0009_git_history_remains_user_owned_frozen_branch_and_head",
+      "label": "Frozen Mission Branch and HEAD",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0009-git-history-remains-user-owned.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+      "label": "Quality Gate Decision Model",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0012-gate-distinguishes-failure-from-indeterminacy.md",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Separating definite engineering failure from untrustworthy Evidence preserves Rework as an engineering judgment and Blocked as a recoverable operational or governance state."
+    },
+    {
+      "id": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_engineering_failure",
+      "label": "Definite Engineering Failure",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0012-gate-distinguishes-failure-from-indeterminacy.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_evidence_indeterminacy",
+      "label": "Evidence Indeterminacy",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0012-gate-distinguishes-failure-from-indeterminacy.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+      "label": "Mission-Owned Design Ledger",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 5-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Keeping design provenance in Mission history avoids unaudited pre-Mission chat and a competing Proposal aggregate; simple Missions pay only for an empty Design Frontier."
+    },
+    {
+      "id": "docs_adr_0013_mission_owned_design_frontier_design_frontier",
+      "label": "Design Frontier",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 7-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+      "label": "User Decision Resolution",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 7-13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0013_mission_owned_design_frontier_decision_supersession",
+      "label": "Decision Supersession",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "line 13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0013_mission_owned_design_frontier_effective_policy_design_budgets",
+      "label": "Effective Policy Design Budgets",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "line 13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0016_stable_roles_carry_assurance_requirements_stable_authority_roles",
+      "label": "Stable Authority Roles",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "lines 5-11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Stable Planner, Developer, Tester, and Reviewer authority preserves safety boundaries while Assurance Requirements allow specialized obligations without proliferating fixed role names."
+    },
+    {
+      "id": "docs_adr_0016_stable_roles_carry_assurance_requirements_assurance_requirements",
+      "label": "Assurance Requirements",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "lines 7-11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0016_stable_roles_carry_assurance_requirements_reviewer_independence_groups",
+      "label": "Reviewer Independence Groups",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "line 11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide",
+      "label": "mission_decide Dedicated Mission Tool",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "lines 5-7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A dedicated revision-checked tool preserves structured, durable partial decisions and keeps mission_resume limited to operational recovery."
+    },
+    {
+      "id": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_resume",
+      "label": "mission_resume Operational Recovery Tool",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_confirmed_testing_seams",
+      "label": "Confirmed Testing Seams",
+      "file_type": "rationale",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 1-11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Tests exercise behavior only through public interfaces so assurance does not couple to private Kernel implementation details."
+    },
+    {
+      "id": "docs_testing_seams_control_plane_kernel_seam",
+      "label": "Control Plane Kernel Testing Seam",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 5",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_model_tools_seam",
+      "label": "Model Tools Testing Seam",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 6",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_loader_composition_seam",
+      "label": "Loader Composition Testing Seam",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_revisioned_projection_seam",
+      "label": "Revisioned Projection Testing Seam",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 8",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_assurance_provider_composition_seam",
+      "label": "Assurance Provider Composition Testing Seam",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 9",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_testing_seams_tracer_bullet_flow",
+      "label": "Kernel Tracer Bullet Flow",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "cordis_patch_dsh_engineering_control_plane_plugin_composition",
+      "target": "cordis_patch_engineering_control_plane_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 1-7",
+      "weight": 1.0
+    },
+    {
+      "source": "cordis_patch_dsh_engineering_control_plane_plugin_composition",
+      "target": "cordis_patch_engineering_control_plane_tools",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 1-11",
+      "weight": 1.0
+    },
+    {
+      "source": "cordis_patch_dsh_engineering_control_plane_plugin_composition",
+      "target": "cordis_patch_engineering_control_plane_invariant",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\cordis.patch.yml",
+      "source_location": "lines 1-15",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0006_mission_runtime_is_not_a_harness_job_plugin_owned_mission_runner",
+      "target": "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+      "target": "docs_adr_0006_mission_runtime_is_not_a_harness_job_harness_jobs",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "lines 5-7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0006_mission_runtime_is_not_a_harness_job_plugin_owned_mission_runner",
+      "target": "docs_adr_0006_mission_runtime_is_not_a_harness_job_ctx_subagents_execution_adapter",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0006-mission-runtime-is-not-a-harness-job.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_engineering_control_plane_service_capability",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_kernel_mission_authority",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0008_mission_authority_is_host_derived_engineering_control_plane_service_capability",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_kernel_mission_authority",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0008_mission_authority_is_host_derived_kernel_mission_authority",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_repository_identity",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0008-mission-authority-is-host-derived.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0009_git_history_remains_user_owned_user_owned_git_history",
+      "target": "docs_adr_0009_git_history_remains_user_owned_frozen_branch_and_head",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0009-git-history-remains-user-owned.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+      "target": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_engineering_failure",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0012-gate-distinguishes-failure-from-indeterminacy.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+      "target": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_evidence_indeterminacy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0012-gate-distinguishes-failure-from-indeterminacy.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+      "target": "docs_adr_0013_mission_owned_design_frontier_design_frontier",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 5-13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+      "target": "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 7-13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+      "target": "docs_adr_0013_mission_owned_design_frontier_decision_supersession",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+      "target": "docs_adr_0013_mission_owned_design_frontier_effective_policy_design_budgets",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0013_mission_owned_design_frontier_design_frontier",
+      "target": "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0013-mission-owned-design-frontier.md",
+      "source_location": "lines 7-13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0016_stable_roles_carry_assurance_requirements_stable_authority_roles",
+      "target": "docs_adr_0016_stable_roles_carry_assurance_requirements_assurance_requirements",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "lines 5-11",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0016_stable_roles_carry_assurance_requirements_assurance_requirements",
+      "target": "docs_adr_0016_stable_roles_carry_assurance_requirements_reviewer_independence_groups",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "line 11",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide",
+      "target": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_resume",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide",
+      "target": "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide",
+      "target": "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide",
+      "target": "docs_adr_0013_mission_owned_design_frontier_design_frontier",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_control_plane_kernel_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-5",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_model_tools_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-6",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_loader_composition_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_revisioned_projection_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-8",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_assurance_provider_composition_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-9",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_confirmed_testing_seams",
+      "target": "docs_testing_seams_tracer_bullet_flow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 3-11",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_model_tools_seam",
+      "target": "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_resume",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 6",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_model_tools_seam",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_repository_identity",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 6",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_model_tools_seam",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 6",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_loader_composition_seam",
+      "target": "cordis_patch_engineering_control_plane_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_loader_composition_seam",
+      "target": "cordis_patch_engineering_control_plane_tools",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_loader_composition_seam",
+      "target": "cordis_patch_engineering_control_plane_invariant",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 7",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_control_plane_kernel_seam",
+      "target": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 5",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_control_plane_kernel_seam",
+      "target": "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 5",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_assurance_provider_composition_seam",
+      "target": "docs_adr_0016_stable_roles_carry_assurance_requirements_assurance_requirements",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 9",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_tracer_bullet_flow",
+      "target": "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 11",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_tracer_bullet_flow",
+      "target": "docs_testing_seams_assurance_provider_composition_seam",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "lines 9-11",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_testing_seams_revisioned_projection_seam",
+      "target": "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md",
+      "source_location": "line 8",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0016_stable_roles_carry_assurance_requirements_stable_authority_roles",
+      "target": "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0016-stable-roles-carry-assurance-requirements.md",
+      "source_location": "lines 5-11",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "mission_authority_and_recovery_boundary",
+      "label": "Mission Authority and Recovery Boundary",
+      "nodes": [
+        "docs_adr_0006_mission_runtime_is_not_a_harness_job_mission_runtime",
+        "docs_adr_0008_mission_authority_is_host_derived_host_derived_mission_authority",
+        "docs_adr_0009_git_history_remains_user_owned_user_owned_git_history",
+        "docs_testing_seams_control_plane_kernel_seam"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md"
+    },
+    {
+      "id": "mission_design_decision_protocol",
+      "label": "Mission Design Decision Protocol",
+      "nodes": [
+        "docs_adr_0013_mission_owned_design_frontier_mission_owned_design_ledger",
+        "docs_adr_0013_mission_owned_design_frontier_design_frontier",
+        "docs_adr_0013_mission_owned_design_frontier_user_decision_resolution",
+        "docs_adr_0017_design_decisions_use_a_dedicated_mission_tool_mission_decide"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0017-design-decisions-use-a-dedicated-mission-tool.md"
+    },
+    {
+      "id": "assurance_evidence_gate_pipeline",
+      "label": "Assurance Evidence and Gate Pipeline",
+      "nodes": [
+        "docs_adr_0016_stable_roles_carry_assurance_requirements_assurance_requirements",
+        "docs_adr_0012_gate_distinguishes_failure_from_indeterminacy_quality_gate_decision_model",
+        "docs_testing_seams_assurance_provider_composition_seam",
+        "docs_testing_seams_tracer_bullet_flow"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\testing-seams.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

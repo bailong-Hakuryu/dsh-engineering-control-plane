@@ -1,0 +1,2855 @@
+{
+  "nodes": [
+    {
+      "id": "control_plane_kernel",
+      "label": "Control Plane Kernel",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "mission",
+      "label": "Mission",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "quality_gate",
+      "label": "Quality Gate",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "evidence_manifest",
+      "label": "Evidence Manifest",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "action_gate",
+      "label": "Action Gate",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "design_ledger",
+      "label": "Design Ledger",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "assurance_plan",
+      "label": "Assurance Plan",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "mission_authority",
+      "label": "Mission Authority",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "effective_policy",
+      "label": "Effective Policy",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "protocol_version",
+      "label": "Protocol Version",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "governed_role_provider",
+      "label": "Governed Role Provider",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "role_run",
+      "label": "Role Run",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "attempt",
+      "label": "Attempt",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "repository_identity",
+      "label": "Repository Identity",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "write_lease",
+      "label": "Write Lease",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "mission_execution_lease",
+      "label": "Mission Execution Lease",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "decision_authority",
+      "label": "Decision Authority",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "design_frontier",
+      "label": "Design Frontier",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "mission_contract",
+      "label": "Mission Contract",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "verification_profile",
+      "label": "Verification Profile",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "action_ledger",
+      "label": "Action Ledger",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "assurance_requirement",
+      "label": "Assurance Requirement",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "attempt_seal",
+      "label": "Attempt Seal",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "adr_0001",
+      "label": "ADR-0001: Control Plane Kernel Owns Governance",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0001-control-plane-kernel-owns-governance.md"
+    },
+    {
+      "id": "adr_0002",
+      "label": "ADR-0002: Quality Gate Defines Approved",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0002-quality-gate-defines-approved.md"
+    },
+    {
+      "id": "adr_0003",
+      "label": "ADR-0003: Role Runs Are One-Shot Per Attempt",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0003-role-runs-are-one-shot-per-attempt.md"
+    },
+    {
+      "id": "adr_0004",
+      "label": "ADR-0004: Cancellation Never Rewrites Workspace",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0004-cancellation-never-rewrites-the-workspace.md"
+    },
+    {
+      "id": "adr_0005",
+      "label": "ADR-0005: Canonical Evidence Is Structured",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0005-canonical-evidence-is-structured.md"
+    },
+    {
+      "id": "adr_0007",
+      "label": "ADR-0007: Mission State Uses Plugin-Owned SQLite",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0007-mission-state-uses-plugin-owned-sqlite.md"
+    },
+    {
+      "id": "adr_0010",
+      "label": "ADR-0010: Verification Policy Is Host-Owned and Frozen",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0010-verification-policy-is-host-owned-and-frozen.md"
+    },
+    {
+      "id": "adr_0011",
+      "label": "ADR-0011: Effective Policy Is Frozen Per Mission",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0011-effective-policy-is-frozen-per-mission.md"
+    },
+    {
+      "id": "adr_0014",
+      "label": "ADR-0014: Assurance Plans Are Attempt-Frozen and Monotonic",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0014-assurance-plans-are-attempt-frozen-and-monotonic.md"
+    },
+    {
+      "id": "adr_0015",
+      "label": "ADR-0015: Action Review Cannot Expand Effective Policy",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0015-action-review-cannot-expand-effective-policy.md"
+    },
+    {
+      "id": "adr_0018",
+      "label": "ADR-0018: Decision Waits Release Write Lease",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0018-decision-waits-release-the-write-lease.md"
+    },
+    {
+      "id": "adr_0019",
+      "label": "ADR-0019: Late Design Changes Start New Attempt",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0019-late-design-changes-start-a-new-attempt.md"
+    },
+    {
+      "id": "deepseek_harness",
+      "label": "DeepSeek Harness",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\README.md"
+    },
+    {
+      "id": "docs_adr_0020_decision_bearing_facts_are_canonical_evidence",
+      "label": "Decision-bearing facts are canonical Evidence",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0020-decision-bearing-facts-are-canonical-evidence.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0021_action_gate_mediates_every_execution_capability",
+      "label": "Action Gate mediates every Execution Capability",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0021-action-gate-mediates-every-execution-capability.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0022_user_decisions_require_host_derived_provenance",
+      "label": "User decisions require host-derived provenance",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0022-user-decisions-require-host-derived-provenance.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0023_assurance_extension_uses_a_versioned_registry",
+      "label": "Assurance extension uses a versioned Registry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0023-assurance-extension-uses-a-versioned-registry.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0024_user_action_authorization_adapts_harness_approval",
+      "label": "User action authorization adapts Harness ApprovalService",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0024-user-action-authorization-adapts-harness-approval.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0025_mission_contract_is_the_specification_authority",
+      "label": "Mission Contract is the specification authority",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0025-mission-contract-is-the-specification-authority.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0026_missions_retain_their_protocol_version",
+      "label": "Missions retain their Protocol Version",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0026-missions-retain-their-protocol-version.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0027_design_closure_requires_independent_challenge",
+      "label": "Design Closure requires independent challenge",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0027-design-closure-requires-independent-challenge.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0028_repository_standards_use_a_captured_baseline",
+      "label": "Repository standards use a captured Baseline",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0028-repository-standards-use-a-captured-baseline.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0029_action_decisions_are_durable_before_execution",
+      "label": "Action Decisions are durable before execution",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0029-action-decisions-are-durable-before-execution.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0030_normative_documents_use_host_resolved_references",
+      "label": "Normative documents use host-resolved references",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0030-normative-documents-use-host-resolved-references.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0031_plan_and_assurance_freeze_after_independent_review",
+      "label": "Plan and Assurance freeze after independent review",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0031-plan-and-assurance-freeze-after-independent-review.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0032_role_agents_use_a_pre_publication_governed_provider",
+      "label": "Role Agents use a pre-publication Governed Provider",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0032-role-agents-use-a-pre-publication-governed-provider.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0033_web_surfaces_are_additive_session_projections",
+      "label": "Web surfaces are additive Session projections",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0033-web-surfaces-are-additive-session-projections.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0034_bound_root_sessions_use_revision_cas",
+      "label": "Bound root Sessions use revision CAS",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0034-bound-root-sessions-use-revision-cas.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0035_unfinished_action_authorization_is_not_resumable",
+      "label": "Unfinished Action Authorization is not resumable",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0035-unfinished-action-authorization-is-not-resumable.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0036_quality_gate_evaluates_an_attempt_seal",
+      "label": "Quality Gate evaluates an Attempt Seal",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0037_workspace_drift_is_not_auto_adopted",
+      "label": "Workspace Drift is not auto-adopted",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0037-workspace-drift-is-not-auto-adopted.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0038_evidence_reuse_is_contract_declared",
+      "label": "Evidence reuse is Contract-declared",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0038-evidence-reuse-is-contract-declared.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0039_assessor_independence_is_host_derived",
+      "label": "Assessor independence is host-derived",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0039-assessor-independence-is-host-derived.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0040_action_capabilities_use_a_frozen_registry",
+      "label": "Action Capabilities use a frozen Registry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0040-action-capabilities-use-a-frozen-registry.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0041_plan_write_scope_is_gated_and_visible",
+      "label": "Plan Write Scope is gated and visible",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0041-plan-write-scope-is-gated-and-visible.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0042_startup_failures_enter_read_only_safe_mode",
+      "label": "Startup failures enter read-only Safe Mode",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0042-startup-failures-enter-read-only-safe-mode.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0043_mission_store_uses_an_immutable_revision_journal",
+      "label": "Mission Store uses an immutable Revision Journal",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0044_audit_chains_have_explicit_integrity_modes",
+      "label": "Audit chains have explicit Integrity Modes",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0044-audit-chains-have-explicit-integrity-modes.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "canonical_evidence",
+      "label": "Canonical Evidence",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0020-decision-bearing-facts-are-canonical-evidence.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "versioned_registry",
+      "label": "Versioned Registry",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0023-assurance-extension-uses-a-versioned-registry.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "governed_provider",
+      "label": "Governed Provider",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0032-role-agents-use-a-pre-publication-governed-provider.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mission_revision_journal",
+      "label": "Mission Revision Journal",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_adr_0045_execution_lease",
+      "label": "Execution Lease",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0045-execution-and-repository-leases-are-separate.md"
+    },
+    {
+      "id": "docs_adr_0045_repository_write_lease",
+      "label": "Repository Write Lease",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0045-execution-and-repository-leases-are-separate.md"
+    },
+    {
+      "id": "docs_adr_0046_execution_admission",
+      "label": "Execution Admission",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0046-execution-admission-is-fair-and-bounded.md"
+    },
+    {
+      "id": "docs_adr_0047_cancellation_protocol",
+      "label": "Cancellation Protocol",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0047-cancellation-is-a-two-phase-quiescence-protocol.md"
+    },
+    {
+      "id": "docs_adr_0048_policy_layering",
+      "label": "Policy Layering",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "id": "docs_adr_0048_product_ceilings",
+      "label": "Product Ceilings",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "id": "docs_adr_0049_human_wait_budget",
+      "label": "Human Wait Budget",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0049-human-wait-does-not-consume-active-execution-budget.md"
+    },
+    {
+      "id": "docs_adr_0050_principal_resolver",
+      "label": "Principal Resolver",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0050-principals-are-host-resolved-not-session-derived.md"
+    },
+    {
+      "id": "docs_adr_0051_model_tool_contracts",
+      "label": "Model Tool Contracts",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "id": "docs_adr_0052_network_authorization",
+      "label": "Network Authorization",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0052-network-authorization-is-revalidated-per-hop.md"
+    },
+    {
+      "id": "docs_adr_0053_process_actions",
+      "label": "Process Actions",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0053-process-actions-are-structured-not-shell-text.md"
+    },
+    {
+      "id": "docs_adr_0054_filesystem_actions",
+      "label": "Filesystem Actions",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0054-filesystem-actions-bind-stable-file-identities.md"
+    },
+    {
+      "id": "docs_adr_0055_evidence_content_security",
+      "label": "Evidence Content Security",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0055-evidence-content-is-untrusted-ui-input.md"
+    },
+    {
+      "id": "docs_adr_0056_operational_telemetry",
+      "label": "Operational Telemetry",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0056-operational-telemetry-is-local-and-allowlisted.md"
+    },
+    {
+      "id": "docs_adr_0057_service_capability",
+      "label": "Service Capability",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0057-integrations-cross-only-the-service-capability.md"
+    },
+    {
+      "id": "docs_adr_0058_prompt_packages",
+      "label": "Prompt Packages",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0058-role-agents-receive-kernel-built-prompt-packages.md"
+    },
+    {
+      "id": "docs_adr_0059_role_output_contracts",
+      "label": "Role Output Contracts",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0059-role-results-use-versioned-output-contracts.md"
+    },
+    {
+      "id": "docs_adr_0060_model_fallback",
+      "label": "Model Fallback",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0060-model-fallback-is-pre-authorized-and-run-scoped.md"
+    },
+    {
+      "id": "docs_adr_0061_role_skills",
+      "label": "Role Skills",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0061-role-skills-are-allowlisted-and-digest-frozen.md"
+    },
+    {
+      "id": "docs_adr_0062_specification_extraction",
+      "label": "Specification Extraction",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0062-specification-extraction-preserves-source-identity.md"
+    },
+    {
+      "id": "docs_adr_0063_content_sanitization",
+      "label": "Content Sanitization",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0063-content-sanitization-is-layered-and-deterministic.md"
+    },
+    {
+      "id": "docs_adr_0064_harness_rc_compatibility",
+      "label": "Harness RC Compatibility",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0064-harness-rc-compatibility-is-exact-and-probed.md"
+    },
+    {
+      "id": "docs_adr_0065_platform_support",
+      "label": "Platform Support",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0065-platform-support-is-proven-on-windows-linux-and-macos.md"
+    },
+    {
+      "id": "docs_adr_0066_tdd_implementation",
+      "label": "TDD Implementation",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0066-implementation-proceeds-in-kernel-first-tdd-slices.md"
+    },
+    {
+      "id": "docs_adr_0067_scripted_providers",
+      "label": "Scripted Providers",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0067-release-tests-use-scripted-providers-not-live-model-oracles.md"
+    },
+    {
+      "id": "docs_adr_0068_property_tests",
+      "label": "Property Tests",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0068-invariants-are-proven-with-property-fault-and-process-tests.md"
+    },
+    {
+      "id": "docs_adr_0053_action_capability_registry",
+      "label": "Action Capability Registry",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0053-process-actions-are-structured-not-shell-text.md"
+    },
+    {
+      "id": "docs_adr_0057_action_gate",
+      "label": "Action Gate",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0057-integrations-cross-only-the-service-capability.md"
+    },
+    {
+      "id": "docs_adr_0050_mission_access_policy",
+      "label": "Mission Access Policy",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0050-principals-are-host-resolved-not-session-derived.md"
+    },
+    {
+      "id": "docs_adr_0051_invocation_identity",
+      "label": "Invocation Identity",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "id": "docs_adr_0058_context_manifest",
+      "label": "Context Manifest",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0058-role-agents-receive-kernel-built-prompt-packages.md"
+    },
+    {
+      "id": "docs_adr_0060_role_run_provenance",
+      "label": "Role Run Provenance",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0060-model-fallback-is-pre-authorized-and-run-scoped.md"
+    },
+    {
+      "id": "docs_adr_0048_effective_policy",
+      "label": "Effective Policy",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "id": "docs_adr_0054_repository_identity",
+      "label": "Repository Identity",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0054-filesystem-actions-bind-stable-file-identities.md"
+    },
+    {
+      "id": "docs_adr_0047_workspace_fingerprint",
+      "label": "Workspace Fingerprint",
+      "type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0047-cancellation-is-a-two-phase-quiescence-protocol.md"
+    },
+    {
+      "id": "docs_adr_0069_web_release_proof",
+      "label": "Web Release Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0069-web-release-proof-covers-projection-security-and-resync.md",
+      "rationale": "Browser smoke tests against packed installation ensure client compatibility beyond TypeScript compilation"
+    },
+    {
+      "id": "docs_adr_0070_migration_proof",
+      "label": "Migration Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0070-migration-proof-uses-versioned-legacy-fixtures.md",
+      "rationale": "Byte-level fixtures verify transactional migration, rollback on fault, and Safe Mode for corrupt stores"
+    },
+    {
+      "id": "docs_adr_0071_packed_installation",
+      "label": "Packed Installation",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md",
+      "rationale": "npm pack and tarball installation ensure plugin operates within declared peer dependencies and public exports"
+    },
+    {
+      "id": "docs_adr_0072_release_promotion",
+      "label": "Release Promotion",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md",
+      "rationale": "RC-to-stable requires passing all gates and manual dogfood mission to ensure production readiness"
+    },
+    {
+      "id": "docs_adr_0073_security_assurance_external",
+      "label": "Security Assurance External Provider",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md",
+      "rationale": "Security Assurance integrates through Provider boundary to maintain separation of concerns"
+    },
+    {
+      "id": "docs_adr_0074_external_assurance_by_value",
+      "label": "External Assurance By Value",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md",
+      "rationale": "Immutable digest-bound submissions prevent provider loss or mutation from altering Mission decisions"
+    },
+    {
+      "id": "docs_adr_0075_host_policy_activation",
+      "label": "Host Policy Activation",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md",
+      "rationale": "Host Policy controls provider selection to prevent unauthorized provider self-registration"
+    },
+    {
+      "id": "docs_adr_0076_machine_providers",
+      "label": "Machine Providers as Assessors",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0076-machine-providers-are-explicit-assessors.md",
+      "rationale": "Machine Provider distinction prevents scanners from impersonating independent Reviewer roles"
+    },
+    {
+      "id": "docs_adr_0077_kernel_issued_context",
+      "label": "Kernel-Issued Execution Context",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md",
+      "rationale": "Mediated execution context prevents external providers from accessing Store, Gate, or unrestricted host capabilities"
+    },
+    {
+      "id": "docs_adr_0078_provider_fail_closed",
+      "label": "Provider Fail-Closed",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md",
+      "rationale": "Missing providers trigger Safe Mode to prevent silent degradation of assurance requirements"
+    },
+    {
+      "id": "docs_adr_0079_sealed_assessments",
+      "label": "Sealed External Assessments",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0079-only-sealed-external-assessments-are-importable.md",
+      "rationale": "Only sealed assessments are importable to ensure evidence integrity"
+    },
+    {
+      "id": "docs_adr_0080_risk_acceptance_authority",
+      "label": "Security Risk Acceptance Authority",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0080-security-risk-acceptance-requires-decision-authority.md",
+      "rationale": "Decision Authority binding ensures risk acceptance cannot bypass governance controls"
+    },
+    {
+      "id": "docs_adr_0081_remediation_rework",
+      "label": "Security Remediation Through Rework",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md",
+      "rationale": "Security Assurance cannot apply changes directly to enforce separation of assessment and implementation"
+    },
+    {
+      "id": "docs_adr_0082_findings_new_evidence",
+      "label": "Findings Close on New Evidence",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md",
+      "rationale": "New sealed assessment required to close findings ensures patch verification is properly validated"
+    },
+    {
+      "id": "docs_adr_0083_unsafe_approval_outcomes",
+      "label": "Security Integration Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md",
+      "rationale": "Unsafe Approval Rate measurement ensures integrated Quality Gate is useful and safe, not just functional"
+    },
+    {
+      "id": "docs_adr_0084_transport_integrity",
+      "label": "Submission Transport Integrity",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md",
+      "rationale": "Transport integrity separate from gate eligibility ensures digest verification doesn't imply assessment validity"
+    },
+    {
+      "id": "docs_adr_0085_post_implementation_subject",
+      "label": "Post-Implementation Subject",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md",
+      "rationale": "Provider execution after implementation ensures assessment runs against code that will reach Quality Gate"
+    },
+    {
+      "id": "docs_adr_0086_mission_cancellation_quiescence",
+      "label": "Mission Cancellation Quiescence",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md",
+      "rationale": "Explicit cancellation with quiescence proof prevents leaving unproven external work behind cancelled missions"
+    },
+    {
+      "id": "docs_adr_0087_cancellation_retry",
+      "label": "Provider Cancellation Retry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0087-provider-cancellation-retry-reconciles-terminal-external-state.md",
+      "rationale": "Idempotent cancellation retry reconciles external state after host restart interrupts cancellation transaction"
+    },
+    {
+      "id": "docs_adr_0088_external_failure_indeterminate",
+      "label": "External Assessment Failure",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0088-external-assessment-failure-is-terminal-indeterminate-assurance.md",
+      "rationale": "External failure produces indeterminate assessment to distinguish from security findings and safety approval"
+    },
+    {
+      "id": "docs_adr_0089_assurance_retry",
+      "label": "Assurance Retry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md",
+      "rationale": "Successor invocation with linked history enables retry without replaying settled identities"
+    },
+    {
+      "id": "docs_adr_0090_repository_binding",
+      "label": "Repository Binding",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0090-repository-binding-is-a-process-local-assertion.md",
+      "rationale": "Process-local repository equality prevents path leakage while enabling same-repository validation"
+    },
+    {
+      "id": "research_codex_reuse_study",
+      "label": "Codex Ecosystem Reuse Study",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\codex-ecosystem-reuse-study.md",
+      "rationale": "Study identifies verified mechanisms for runtime ownership, cancellation, approval, and lifecycle from Codex ecosystem"
+    },
+    {
+      "id": "research_deepseek_harness_study",
+      "label": "DeepSeek Harness Source Study",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md",
+      "rationale": "Comprehensive study maps Engineering Control Plane requirements to DeepSeek Harness extension points and establishes architecture boundaries"
+    },
+    {
+      "id": "concept_assurance_provider",
+      "label": "Assurance Provider",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "id": "concept_quality_gate",
+      "label": "Quality Gate",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "id": "concept_assurance_submission",
+      "label": "Assurance Submission",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "id": "concept_provider_invocation",
+      "label": "Provider Invocation",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "id": "concept_mission",
+      "label": "Mission",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "id": "concept_evidence_store",
+      "label": "Evidence Store",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "id": "concept_safe_mode",
+      "label": "Safe Mode",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "id": "concept_plugin_boundary",
+      "label": "Plugin Boundary",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md"
+    },
+    {
+      "id": "concept_assurance_execution_context",
+      "label": "Assurance Execution Context",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "id": "concept_control_plane_kernel",
+      "label": "Control Plane Kernel",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "control_plane_kernel",
+      "target": "mission",
+      "relation": "owns",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "control_plane_kernel",
+      "target": "quality_gate",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "control_plane_kernel",
+      "target": "evidence_manifest",
+      "relation": "owns",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "control_plane_kernel",
+      "target": "action_gate",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "control_plane_kernel",
+      "target": "design_ledger",
+      "relation": "owns",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "mission",
+      "target": "attempt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "mission",
+      "target": "repository_identity",
+      "relation": "bound_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "mission",
+      "target": "effective_policy",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "mission",
+      "target": "protocol_version",
+      "relation": "bound_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "mission",
+      "target": "design_ledger",
+      "relation": "owns",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "attempt",
+      "target": "role_run",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "attempt",
+      "target": "assurance_plan",
+      "relation": "bound_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "attempt",
+      "target": "attempt_seal",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "quality_gate",
+      "target": "attempt_seal",
+      "relation": "evaluates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "quality_gate",
+      "target": "evidence_manifest",
+      "relation": "consumes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "action_gate",
+      "target": "effective_policy",
+      "relation": "enforces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "action_gate",
+      "target": "action_ledger",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "role_run",
+      "target": "governed_role_provider",
+      "relation": "executed_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "role_run",
+      "target": "action_ledger",
+      "relation": "records_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "assurance_plan",
+      "target": "assurance_requirement",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "design_ledger",
+      "target": "design_frontier",
+      "relation": "computes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "design_frontier",
+      "target": "decision_authority",
+      "relation": "requires",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "effective_policy",
+      "target": "verification_profile",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "write_lease",
+      "target": "repository_identity",
+      "relation": "protects",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "mission_execution_lease",
+      "target": "mission",
+      "relation": "protects",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "adr_0001",
+      "target": "control_plane_kernel",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0001-control-plane-kernel-owns-governance.md"
+    },
+    {
+      "source": "adr_0002",
+      "target": "quality_gate",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0002-quality-gate-defines-approved.md"
+    },
+    {
+      "source": "adr_0003",
+      "target": "role_run",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0003-role-runs-are-one-shot-per-attempt.md"
+    },
+    {
+      "source": "adr_0005",
+      "target": "evidence_manifest",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0005-canonical-evidence-is-structured.md"
+    },
+    {
+      "source": "adr_0010",
+      "target": "verification_profile",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0010-verification-policy-is-host-owned-and-frozen.md"
+    },
+    {
+      "source": "adr_0011",
+      "target": "effective_policy",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0011-effective-policy-is-frozen-per-mission.md"
+    },
+    {
+      "source": "adr_0014",
+      "target": "assurance_plan",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0014-assurance-plans-are-attempt-frozen-and-monotonic.md"
+    },
+    {
+      "source": "adr_0015",
+      "target": "action_gate",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0015-action-review-cannot-expand-effective-policy.md"
+    },
+    {
+      "source": "adr_0018",
+      "target": "write_lease",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0018-decision-waits-release-the-write-lease.md"
+    },
+    {
+      "source": "adr_0019",
+      "target": "attempt",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0019-late-design-changes-start-a-new-attempt.md"
+    },
+    {
+      "source": "control_plane_kernel",
+      "target": "deepseek_harness",
+      "relation": "integrates_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\README.md"
+    },
+    {
+      "source": "deepseek_harness",
+      "target": "control_plane_kernel",
+      "relation": "provides_execution_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture.md"
+    },
+    {
+      "source": "mission_authority",
+      "target": "mission",
+      "relation": "authorizes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "decision_authority",
+      "target": "design_ledger",
+      "relation": "modifies",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "effective_policy",
+      "target": "protocol_version",
+      "relation": "bound_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "attempt_seal",
+      "target": "mission_contract",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "attempt_seal",
+      "target": "action_ledger",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "governed_role_provider",
+      "target": "action_gate",
+      "relation": "mediated_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "source": "adr_0002",
+      "target": "adr_0001",
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0002-quality-gate-defines-approved.md"
+    },
+    {
+      "source": "adr_0003",
+      "target": "adr_0001",
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0003-role-runs-are-one-shot-per-attempt.md"
+    },
+    {
+      "source": "adr_0015",
+      "target": "adr_0011",
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0015-action-review-cannot-expand-effective-policy.md"
+    },
+    {
+      "source": "adr_0014",
+      "target": "adr_0011",
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0014-assurance-plans-are-attempt-frozen-and-monotonic.md"
+    },
+    {
+      "source": "mission",
+      "target": "mission_contract",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "design_frontier",
+      "target": "write_lease",
+      "relation": "releases_on_block",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0018-decision-waits-release-the-write-lease.md"
+    },
+    {
+      "source": "adr_0018",
+      "target": "design_frontier",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0018-decision-waits-release-the-write-lease.md"
+    },
+    {
+      "source": "protocol_version",
+      "target": "mission",
+      "relation": "governs",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "source": "adr_0010",
+      "target": "adr_0011",
+      "relation": "contributes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0010-verification-policy-is-host-owned-and-frozen.md"
+    },
+    {
+      "source": "docs_adr_0020_decision_bearing_facts_are_canonical_evidence",
+      "target": "canonical_evidence",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0020-decision-bearing-facts-are-canonical-evidence.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "canonical_evidence",
+      "target": "action_gate",
+      "relation": "informs",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0020-decision-bearing-facts-are-canonical-evidence.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "canonical_evidence",
+      "target": "quality_gate",
+      "relation": "informs",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0020-decision-bearing-facts-are-canonical-evidence.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0021_action_gate_mediates_every_execution_capability",
+      "target": "action_gate",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0021-action-gate-mediates-every-execution-capability.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "action_gate",
+      "target": "action_ledger",
+      "relation": "produces",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0021-action-gate-mediates-every-execution-capability.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0022_user_decisions_require_host_derived_provenance",
+      "target": "mission_contract",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0022-user-decisions-require-host-derived-provenance.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0023_assurance_extension_uses_a_versioned_registry",
+      "target": "versioned_registry",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0023-assurance-extension-uses-a-versioned-registry.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "versioned_registry",
+      "target": "effective_policy",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0023-assurance-extension-uses-a-versioned-registry.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0024_user_action_authorization_adapts_harness_approval",
+      "target": "action_gate",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0024-user-action-authorization-adapts-harness-approval.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0025_mission_contract_is_the_specification_authority",
+      "target": "mission_contract",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0025-mission-contract-is-the-specification-authority.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "mission_contract",
+      "target": "quality_gate",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0025-mission-contract-is-the-specification-authority.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0027_design_closure_requires_independent_challenge",
+      "target": "design_ledger",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0027-design-closure-requires-independent-challenge.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "design_ledger",
+      "target": "mission_contract",
+      "relation": "contributes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0027-design-closure-requires-independent-challenge.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0029_action_decisions_are_durable_before_execution",
+      "target": "action_ledger",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0029-action-decisions-are-durable-before-execution.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "action_ledger",
+      "target": "attempt_seal",
+      "relation": "contributes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0029-action-decisions-are-durable-before-execution.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0030_normative_documents_use_host_resolved_references",
+      "target": "mission_contract",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0030-normative-documents-use-host-resolved-references.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0031_plan_and_assurance_freeze_after_independent_review",
+      "target": "mission_contract",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0031-plan-and-assurance-freeze-after-independent-review.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0031_plan_and_assurance_freeze_after_independent_review",
+      "target": "design_ledger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0031-plan-and-assurance-freeze-after-independent-review.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0032_role_agents_use_a_pre_publication_governed_provider",
+      "target": "governed_provider",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0032-role-agents-use-a-pre-publication-governed-provider.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "governed_provider",
+      "target": "action_gate",
+      "relation": "integrates_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0032-role-agents-use-a-pre-publication-governed-provider.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "governed_provider",
+      "target": "effective_policy",
+      "relation": "constrained_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0032-role-agents-use-a-pre-publication-governed-provider.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0034_bound_root_sessions_use_revision_cas",
+      "target": "mission_revision_journal",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0034-bound-root-sessions-use-revision-cas.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0035_unfinished_action_authorization_is_not_resumable",
+      "target": "action_gate",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0035-unfinished-action-authorization-is-not-resumable.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0035_unfinished_action_authorization_is_not_resumable",
+      "target": "action_ledger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0035-unfinished-action-authorization-is-not-resumable.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0036_quality_gate_evaluates_an_attempt_seal",
+      "target": "quality_gate",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0036_quality_gate_evaluates_an_attempt_seal",
+      "target": "attempt_seal",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "quality_gate",
+      "target": "attempt_seal",
+      "relation": "evaluates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "attempt_seal",
+      "target": "mission_contract",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "attempt_seal",
+      "target": "action_ledger",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "attempt_seal",
+      "target": "canonical_evidence",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0038_evidence_reuse_is_contract_declared",
+      "target": "canonical_evidence",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0038-evidence-reuse-is-contract-declared.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0038_evidence_reuse_is_contract_declared",
+      "target": "mission_contract",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0038-evidence-reuse-is-contract-declared.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0038_evidence_reuse_is_contract_declared",
+      "target": "effective_policy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0038-evidence-reuse-is-contract-declared.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0040_action_capabilities_use_a_frozen_registry",
+      "target": "action_gate",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0040-action-capabilities-use-a-frozen-registry.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0040_action_capabilities_use_a_frozen_registry",
+      "target": "versioned_registry",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0040-action-capabilities-use-a-frozen-registry.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0041_plan_write_scope_is_gated_and_visible",
+      "target": "action_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0041-plan-write-scope-is-gated-and-visible.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0041_plan_write_scope_is_gated_and_visible",
+      "target": "effective_policy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0041-plan-write-scope-is-gated-and-visible.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0042_startup_failures_enter_read_only_safe_mode",
+      "target": "versioned_registry",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0042-startup-failures-enter-read-only-safe-mode.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0043_mission_store_uses_an_immutable_revision_journal",
+      "target": "mission_revision_journal",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "mission_revision_journal",
+      "target": "canonical_evidence",
+      "relation": "stores",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "mission_revision_journal",
+      "target": "action_ledger",
+      "relation": "stores",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0044_audit_chains_have_explicit_integrity_modes",
+      "target": "mission_revision_journal",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0044-audit-chains-have-explicit-integrity-modes.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0044_audit_chains_have_explicit_integrity_modes",
+      "target": "attempt_seal",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0044-audit-chains-have-explicit-integrity-modes.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0026_missions_retain_their_protocol_version",
+      "target": "mission_revision_journal",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0026-missions-retain-their-protocol-version.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0026_missions_retain_their_protocol_version",
+      "target": "design_ledger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0026-missions-retain-their-protocol-version.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0026_missions_retain_their_protocol_version",
+      "target": "action_ledger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0026-missions-retain-their-protocol-version.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0028_repository_standards_use_a_captured_baseline",
+      "target": "mission_contract",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0028-repository-standards-use-a-captured-baseline.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0033_web_surfaces_are_additive_session_projections",
+      "target": "canonical_evidence",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0033-web-surfaces-are-additive-session-projections.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0033_web_surfaces_are_additive_session_projections",
+      "target": "action_ledger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0033-web-surfaces-are-additive-session-projections.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0039_assessor_independence_is_host_derived",
+      "target": "effective_policy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0039-assessor-independence-is-host-derived.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0022_user_decisions_require_host_derived_provenance",
+      "target": "design_ledger",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0022-user-decisions-require-host-derived-provenance.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0024_user_action_authorization_adapts_harness_approval",
+      "target": "docs_adr_0035_unfinished_action_authorization_is_not_resumable",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0024-user-action-authorization-adapts-harness-approval.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0023_assurance_extension_uses_a_versioned_registry",
+      "target": "docs_adr_0040_action_capabilities_use_a_frozen_registry",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0023-assurance-extension-uses-a-versioned-registry.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_adr_0045_execution_lease",
+      "target": "docs_adr_0045_repository_write_lease",
+      "relation": "independent_from",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0045-execution-and-repository-leases-are-separate.md"
+    },
+    {
+      "source": "docs_adr_0049_human_wait_budget",
+      "target": "docs_adr_0045_repository_write_lease",
+      "relation": "releases",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0049-human-wait-does-not-consume-active-execution-budget.md"
+    },
+    {
+      "source": "docs_adr_0047_cancellation_protocol",
+      "target": "docs_adr_0045_repository_write_lease",
+      "relation": "releases_after_quiescence",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0047-cancellation-is-a-two-phase-quiescence-protocol.md"
+    },
+    {
+      "source": "docs_adr_0047_cancellation_protocol",
+      "target": "docs_adr_0047_workspace_fingerprint",
+      "relation": "captures",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0047-cancellation-is-a-two-phase-quiescence-protocol.md"
+    },
+    {
+      "source": "docs_adr_0046_execution_admission",
+      "target": "docs_adr_0048_product_ceilings",
+      "relation": "bounded_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0046-execution-admission-is-fair-and-bounded.md"
+    },
+    {
+      "source": "docs_adr_0048_policy_layering",
+      "target": "docs_adr_0048_product_ceilings",
+      "relation": "enforces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "source": "docs_adr_0048_policy_layering",
+      "target": "docs_adr_0048_effective_policy",
+      "relation": "resolves_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "source": "docs_adr_0050_principal_resolver",
+      "target": "docs_adr_0050_mission_access_policy",
+      "relation": "validates_against",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0050-principals-are-host-resolved-not-session-derived.md"
+    },
+    {
+      "source": "docs_adr_0051_model_tool_contracts",
+      "target": "docs_adr_0051_invocation_identity",
+      "relation": "uses_for_idempotency",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "source": "docs_adr_0052_network_authorization",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "validated_by",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0052-network-authorization-is-revalidated-per-hop.md"
+    },
+    {
+      "source": "docs_adr_0053_process_actions",
+      "target": "docs_adr_0053_action_capability_registry",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0053-process-actions-are-structured-not-shell-text.md"
+    },
+    {
+      "source": "docs_adr_0054_filesystem_actions",
+      "target": "docs_adr_0054_repository_identity",
+      "relation": "validates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0054-filesystem-actions-bind-stable-file-identities.md"
+    },
+    {
+      "source": "docs_adr_0055_evidence_content_security",
+      "target": "docs_adr_0063_content_sanitization",
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0055-evidence-content-is-untrusted-ui-input.md"
+    },
+    {
+      "source": "docs_adr_0057_service_capability",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "enforces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0057-integrations-cross-only-the-service-capability.md"
+    },
+    {
+      "source": "docs_adr_0058_prompt_packages",
+      "target": "docs_adr_0058_context_manifest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0058-role-agents-receive-kernel-built-prompt-packages.md"
+    },
+    {
+      "source": "docs_adr_0058_prompt_packages",
+      "target": "docs_adr_0061_role_skills",
+      "relation": "includes",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0061-role-skills-are-allowlisted-and-digest-frozen.md"
+    },
+    {
+      "source": "docs_adr_0060_model_fallback",
+      "target": "docs_adr_0048_effective_policy",
+      "relation": "constrained_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0060-model-fallback-is-pre-authorized-and-run-scoped.md"
+    },
+    {
+      "source": "docs_adr_0060_model_fallback",
+      "target": "docs_adr_0060_role_run_provenance",
+      "relation": "records_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0060-model-fallback-is-pre-authorized-and-run-scoped.md"
+    },
+    {
+      "source": "docs_adr_0061_role_skills",
+      "target": "docs_adr_0048_effective_policy",
+      "relation": "frozen_by",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0061-role-skills-are-allowlisted-and-digest-frozen.md"
+    },
+    {
+      "source": "docs_adr_0061_role_skills",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "subject_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0061-role-skills-are-allowlisted-and-digest-frozen.md"
+    },
+    {
+      "source": "docs_adr_0062_specification_extraction",
+      "target": "docs_adr_0054_repository_identity",
+      "relation": "preserves",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0062-specification-extraction-preserves-source-identity.md"
+    },
+    {
+      "source": "docs_adr_0063_content_sanitization",
+      "target": "docs_adr_0056_operational_telemetry",
+      "relation": "applies_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0063-content-sanitization-is-layered-and-deterministic.md"
+    },
+    {
+      "source": "docs_adr_0064_harness_rc_compatibility",
+      "target": "docs_adr_0065_platform_support",
+      "relation": "tested_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0065-platform-support-is-proven-on-windows-linux-and-macos.md"
+    },
+    {
+      "source": "docs_adr_0066_tdd_implementation",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0066-implementation-proceeds-in-kernel-first-tdd-slices.md"
+    },
+    {
+      "source": "docs_adr_0067_scripted_providers",
+      "target": "docs_adr_0059_role_output_contracts",
+      "relation": "tests",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0067-release-tests-use-scripted-providers-not-live-model-oracles.md"
+    },
+    {
+      "source": "docs_adr_0068_property_tests",
+      "target": "docs_adr_0045_execution_lease",
+      "relation": "proves_invariants_of",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0068-invariants-are-proven-with-property-fault-and-process-tests.md"
+    },
+    {
+      "source": "docs_adr_0068_property_tests",
+      "target": "docs_adr_0047_cancellation_protocol",
+      "relation": "proves_invariants_of",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0068-invariants-are-proven-with-property-fault-and-process-tests.md"
+    },
+    {
+      "source": "docs_adr_0053_action_capability_registry",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "mediates_through",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0053-process-actions-are-structured-not-shell-text.md"
+    },
+    {
+      "source": "docs_adr_0050_mission_access_policy",
+      "target": "docs_adr_0048_effective_policy",
+      "relation": "component_of",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0050-principals-are-host-resolved-not-session-derived.md"
+    },
+    {
+      "source": "docs_adr_0051_invocation_identity",
+      "target": "docs_adr_0054_repository_identity",
+      "relation": "binds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "source": "docs_adr_0059_role_output_contracts",
+      "target": "docs_adr_0048_effective_policy",
+      "relation": "frozen_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0059-role-results-use-versioned-output-contracts.md"
+    },
+    {
+      "source": "docs_adr_0058_context_manifest",
+      "target": "docs_adr_0047_workspace_fingerprint",
+      "relation": "includes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0058-role-agents-receive-kernel-built-prompt-packages.md"
+    },
+    {
+      "source": "docs_adr_0045_repository_write_lease",
+      "target": "docs_adr_0054_repository_identity",
+      "relation": "locks",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0045-execution-and-repository-leases-are-separate.md"
+    },
+    {
+      "source": "docs_adr_0045_execution_lease",
+      "target": "docs_adr_0047_workspace_fingerprint",
+      "relation": "validates",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0045-execution-and-repository-leases-are-separate.md"
+    },
+    {
+      "source": "docs_adr_0066_tdd_implementation",
+      "target": "docs_adr_0068_property_tests",
+      "relation": "methodology_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0066-implementation-proceeds-in-kernel-first-tdd-slices.md"
+    },
+    {
+      "source": "docs_adr_0065_platform_support",
+      "target": "docs_adr_0054_filesystem_actions",
+      "relation": "validates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0065-platform-support-is-proven-on-windows-linux-and-macos.md"
+    },
+    {
+      "source": "docs_adr_0051_model_tool_contracts",
+      "target": "docs_adr_0059_role_output_contracts",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "source": "docs_adr_0053_process_actions",
+      "target": "docs_adr_0054_filesystem_actions",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0053-process-actions-are-structured-not-shell-text.md"
+    },
+    {
+      "source": "docs_adr_0050_principal_resolver",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "authorizes_through",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0050-principals-are-host-resolved-not-session-derived.md"
+    },
+    {
+      "source": "docs_adr_0056_operational_telemetry",
+      "target": "docs_adr_0055_evidence_content_security",
+      "relation": "excludes_sensitive_content_like",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0056-operational-telemetry-is-local-and-allowlisted.md"
+    },
+    {
+      "source": "docs_adr_0046_execution_admission",
+      "target": "docs_adr_0045_execution_lease",
+      "relation": "allocates",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0046-execution-admission-is-fair-and-bounded.md"
+    },
+    {
+      "source": "docs_adr_0057_service_capability",
+      "target": "docs_adr_0050_principal_resolver",
+      "relation": "enforces_authority_through",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0057-integrations-cross-only-the-service-capability.md"
+    },
+    {
+      "source": "docs_adr_0052_network_authorization",
+      "target": "docs_adr_0063_content_sanitization",
+      "relation": "applies",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0052-network-authorization-is-revalidated-per-hop.md"
+    },
+    {
+      "source": "docs_adr_0048_policy_layering",
+      "target": "docs_adr_0061_role_skills",
+      "relation": "governs",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0048-policy-layering-has-hard-product-ceilings.md"
+    },
+    {
+      "source": "docs_adr_0067_scripted_providers",
+      "target": "docs_adr_0060_model_fallback",
+      "relation": "tests",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0067-release-tests-use-scripted-providers-not-live-model-oracles.md"
+    },
+    {
+      "source": "docs_adr_0068_property_tests",
+      "target": "docs_adr_0057_action_gate",
+      "relation": "proves_invariants_of",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0068-invariants-are-proven-with-property-fault-and-process-tests.md"
+    },
+    {
+      "source": "docs_adr_0062_specification_extraction",
+      "target": "docs_adr_0058_prompt_packages",
+      "relation": "feeds_into",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0062-specification-extraction-preserves-source-identity.md"
+    },
+    {
+      "source": "docs_adr_0064_harness_rc_compatibility",
+      "target": "docs_adr_0051_model_tool_contracts",
+      "relation": "validates",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0064-harness-rc-compatibility-is-exact-and-probed.md"
+    },
+    {
+      "source": "docs_adr_0066_tdd_implementation",
+      "target": "docs_adr_0051_model_tool_contracts",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0066-implementation-proceeds-in-kernel-first-tdd-slices.md"
+    },
+    {
+      "source": "docs_adr_0073_security_assurance_external",
+      "target": "concept_assurance_provider",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "docs_adr_0074_external_assurance_by_value",
+      "target": "concept_assurance_submission",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "source": "docs_adr_0075_host_policy_activation",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0077_kernel_issued_context",
+      "target": "concept_assurance_execution_context",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "source": "concept_assurance_execution_context",
+      "target": "concept_assurance_provider",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "source": "docs_adr_0078_provider_fail_closed",
+      "target": "concept_safe_mode",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "source": "docs_adr_0079_sealed_assessments",
+      "target": "concept_assurance_submission",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0079-only-sealed-external-assessments-are-importable.md"
+    },
+    {
+      "source": "docs_adr_0081_remediation_rework",
+      "target": "concept_mission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md"
+    },
+    {
+      "source": "docs_adr_0082_findings_new_evidence",
+      "target": "concept_evidence_store",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md"
+    },
+    {
+      "source": "docs_adr_0083_unsafe_approval_outcomes",
+      "target": "concept_quality_gate",
+      "relation": "evaluates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "concept_assurance_submission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0086_mission_cancellation_quiescence",
+      "target": "concept_provider_invocation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0087_cancellation_retry",
+      "target": "concept_provider_invocation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0087-provider-cancellation-retry-reconciles-terminal-external-state.md"
+    },
+    {
+      "source": "docs_adr_0088_external_failure_indeterminate",
+      "target": "concept_assurance_submission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0088-external-assessment-failure-is-terminal-indeterminate-assurance.md"
+    },
+    {
+      "source": "docs_adr_0089_assurance_retry",
+      "target": "concept_provider_invocation",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "source": "docs_adr_0090_repository_binding",
+      "target": "concept_assurance_execution_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0090-repository-binding-is-a-process-local-assertion.md"
+    },
+    {
+      "source": "docs_adr_0071_packed_installation",
+      "target": "concept_plugin_boundary",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "concept_control_plane_kernel",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "concept_mission",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_codex_reuse_study",
+      "target": "concept_provider_invocation",
+      "relation": "influences",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\codex-ecosystem-reuse-study.md"
+    },
+    {
+      "source": "docs_adr_0074_external_assurance_by_value",
+      "target": "concept_evidence_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "source": "docs_adr_0073_security_assurance_external",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "docs_adr_0080_risk_acceptance_authority",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0080-security-risk-acceptance-requires-decision-authority.md"
+    },
+    {
+      "source": "docs_adr_0081_remediation_rework",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md"
+    },
+    {
+      "source": "docs_adr_0082_findings_new_evidence",
+      "target": "docs_adr_0079_sealed_assessments",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md"
+    },
+    {
+      "source": "docs_adr_0086_mission_cancellation_quiescence",
+      "target": "docs_adr_0087_cancellation_retry",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0089_assurance_retry",
+      "target": "docs_adr_0088_external_failure_indeterminate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "source": "docs_adr_0069_web_release_proof",
+      "target": "docs_adr_0071_packed_installation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0069-web-release-proof-covers-projection-security-and-resync.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "docs_adr_0071_packed_installation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "docs_adr_0070_migration_proof",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "docs_adr_0078_provider_fail_closed",
+      "target": "docs_adr_0075_host_policy_activation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "docs_adr_0075_host_policy_activation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "docs_adr_0079_sealed_assessments",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0083_unsafe_approval_outcomes",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md"
+    },
+    {
+      "source": "concept_assurance_provider",
+      "target": "concept_control_plane_kernel",
+      "relation": "integrates_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "concept_assurance_submission",
+      "target": "concept_quality_gate",
+      "relation": "provides_input_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "concept_mission",
+      "target": "concept_quality_gate",
+      "relation": "evaluated_by",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "concept_mission",
+      "target": "concept_evidence_store",
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "docs_adr_0070_migration_proof",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "docs_adr_0076_machine_providers",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0076-machine-providers-are-explicit-assessors.md"
+    },
+    {
+      "source": "docs_adr_0075_host_policy_activation",
+      "target": "docs_adr_0078_provider_fail_closed",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0077_kernel_issued_context",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "mission_governance_triad",
+      "label": "Mission Governance Triad",
+      "nodes": [
+        "control_plane_kernel",
+        "mission",
+        "effective_policy"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "gate_evaluation_boundary",
+      "label": "Gate Evaluation Boundary",
+      "nodes": [
+        "attempt_seal",
+        "quality_gate",
+        "evidence_manifest",
+        "action_ledger"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\control-plane-kernel-architecture-v0.2.md"
+    },
+    {
+      "id": "lease_coordination_system",
+      "label": "Lease Coordination System",
+      "nodes": [
+        "write_lease",
+        "mission_execution_lease",
+        "repository_identity"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\CONTEXT.md"
+    },
+    {
+      "id": "governance_boundary_enforcement",
+      "label": "Governance Boundary Enforcement",
+      "nodes": [
+        "action_gate",
+        "quality_gate",
+        "governed_provider",
+        "effective_policy"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0021-action-gate-mediates-every-execution-capability.md"
+    },
+    {
+      "id": "immutable_audit_trail",
+      "label": "Immutable Audit Trail",
+      "nodes": [
+        "mission_revision_journal",
+        "action_ledger",
+        "design_ledger",
+        "attempt_seal"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0043-mission-store-uses-an-immutable-revision-journal.md"
+    },
+    {
+      "id": "evidence_integrity_chain",
+      "label": "Evidence Integrity Chain",
+      "nodes": [
+        "canonical_evidence",
+        "attempt_seal",
+        "quality_gate",
+        "mission_contract"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0036-quality-gate-evaluates-an-attempt-seal.md"
+    },
+    {
+      "id": "action_authorization_boundary",
+      "label": "Action Authorization Boundary",
+      "nodes": [
+        "docs_adr_0050_principal_resolver",
+        "docs_adr_0057_action_gate",
+        "docs_adr_0053_action_capability_registry",
+        "docs_adr_0052_network_authorization",
+        "docs_adr_0054_filesystem_actions"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0057-integrations-cross-only-the-service-capability.md"
+    },
+    {
+      "id": "versioned_contracts_pattern",
+      "label": "Versioned Contracts Pattern",
+      "nodes": [
+        "docs_adr_0051_model_tool_contracts",
+        "docs_adr_0059_role_output_contracts",
+        "docs_adr_0058_prompt_packages",
+        "docs_adr_0048_effective_policy"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0051-model-tools-have-versioned-replay-safe-contracts.md"
+    },
+    {
+      "id": "testing_strategy",
+      "label": "Testing Strategy",
+      "nodes": [
+        "docs_adr_0066_tdd_implementation",
+        "docs_adr_0067_scripted_providers",
+        "docs_adr_0068_property_tests",
+        "docs_adr_0065_platform_support"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0066-implementation-proceeds-in-kernel-first-tdd-slices.md"
+    },
+    {
+      "id": "external_provider_integration_pattern",
+      "label": "External Provider Integration Pattern",
+      "nodes": [
+        "docs_adr_0073_security_assurance_external",
+        "docs_adr_0074_external_assurance_by_value",
+        "docs_adr_0075_host_policy_activation",
+        "docs_adr_0077_kernel_issued_context",
+        "docs_adr_0078_provider_fail_closed"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "id": "provider_lifecycle_management",
+      "label": "Provider Lifecycle Management",
+      "nodes": [
+        "docs_adr_0086_mission_cancellation_quiescence",
+        "docs_adr_0087_cancellation_retry",
+        "docs_adr_0088_external_failure_indeterminate",
+        "docs_adr_0089_assurance_retry"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "id": "release_qualification_loop",
+      "label": "Release Qualification Loop",
+      "nodes": [
+        "docs_adr_0069_web_release_proof",
+        "docs_adr_0070_migration_proof",
+        "docs_adr_0071_packed_installation",
+        "docs_adr_0072_release_promotion"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    }
+  ]
+}

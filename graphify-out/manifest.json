@@ -1,0 +1,962 @@
+{
+  "package.json": {
+    "mtime": 1787429249.3423994,
+    "seen": 1787717335.804661,
+    "ast_hash": "9515b8da648a8c7d0dcf4de68ba05fba",
+    "semantic_hash": "9515b8da648a8c7d0dcf4de68ba05fba"
+  },
+  "src/adapters/git-repository.ts": {
+    "mtime": 1787431462.572043,
+    "seen": 1787717335.804661,
+    "ast_hash": "eb560f165e275613b771af6d656a2562",
+    "semantic_hash": "eb560f165e275613b771af6d656a2562"
+  },
+  "src/adapters/harness-command-executor.ts": {
+    "mtime": 1787417230.1890354,
+    "seen": 1787717335.804661,
+    "ast_hash": "85789b858b90c924d439b39af83b4056",
+    "semantic_hash": "85789b858b90c924d439b39af83b4056"
+  },
+  "src/adapters/harness-role-executor.ts": {
+    "mtime": 1787373323.2583416,
+    "seen": 1787717335.804661,
+    "ast_hash": "e25c53c190514de78e9426e157d964c0",
+    "semantic_hash": "e25c53c190514de78e9426e157d964c0"
+  },
+  "src/adapters/sqlite-mission-store.ts": {
+    "mtime": 1787378018.1210623,
+    "seen": 1787717335.804661,
+    "ast_hash": "04c3b3a7b6aef9c4abb53d47210bc99e",
+    "semantic_hash": "04c3b3a7b6aef9c4abb53d47210bc99e"
+  },
+  "src/adapters/verification.ts": {
+    "mtime": 1787373583.4180515,
+    "seen": 1787717335.804661,
+    "ast_hash": "c0a6a0f0eb080ceda16dffdc725dc2b7",
+    "semantic_hash": "c0a6a0f0eb080ceda16dffdc725dc2b7"
+  },
+  "src/assurance-provider.ts": {
+    "mtime": 1787515619.9549375,
+    "seen": 1787717335.804661,
+    "ast_hash": "4953669779e019a0e37e03514b4016a9",
+    "semantic_hash": "4953669779e019a0e37e03514b4016a9"
+  },
+  "src/assurance-provider/contracts.ts": {
+    "mtime": 1787518856.8557324,
+    "seen": 1787717335.804661,
+    "ast_hash": "bfbfede1bdcf2c27df858d3d21647869",
+    "semantic_hash": "bfbfede1bdcf2c27df858d3d21647869"
+  },
+  "src/assurance-provider/eligibility.ts": {
+    "mtime": 1787433287.9354868,
+    "seen": 1787717335.804661,
+    "ast_hash": "488e6ed4c8750aa567b4fbd028e2d321",
+    "semantic_hash": "488e6ed4c8750aa567b4fbd028e2d321"
+  },
+  "src/assurance-provider/invocation-coordinator.ts": {
+    "mtime": 1787516129.6106434,
+    "seen": 1787717335.804661,
+    "ast_hash": "46090922a5b63077c17f30b07388f3a5",
+    "semantic_hash": "46090922a5b63077c17f30b07388f3a5"
+  },
+  "src/assurance-provider/registry.ts": {
+    "mtime": 1787509204.3569193,
+    "seen": 1787717335.804661,
+    "ast_hash": "788a1b8a1eb6d93fb9325da677c159de",
+    "semantic_hash": "788a1b8a1eb6d93fb9325da677c159de"
+  },
+  "src/assurance-provider/submission.ts": {
+    "mtime": 1787429630.0612047,
+    "seen": 1787717335.804661,
+    "ast_hash": "31149758d594bb8b69f019aab77522c6",
+    "semantic_hash": "31149758d594bb8b69f019aab77522c6"
+  },
+  "src/bin.ts": {
+    "mtime": 1787378586.0609202,
+    "seen": 1787717335.804661,
+    "ast_hash": "2275817c2550ec082f241f94b90a296c",
+    "semantic_hash": "2275817c2550ec082f241f94b90a296c"
+  },
+  "src/client.ts": {
+    "mtime": 1787378140.7033453,
+    "seen": 1787717335.804661,
+    "ast_hash": "1ee0a7ec36ebb72ec8f490df6d6279bd",
+    "semantic_hash": "1ee0a7ec36ebb72ec8f490df6d6279bd"
+  },
+  "src/config.ts": {
+    "mtime": 1787509204.994537,
+    "seen": 1787717335.804661,
+    "ast_hash": "c5121a89e87daead062fd496edc65299",
+    "semantic_hash": "c5121a89e87daead062fd496edc65299"
+  },
+  "src/doctor.ts": {
+    "mtime": 1787428478.627149,
+    "seen": 1787717335.804661,
+    "ast_hash": "2eb717e7b5689326fd346da00f912cc3",
+    "semantic_hash": "2eb717e7b5689326fd346da00f912cc3"
+  },
+  "src/evidence/filesystem-store.ts": {
+    "mtime": 1787517175.5242941,
+    "seen": 1787717335.804661,
+    "ast_hash": "1c061679ceffb798781b70e41182b506",
+    "semantic_hash": "1c061679ceffb798781b70e41182b506"
+  },
+  "src/index.ts": {
+    "mtime": 1787518095.4159029,
+    "seen": 1787717335.804661,
+    "ast_hash": "8648a1f78c004fbf1b6219d85e50ff4d",
+    "semantic_hash": "8648a1f78c004fbf1b6219d85e50ff4d"
+  },
+  "src/invariant.ts": {
+    "mtime": 1787375590.9155684,
+    "seen": 1787717335.804661,
+    "ast_hash": "1f141656487174b6b41c25edab725d62",
+    "semantic_hash": "1f141656487174b6b41c25edab725d62"
+  },
+  "src/kernel/assurance-execution-context.ts": {
+    "mtime": 1787518857.5436692,
+    "seen": 1787717335.804661,
+    "ast_hash": "cd03541e53afb1181fee33c80006e573",
+    "semantic_hash": "cd03541e53afb1181fee33c80006e573"
+  },
+  "src/kernel/assurance-retry.ts": {
+    "mtime": 1787519433.8195517,
+    "seen": 1787717335.804661,
+    "ast_hash": "79fce6016f84b3466c10a3c22322b08d",
+    "semantic_hash": "79fce6016f84b3466c10a3c22322b08d"
+  },
+  "src/kernel/errors.ts": {
+    "mtime": 1787377414.4046853,
+    "seen": 1787717335.804661,
+    "ast_hash": "da8e9eaa5153d7ec5a42ed9e61d7b93b",
+    "semantic_hash": "da8e9eaa5153d7ec5a42ed9e61d7b93b"
+  },
+  "src/kernel/gate.ts": {
+    "mtime": 1787431237.679053,
+    "seen": 1787717335.804661,
+    "ast_hash": "849ae025c4091674f3f0c8e08c9bc302",
+    "semantic_hash": "849ae025c4091674f3f0c8e08c9bc302"
+  },
+  "src/kernel/index.ts": {
+    "mtime": 1787518093.026338,
+    "seen": 1787717335.804661,
+    "ast_hash": "435e26a11f38531feed3804400f9dc9a",
+    "semantic_hash": "435e26a11f38531feed3804400f9dc9a"
+  },
+  "src/kernel/memory-store.ts": {
+    "mtime": 1787372521.9938085,
+    "seen": 1787717335.804661,
+    "ast_hash": "c72a24d6955bce304091dfcf379dee40",
+    "semantic_hash": "c72a24d6955bce304091dfcf379dee40"
+  },
+  "src/kernel/state-machine.ts": {
+    "mtime": 1787370631.7067766,
+    "seen": 1787717335.804661,
+    "ast_hash": "922c9b76fa6969bb190a42a7efa26cc7",
+    "semantic_hash": "922c9b76fa6969bb190a42a7efa26cc7"
+  },
+  "src/kernel/types.ts": {
+    "mtime": 1787517019.0560155,
+    "seen": 1787717335.804661,
+    "ast_hash": "726c9c1e8a3b89fc377b99156778470e",
+    "semantic_hash": "726c9c1e8a3b89fc377b99156778470e"
+  },
+  "src/policy.ts": {
+    "mtime": 1787510152.7159073,
+    "seen": 1787717335.804661,
+    "ast_hash": "ec1816a85e06db912b509ebc91aad7cf",
+    "semantic_hash": "ec1816a85e06db912b509ebc91aad7cf"
+  },
+  "src/runner/mission-runner.ts": {
+    "mtime": 1787518093.8284478,
+    "seen": 1787717335.804661,
+    "ast_hash": "02b452ed314daa96b55ec084aa3d35f0",
+    "semantic_hash": "02b452ed314daa96b55ec084aa3d35f0"
+  },
+  "src/runner/role-contracts.ts": {
+    "mtime": 1787373020.3913453,
+    "seen": 1787717335.804661,
+    "ast_hash": "0ee36279379110ea230870865e4f4b93",
+    "semantic_hash": "0ee36279379110ea230870865e4f4b93"
+  },
+  "src/tools.ts": {
+    "mtime": 1787519255.6446447,
+    "seen": 1787717335.804661,
+    "ast_hash": "a49f9b401ef76f3b75e09176ceb9f984",
+    "semantic_hash": "a49f9b401ef76f3b75e09176ceb9f984"
+  },
+  "tests/assurance-provider-composition.spec.ts": {
+    "mtime": 1787518921.9511745,
+    "seen": 1787717335.804661,
+    "ast_hash": "93593cddb4ae8a275bb0686d36368490",
+    "semantic_hash": "93593cddb4ae8a275bb0686d36368490"
+  },
+  "tests/assurance-provider-invocation-coordinator.spec.ts": {
+    "mtime": 1787433671.6350386,
+    "seen": 1787717335.804661,
+    "ast_hash": "9e8b09af87bd652749709ea1d61f0215",
+    "semantic_hash": "9e8b09af87bd652749709ea1d61f0215"
+  },
+  "tests/assurance-provider-submission-digest.spec.ts": {
+    "mtime": 1787429278.77104,
+    "seen": 1787717335.804661,
+    "ast_hash": "07d3d01a65ac051fe26104d8d6cba6bf",
+    "semantic_hash": "07d3d01a65ac051fe26104d8d6cba6bf"
+  },
+  "tests/assurance-provider-submission.spec.ts": {
+    "mtime": 1787433780.000593,
+    "seen": 1787717335.804661,
+    "ast_hash": "64e872a108cfefa5967319212b257726",
+    "semantic_hash": "64e872a108cfefa5967319212b257726"
+  },
+  "tests/client-projection.spec.ts": {
+    "mtime": 1787378141.487265,
+    "seen": 1787717335.804661,
+    "ast_hash": "be9a89daa7110bb09d9a6a421a3d1055",
+    "semantic_hash": "be9a89daa7110bb09d9a6a421a3d1055"
+  },
+  "tests/doctor.spec.ts": {
+    "mtime": 1787432163.850999,
+    "seen": 1787717335.804661,
+    "ast_hash": "17d2daa0d1a84925cdc72119d08b4c23",
+    "semantic_hash": "17d2daa0d1a84925cdc72119d08b4c23"
+  },
+  "tests/e2e-approved.spec.ts": {
+    "mtime": 1787378561.0450275,
+    "seen": 1787717335.804661,
+    "ast_hash": "daeaea715c0dff365213989754f8dcb8",
+    "semantic_hash": "daeaea715c0dff365213989754f8dcb8"
+  },
+  "tests/filesystem-evidence-store.spec.ts": {
+    "mtime": 1787517258.3094907,
+    "seen": 1787717335.804661,
+    "ast_hash": "89edf02367a3be198792aa9a0e2585db",
+    "semantic_hash": "89edf02367a3be198792aa9a0e2585db"
+  },
+  "tests/fixtures/scripted-engineering-provider.ts": {
+    "mtime": 1787432231.6232495,
+    "seen": 1787717335.804661,
+    "ast_hash": "b63b976176b398fe9449518d6b0b2cb0",
+    "semantic_hash": "b63b976176b398fe9449518d6b0b2cb0"
+  },
+  "tests/git-repository-environment.spec.ts": {
+    "mtime": 1787417202.8494601,
+    "seen": 1787717335.804661,
+    "ast_hash": "f23b5bd3b2ff6ac89a9c0f5946c01094",
+    "semantic_hash": "f23b5bd3b2ff6ac89a9c0f5946c01094"
+  },
+  "tests/kernel-assurance-provider-invocation.spec.ts": {
+    "mtime": 1787516469.255185,
+    "seen": 1787717335.804661,
+    "ast_hash": "c7126a5b25fdc7be511271052d9bcff1",
+    "semantic_hash": "c7126a5b25fdc7be511271052d9bcff1"
+  },
+  "tests/kernel-cancel.spec.ts": {
+    "mtime": 1787377651.9507434,
+    "seen": 1787717335.804661,
+    "ast_hash": "22e1b2dd49bc72367b6b63a1639e4627",
+    "semantic_hash": "22e1b2dd49bc72367b6b63a1639e4627"
+  },
+  "tests/kernel-evidence.spec.ts": {
+    "mtime": 1787377652.7058952,
+    "seen": 1787717335.804661,
+    "ast_hash": "62b2852c4e1d11e43c51bb402576dff9",
+    "semantic_hash": "62b2852c4e1d11e43c51bb402576dff9"
+  },
+  "tests/kernel-gate.spec.ts": {
+    "mtime": 1787431959.8110816,
+    "seen": 1787717335.804661,
+    "ast_hash": "455d8b04a5854326f8570195df7a48fd",
+    "semantic_hash": "455d8b04a5854326f8570195df7a48fd"
+  },
+  "tests/kernel-lifecycle.spec.ts": {
+    "mtime": 1787432189.5974367,
+    "seen": 1787717335.804661,
+    "ast_hash": "f899f8f07f9b976701af63cd8e0b50d9",
+    "semantic_hash": "f899f8f07f9b976701af63cd8e0b50d9"
+  },
+  "tests/kernel-role-runs.spec.ts": {
+    "mtime": 1787377654.9936347,
+    "seen": 1787717335.804661,
+    "ast_hash": "0bd07306e09e23f3bfffa29a1982a696",
+    "semantic_hash": "0bd07306e09e23f3bfffa29a1982a696"
+  },
+  "tests/kernel-start-status.spec.ts": {
+    "mtime": 1787377655.75827,
+    "seen": 1787717335.804661,
+    "ast_hash": "a5fa0352e11aaba65ee76f794745f0af",
+    "semantic_hash": "a5fa0352e11aaba65ee76f794745f0af"
+  },
+  "tests/kernel-write-lease.spec.ts": {
+    "mtime": 1787377332.338416,
+    "seen": 1787717335.804661,
+    "ast_hash": "c87e7d52440de0bb6a43fb7c65d35372",
+    "semantic_hash": "c87e7d52440de0bb6a43fb7c65d35372"
+  },
+  "tests/loader-lifecycle.spec.ts": {
+    "mtime": 1787515660.8449476,
+    "seen": 1787717335.804661,
+    "ast_hash": "406c2918d093e7739d14316a87ee7bba",
+    "semantic_hash": "406c2918d093e7739d14316a87ee7bba"
+  },
+  "tests/mission-runner-assurance-gate.spec.ts": {
+    "mtime": 1787433584.3081334,
+    "seen": 1787717335.804661,
+    "ast_hash": "8b662844bb259c71226a94e3356150b4",
+    "semantic_hash": "8b662844bb259c71226a94e3356150b4"
+  },
+  "tests/mission-runner-cancellation.spec.ts": {
+    "mtime": 1787377656.5379734,
+    "seen": 1787717335.804661,
+    "ast_hash": "56570149b018374509ad5eee5e66d22d",
+    "semantic_hash": "56570149b018374509ad5eee5e66d22d"
+  },
+  "tests/mission-runner-happy-path.spec.ts": {
+    "mtime": 1787431518.7596655,
+    "seen": 1787717335.804661,
+    "ast_hash": "4f46f1d2966f5ab15082bb4d28768a37",
+    "semantic_hash": "4f46f1d2966f5ab15082bb4d28768a37"
+  },
+  "tests/mission-runner-recovery.spec.ts": {
+    "mtime": 1787378681.6423752,
+    "seen": 1787717335.804661,
+    "ast_hash": "8993d5ad9f16d22d9b458382d97cd959",
+    "semantic_hash": "8993d5ad9f16d22d9b458382d97cd959"
+  },
+  "tests/mission-runner-rework-context.spec.ts": {
+    "mtime": 1787431240.7671976,
+    "seen": 1787717335.804661,
+    "ast_hash": "0b23f99cd46e866db51eace8919a8c18",
+    "semantic_hash": "0b23f99cd46e866db51eace8919a8c18"
+  },
+  "tests/policy.spec.ts": {
+    "mtime": 1787510054.9245484,
+    "seen": 1787717335.804661,
+    "ast_hash": "ef842129ba367d71b6f9dda2a647d8f8",
+    "semantic_hash": "ef842129ba367d71b6f9dda2a647d8f8"
+  },
+  "tests/restart-fingerprint.spec.ts": {
+    "mtime": 1787379328.5262535,
+    "seen": 1787717335.804661,
+    "ast_hash": "9af0c95652e26f8d5069fb885ccc1ea1",
+    "semantic_hash": "9af0c95652e26f8d5069fb885ccc1ea1"
+  },
+  "tests/sqlite-mission-store.spec.ts": {
+    "mtime": 1787377715.8359041,
+    "seen": 1787717335.804661,
+    "ast_hash": "afbfeb473d43c4651a041c97feb9a049",
+    "semantic_hash": "afbfeb473d43c4651a041c97feb9a049"
+  },
+  "tests/tools.spec.ts": {
+    "mtime": 1787519043.1098576,
+    "seen": 1787717335.804661,
+    "ast_hash": "dae141dfe39cf4435247464e7816e685",
+    "semantic_hash": "dae141dfe39cf4435247464e7816e685"
+  },
+  "tsconfig.build.json": {
+    "mtime": 1787414448.6783738,
+    "seen": 1787717335.804661,
+    "ast_hash": "a600f888c6a9a414e2098eb7a297945d",
+    "semantic_hash": "a600f888c6a9a414e2098eb7a297945d"
+  },
+  "tsconfig.json": {
+    "mtime": 1787369851.5611799,
+    "seen": 1787717335.804661,
+    "ast_hash": "dad1cc0c7b878d5e0cffafe9b2f957ca",
+    "semantic_hash": "dad1cc0c7b878d5e0cffafe9b2f957ca"
+  },
+  "vitest.config.ts": {
+    "mtime": 1787369852.8485346,
+    "seen": 1787717335.804661,
+    "ast_hash": "e35462d1d1cd8a75be700fa9cc332b0b",
+    "semantic_hash": "e35462d1d1cd8a75be700fa9cc332b0b"
+  },
+  "CONTEXT.md": {
+    "mtime": 1787519243.5002577,
+    "seen": 1787717335.804661,
+    "ast_hash": "59aa520e19bb59acda71460a9bbc5ffd",
+    "semantic_hash": "59aa520e19bb59acda71460a9bbc5ffd"
+  },
+  "README.md": {
+    "mtime": 1787519434.4921858,
+    "seen": 1787717335.804661,
+    "ast_hash": "021905d0349aa64b5b868bd5e360ac93",
+    "semantic_hash": "021905d0349aa64b5b868bd5e360ac93"
+  },
+  "control-plane-kernel-architecture-v0.2.md": {
+    "mtime": 1787395710.9695573,
+    "seen": 1787717335.804661,
+    "ast_hash": "421dd0bd4e383641fd0e874721087bce",
+    "semantic_hash": "421dd0bd4e383641fd0e874721087bce"
+  },
+  "cordis.patch.yml": {
+    "mtime": 1787376700.1727223,
+    "seen": 1787717335.804661,
+    "ast_hash": "749eb50e8c46a49d1400ce695ebb5613",
+    "semantic_hash": "749eb50e8c46a49d1400ce695ebb5613"
+  },
+  "docs/adr/0001-control-plane-kernel-owns-governance.md": {
+    "mtime": 1787383414.249229,
+    "seen": 1787717335.804661,
+    "ast_hash": "7d8db9431551ab46de5b414b9fee1d1e",
+    "semantic_hash": "7d8db9431551ab46de5b414b9fee1d1e"
+  },
+  "docs/adr/0002-quality-gate-defines-approved.md": {
+    "mtime": 1787367333.3283913,
+    "seen": 1787717335.804661,
+    "ast_hash": "df6d47628f2e22b10b87ba1ae22b79fc",
+    "semantic_hash": "df6d47628f2e22b10b87ba1ae22b79fc"
+  },
+  "docs/adr/0003-role-runs-are-one-shot-per-attempt.md": {
+    "mtime": 1787367333.9727495,
+    "seen": 1787717335.804661,
+    "ast_hash": "80b32f109f95d4794c1e814bf99860f1",
+    "semantic_hash": "80b32f109f95d4794c1e814bf99860f1"
+  },
+  "docs/adr/0004-cancellation-never-rewrites-the-workspace.md": {
+    "mtime": 1787367923.2128758,
+    "seen": 1787717335.804661,
+    "ast_hash": "778eba1ad905e13a5178cf60564a17ac",
+    "semantic_hash": "778eba1ad905e13a5178cf60564a17ac"
+  },
+  "docs/adr/0005-canonical-evidence-is-structured.md": {
+    "mtime": 1787368297.77265,
+    "seen": 1787717335.804661,
+    "ast_hash": "6ce7225269209c7a25c0a0d81cce3973",
+    "semantic_hash": "6ce7225269209c7a25c0a0d81cce3973"
+  },
+  "docs/adr/0006-mission-runtime-is-not-a-harness-job.md": {
+    "mtime": 1787369064.5951028,
+    "seen": 1787717335.804661,
+    "ast_hash": "69ac610312ef4356a7b8765a62eb030c",
+    "semantic_hash": "69ac610312ef4356a7b8765a62eb030c"
+  },
+  "docs/adr/0007-mission-state-uses-plugin-owned-sqlite.md": {
+    "mtime": 1787369065.2263973,
+    "seen": 1787717335.804661,
+    "ast_hash": "f9dbbc5371b6a095b6a0c3e33768e592",
+    "semantic_hash": "f9dbbc5371b6a095b6a0c3e33768e592"
+  },
+  "docs/adr/0008-mission-authority-is-host-derived.md": {
+    "mtime": 1787369065.8719282,
+    "seen": 1787717335.804661,
+    "ast_hash": "f87eec1e8489e85f87ed596c70876c3f",
+    "semantic_hash": "f87eec1e8489e85f87ed596c70876c3f"
+  },
+  "docs/adr/0009-git-history-remains-user-owned.md": {
+    "mtime": 1787369580.2800708,
+    "seen": 1787717335.804661,
+    "ast_hash": "e44367cd088c236d8ef83106e44d0585",
+    "semantic_hash": "e44367cd088c236d8ef83106e44d0585"
+  },
+  "docs/adr/0010-verification-policy-is-host-owned-and-frozen.md": {
+    "mtime": 1787369580.9056246,
+    "seen": 1787717335.804661,
+    "ast_hash": "b99826a9964eb51ba702ba853c39f85d",
+    "semantic_hash": "b99826a9964eb51ba702ba853c39f85d"
+  },
+  "docs/adr/0011-effective-policy-is-frozen-per-mission.md": {
+    "mtime": 1787369581.5192275,
+    "seen": 1787717335.804661,
+    "ast_hash": "2f658c7a05b841d4aab343bf39b179da",
+    "semantic_hash": "2f658c7a05b841d4aab343bf39b179da"
+  },
+  "docs/adr/0012-gate-distinguishes-failure-from-indeterminacy.md": {
+    "mtime": 1787369582.1121163,
+    "seen": 1787717335.804661,
+    "ast_hash": "cba5c72d151173f1ac1c8b9fbdca8459",
+    "semantic_hash": "cba5c72d151173f1ac1c8b9fbdca8459"
+  },
+  "docs/adr/0013-mission-owned-design-frontier.md": {
+    "mtime": 1787382643.6892385,
+    "seen": 1787717335.804661,
+    "ast_hash": "4559cbbe2d7ab7c757d5c28e39880392",
+    "semantic_hash": "4559cbbe2d7ab7c757d5c28e39880392"
+  },
+  "docs/adr/0014-assurance-plans-are-attempt-frozen-and-monotonic.md": {
+    "mtime": 1787383913.3044052,
+    "seen": 1787717335.804661,
+    "ast_hash": "8d4a65dbfeea13f1dcb51198d81ebbb6",
+    "semantic_hash": "8d4a65dbfeea13f1dcb51198d81ebbb6"
+  },
+  "docs/adr/0015-action-review-cannot-expand-effective-policy.md": {
+    "mtime": 1787383133.262616,
+    "seen": 1787717335.804661,
+    "ast_hash": "e594aece0f2a821405e6895b86103435",
+    "semantic_hash": "e594aece0f2a821405e6895b86103435"
+  },
+  "docs/adr/0016-stable-roles-carry-assurance-requirements.md": {
+    "mtime": 1787383134.1725602,
+    "seen": 1787717335.804661,
+    "ast_hash": "ba49254194ca1212d599adb6c9649022",
+    "semantic_hash": "ba49254194ca1212d599adb6c9649022"
+  },
+  "docs/adr/0017-design-decisions-use-a-dedicated-mission-tool.md": {
+    "mtime": 1787382454.5699296,
+    "seen": 1787717335.804661,
+    "ast_hash": "c337ceae426943fa0393f6281cac1c81",
+    "semantic_hash": "c337ceae426943fa0393f6281cac1c81"
+  },
+  "docs/adr/0018-decision-waits-release-the-write-lease.md": {
+    "mtime": 1787382455.4345841,
+    "seen": 1787717335.804661,
+    "ast_hash": "b9ff612b97ff97c867431e6e23ec9570",
+    "semantic_hash": "b9ff612b97ff97c867431e6e23ec9570"
+  },
+  "docs/adr/0019-late-design-changes-start-a-new-attempt.md": {
+    "mtime": 1787382645.4564302,
+    "seen": 1787717335.804661,
+    "ast_hash": "b7caca5c4828aaa6e8342e7751928a34",
+    "semantic_hash": "b7caca5c4828aaa6e8342e7751928a34"
+  },
+  "docs/adr/0020-decision-bearing-facts-are-canonical-evidence.md": {
+    "mtime": 1787382646.3465948,
+    "seen": 1787717335.804661,
+    "ast_hash": "e70886784f6eeb1a8d169eecd5369547",
+    "semantic_hash": "e70886784f6eeb1a8d169eecd5369547"
+  },
+  "docs/adr/0021-action-gate-mediates-every-execution-capability.md": {
+    "mtime": 1787385220.2511134,
+    "seen": 1787717335.804661,
+    "ast_hash": "4ae37fc7a2badfd0e0852d581a10048d",
+    "semantic_hash": "4ae37fc7a2badfd0e0852d581a10048d"
+  },
+  "docs/adr/0022-user-decisions-require-host-derived-provenance.md": {
+    "mtime": 1787386788.8582523,
+    "seen": 1787717335.804661,
+    "ast_hash": "31c94474bdaa79eea45bd91a92dafa79",
+    "semantic_hash": "31c94474bdaa79eea45bd91a92dafa79"
+  },
+  "docs/adr/0023-assurance-extension-uses-a-versioned-registry.md": {
+    "mtime": 1787383659.60244,
+    "seen": 1787717335.804661,
+    "ast_hash": "afe7b80f88c92b677d384d9b3dc63864",
+    "semantic_hash": "afe7b80f88c92b677d384d9b3dc63864"
+  },
+  "docs/adr/0024-user-action-authorization-adapts-harness-approval.md": {
+    "mtime": 1787386789.5105705,
+    "seen": 1787717335.804661,
+    "ast_hash": "6fb9292e4f8767006456691d3e42329e",
+    "semantic_hash": "6fb9292e4f8767006456691d3e42329e"
+  },
+  "docs/adr/0025-mission-contract-is-the-specification-authority.md": {
+    "mtime": 1787383416.8205802,
+    "seen": 1787717335.804661,
+    "ast_hash": "e2a5801a9ca46c56d1a0df7c7165826e",
+    "semantic_hash": "e2a5801a9ca46c56d1a0df7c7165826e"
+  },
+  "docs/adr/0026-missions-retain-their-protocol-version.md": {
+    "mtime": 1787386790.1796203,
+    "seen": 1787717335.804661,
+    "ast_hash": "16acc453d3f4ae9d2a71044ac31ff5dc",
+    "semantic_hash": "16acc453d3f4ae9d2a71044ac31ff5dc"
+  },
+  "docs/adr/0027-design-closure-requires-independent-challenge.md": {
+    "mtime": 1787383661.393605,
+    "seen": 1787717335.804661,
+    "ast_hash": "652f6910360fd3b69e411cf99fc6a7a0",
+    "semantic_hash": "652f6910360fd3b69e411cf99fc6a7a0"
+  },
+  "docs/adr/0028-repository-standards-use-a-captured-baseline.md": {
+    "mtime": 1787383662.2642047,
+    "seen": 1787717335.804661,
+    "ast_hash": "0093cb6e7ddc1f39fd4b5c3a7fa59a64",
+    "semantic_hash": "0093cb6e7ddc1f39fd4b5c3a7fa59a64"
+  },
+  "docs/adr/0029-action-decisions-are-durable-before-execution.md": {
+    "mtime": 1787385222.1006515,
+    "seen": 1787717335.804661,
+    "ast_hash": "1fb177d88c689c92110f03079e21f5b5",
+    "semantic_hash": "1fb177d88c689c92110f03079e21f5b5"
+  },
+  "docs/adr/0030-normative-documents-use-host-resolved-references.md": {
+    "mtime": 1787383914.2011676,
+    "seen": 1787717335.804661,
+    "ast_hash": "f9942669b8e079262512b22036931bb8",
+    "semantic_hash": "f9942669b8e079262512b22036931bb8"
+  },
+  "docs/adr/0031-plan-and-assurance-freeze-after-independent-review.md": {
+    "mtime": 1787383915.0547614,
+    "seen": 1787717335.804661,
+    "ast_hash": "9e43d300c5bf6d6b2b2724489542fe64",
+    "semantic_hash": "9e43d300c5bf6d6b2b2724489542fe64"
+  },
+  "docs/adr/0032-role-agents-use-a-pre-publication-governed-provider.md": {
+    "mtime": 1787386790.8289757,
+    "seen": 1787717335.804661,
+    "ast_hash": "a221ef76bede1c5f20fa7099ee8a0981",
+    "semantic_hash": "a221ef76bede1c5f20fa7099ee8a0981"
+  },
+  "docs/adr/0033-web-surfaces-are-additive-session-projections.md": {
+    "mtime": 1787386791.4898913,
+    "seen": 1787717335.804661,
+    "ast_hash": "80f5d86b6244bab73bf33583187a28f9",
+    "semantic_hash": "80f5d86b6244bab73bf33583187a28f9"
+  },
+  "docs/adr/0034-bound-root-sessions-use-revision-cas.md": {
+    "mtime": 1787386792.1522245,
+    "seen": 1787717335.804661,
+    "ast_hash": "c74bacc3f4e3ea4d99f31d86817afeea",
+    "semantic_hash": "c74bacc3f4e3ea4d99f31d86817afeea"
+  },
+  "docs/adr/0035-unfinished-action-authorization-is-not-resumable.md": {
+    "mtime": 1787386792.7975154,
+    "seen": 1787717335.804661,
+    "ast_hash": "f85c9721d820a005b0f66376035ea0d1",
+    "semantic_hash": "f85c9721d820a005b0f66376035ea0d1"
+  },
+  "docs/adr/0036-quality-gate-evaluates-an-attempt-seal.md": {
+    "mtime": 1787393845.2172132,
+    "seen": 1787717335.804661,
+    "ast_hash": "e65ce8979dc74878840913422dd37166",
+    "semantic_hash": "e65ce8979dc74878840913422dd37166"
+  },
+  "docs/adr/0037-workspace-drift-is-not-auto-adopted.md": {
+    "mtime": 1787393845.887146,
+    "seen": 1787717335.804661,
+    "ast_hash": "926441c54a934d42f629a3ea394792da",
+    "semantic_hash": "926441c54a934d42f629a3ea394792da"
+  },
+  "docs/adr/0038-evidence-reuse-is-contract-declared.md": {
+    "mtime": 1787393846.5310223,
+    "seen": 1787717335.804661,
+    "ast_hash": "f601071f4a01dbd28b56c59259fa7f25",
+    "semantic_hash": "f601071f4a01dbd28b56c59259fa7f25"
+  },
+  "docs/adr/0039-assessor-independence-is-host-derived.md": {
+    "mtime": 1787393847.1852345,
+    "seen": 1787717335.804661,
+    "ast_hash": "506d4a1df9325d3aa32c59e428f7525e",
+    "semantic_hash": "506d4a1df9325d3aa32c59e428f7525e"
+  },
+  "docs/adr/0040-action-capabilities-use-a-frozen-registry.md": {
+    "mtime": 1787393847.842682,
+    "seen": 1787717335.804661,
+    "ast_hash": "9e5980550593f5da015d92ea4216fbae",
+    "semantic_hash": "9e5980550593f5da015d92ea4216fbae"
+  },
+  "docs/adr/0041-plan-write-scope-is-gated-and-visible.md": {
+    "mtime": 1787393848.4579585,
+    "seen": 1787717335.804661,
+    "ast_hash": "aeb7db94515022182adb2542b82bdc8a",
+    "semantic_hash": "aeb7db94515022182adb2542b82bdc8a"
+  },
+  "docs/adr/0042-startup-failures-enter-read-only-safe-mode.md": {
+    "mtime": 1787394332.310616,
+    "seen": 1787717335.804661,
+    "ast_hash": "ea289bf293b65ee1c6e65e3f644e90fa",
+    "semantic_hash": "ea289bf293b65ee1c6e65e3f644e90fa"
+  },
+  "docs/adr/0043-mission-store-uses-an-immutable-revision-journal.md": {
+    "mtime": 1787394332.9311073,
+    "seen": 1787717335.804661,
+    "ast_hash": "ed8d3a032af482c5ee83840f45b61435",
+    "semantic_hash": "ed8d3a032af482c5ee83840f45b61435"
+  },
+  "docs/adr/0044-audit-chains-have-explicit-integrity-modes.md": {
+    "mtime": 1787394333.538658,
+    "seen": 1787717335.804661,
+    "ast_hash": "6f79309cad69cd5ec286f12a85354205",
+    "semantic_hash": "6f79309cad69cd5ec286f12a85354205"
+  },
+  "docs/adr/0045-execution-and-repository-leases-are-separate.md": {
+    "mtime": 1787394334.1428041,
+    "seen": 1787717335.804661,
+    "ast_hash": "9a5077b5d904f46e17853820b5436b98",
+    "semantic_hash": "9a5077b5d904f46e17853820b5436b98"
+  },
+  "docs/adr/0046-execution-admission-is-fair-and-bounded.md": {
+    "mtime": 1787394334.7196598,
+    "seen": 1787717335.804661,
+    "ast_hash": "f81b4e5e6fcbbc0c9136e804ed375d8c",
+    "semantic_hash": "f81b4e5e6fcbbc0c9136e804ed375d8c"
+  },
+  "docs/adr/0047-cancellation-is-a-two-phase-quiescence-protocol.md": {
+    "mtime": 1787394335.3248663,
+    "seen": 1787717335.804661,
+    "ast_hash": "7e305d614da14c5efc1734c566115947",
+    "semantic_hash": "7e305d614da14c5efc1734c566115947"
+  },
+  "docs/adr/0048-policy-layering-has-hard-product-ceilings.md": {
+    "mtime": 1787394335.9253056,
+    "seen": 1787717335.804661,
+    "ast_hash": "62ce4e61c5820f5e2c3d512b7b8eb005",
+    "semantic_hash": "62ce4e61c5820f5e2c3d512b7b8eb005"
+  },
+  "docs/adr/0049-human-wait-does-not-consume-active-execution-budget.md": {
+    "mtime": 1787394336.5067859,
+    "seen": 1787717335.804661,
+    "ast_hash": "64c385c8daf3886fd75ce6adf07f9521",
+    "semantic_hash": "64c385c8daf3886fd75ce6adf07f9521"
+  },
+  "docs/adr/0050-principals-are-host-resolved-not-session-derived.md": {
+    "mtime": 1787394701.7162178,
+    "seen": 1787717335.804661,
+    "ast_hash": "76e49929eb495b4160ef5342e10ca62c",
+    "semantic_hash": "76e49929eb495b4160ef5342e10ca62c"
+  },
+  "docs/adr/0051-model-tools-have-versioned-replay-safe-contracts.md": {
+    "mtime": 1787394702.361726,
+    "seen": 1787717335.804661,
+    "ast_hash": "bfbc3368bae0913dc3183d311d9afc3f",
+    "semantic_hash": "bfbc3368bae0913dc3183d311d9afc3f"
+  },
+  "docs/adr/0052-network-authorization-is-revalidated-per-hop.md": {
+    "mtime": 1787394703.0352838,
+    "seen": 1787717335.804661,
+    "ast_hash": "13e5c76cf95a34668d20286148832c6b",
+    "semantic_hash": "13e5c76cf95a34668d20286148832c6b"
+  },
+  "docs/adr/0053-process-actions-are-structured-not-shell-text.md": {
+    "mtime": 1787394703.6775825,
+    "seen": 1787717335.804661,
+    "ast_hash": "dd137b05b5181d3cd02f072c0e35ca35",
+    "semantic_hash": "dd137b05b5181d3cd02f072c0e35ca35"
+  },
+  "docs/adr/0054-filesystem-actions-bind-stable-file-identities.md": {
+    "mtime": 1787394704.300481,
+    "seen": 1787717335.804661,
+    "ast_hash": "60f65166ac7525d0d021122cbbba16fb",
+    "semantic_hash": "60f65166ac7525d0d021122cbbba16fb"
+  },
+  "docs/adr/0055-evidence-content-is-untrusted-ui-input.md": {
+    "mtime": 1787394704.958254,
+    "seen": 1787717335.804661,
+    "ast_hash": "f59103e86446b3f58764df607aaf2030",
+    "semantic_hash": "f59103e86446b3f58764df607aaf2030"
+  },
+  "docs/adr/0056-operational-telemetry-is-local-and-allowlisted.md": {
+    "mtime": 1787394705.6034307,
+    "seen": 1787717335.804661,
+    "ast_hash": "5290b78b1ca75e923c9cce24761e7afe",
+    "semantic_hash": "5290b78b1ca75e923c9cce24761e7afe"
+  },
+  "docs/adr/0057-integrations-cross-only-the-service-capability.md": {
+    "mtime": 1787394706.2620125,
+    "seen": 1787717335.804661,
+    "ast_hash": "d29d905a440b1f8c36b0d8421510eae1",
+    "semantic_hash": "d29d905a440b1f8c36b0d8421510eae1"
+  },
+  "docs/adr/0058-role-agents-receive-kernel-built-prompt-packages.md": {
+    "mtime": 1787394892.685806,
+    "seen": 1787717335.804661,
+    "ast_hash": "11717ffd7873dbdaf3a5e368e0c7eb66",
+    "semantic_hash": "11717ffd7873dbdaf3a5e368e0c7eb66"
+  },
+  "docs/adr/0059-role-results-use-versioned-output-contracts.md": {
+    "mtime": 1787394893.291386,
+    "seen": 1787717335.804661,
+    "ast_hash": "61a01f33dbbfd7da91fe37916de45057",
+    "semantic_hash": "61a01f33dbbfd7da91fe37916de45057"
+  },
+  "docs/adr/0060-model-fallback-is-pre-authorized-and-run-scoped.md": {
+    "mtime": 1787394893.8876817,
+    "seen": 1787717335.804661,
+    "ast_hash": "c3193c151c5075cc9b2f505bc7929810",
+    "semantic_hash": "c3193c151c5075cc9b2f505bc7929810"
+  },
+  "docs/adr/0061-role-skills-are-allowlisted-and-digest-frozen.md": {
+    "mtime": 1787394894.5076256,
+    "seen": 1787717335.804661,
+    "ast_hash": "bf1c0dcbac6ad34f7f13af189893f362",
+    "semantic_hash": "bf1c0dcbac6ad34f7f13af189893f362"
+  },
+  "docs/adr/0062-specification-extraction-preserves-source-identity.md": {
+    "mtime": 1787394895.0965872,
+    "seen": 1787717335.804661,
+    "ast_hash": "1b7d7163983984447f024c24cea1c3ec",
+    "semantic_hash": "1b7d7163983984447f024c24cea1c3ec"
+  },
+  "docs/adr/0063-content-sanitization-is-layered-and-deterministic.md": {
+    "mtime": 1787394895.7149587,
+    "seen": 1787717335.804661,
+    "ast_hash": "2ec3542feb938646fba59cdd9f18eda2",
+    "semantic_hash": "2ec3542feb938646fba59cdd9f18eda2"
+  },
+  "docs/adr/0064-harness-rc-compatibility-is-exact-and-probed.md": {
+    "mtime": 1787395508.1420145,
+    "seen": 1787717335.804661,
+    "ast_hash": "6b4121ab0d2d45850663432630118966",
+    "semantic_hash": "6b4121ab0d2d45850663432630118966"
+  },
+  "docs/adr/0065-platform-support-is-proven-on-windows-linux-and-macos.md": {
+    "mtime": 1787395508.814414,
+    "seen": 1787717335.804661,
+    "ast_hash": "e2a230e8a4072bf92a1921ebb49ff629",
+    "semantic_hash": "e2a230e8a4072bf92a1921ebb49ff629"
+  },
+  "docs/adr/0066-implementation-proceeds-in-kernel-first-tdd-slices.md": {
+    "mtime": 1787395509.5282059,
+    "seen": 1787717335.804661,
+    "ast_hash": "37a965f4254a8936e8ff52819d62fc53",
+    "semantic_hash": "37a965f4254a8936e8ff52819d62fc53"
+  },
+  "docs/adr/0067-release-tests-use-scripted-providers-not-live-model-oracles.md": {
+    "mtime": 1787395510.210552,
+    "seen": 1787717335.804661,
+    "ast_hash": "56435b8ae2db02842f8d2988d92b7459",
+    "semantic_hash": "56435b8ae2db02842f8d2988d92b7459"
+  },
+  "docs/adr/0068-invariants-are-proven-with-property-fault-and-process-tests.md": {
+    "mtime": 1787395510.8459907,
+    "seen": 1787717335.804661,
+    "ast_hash": "aed2012f0d735aedc75116ab23c7b21d",
+    "semantic_hash": "aed2012f0d735aedc75116ab23c7b21d"
+  },
+  "docs/adr/0069-web-release-proof-covers-projection-security-and-resync.md": {
+    "mtime": 1787395511.5324728,
+    "seen": 1787717335.804661,
+    "ast_hash": "38268293cae0fec5a64ebf26c2e92d5d",
+    "semantic_hash": "38268293cae0fec5a64ebf26c2e92d5d"
+  },
+  "docs/adr/0070-migration-proof-uses-versioned-legacy-fixtures.md": {
+    "mtime": 1787395512.1968067,
+    "seen": 1787717335.804661,
+    "ast_hash": "35a42e01bb68e37ac04fc930175d87e7",
+    "semantic_hash": "35a42e01bb68e37ac04fc930175d87e7"
+  },
+  "docs/adr/0071-packed-installation-is-the-plugin-boundary-proof.md": {
+    "mtime": 1787395512.8699312,
+    "seen": 1787717335.804661,
+    "ast_hash": "94aec95977ee4bf9ba317313d87fa733",
+    "semantic_hash": "94aec95977ee4bf9ba317313d87fa733"
+  },
+  "docs/adr/0072-release-promotion-requires-complete-evidence.md": {
+    "mtime": 1787395513.5633233,
+    "seen": 1787717335.804661,
+    "ast_hash": "ce0123784b60378113a6899d685962c4",
+    "semantic_hash": "ce0123784b60378113a6899d685962c4"
+  },
+  "docs/adr/0073-security-assurance-remains-an-external-provider.md": {
+    "mtime": 1787399612.4401891,
+    "seen": 1787717335.804661,
+    "ast_hash": "d07bc3c9ecbcad230fe0a482bb8fcb13",
+    "semantic_hash": "d07bc3c9ecbcad230fe0a482bb8fcb13"
+  },
+  "docs/adr/0074-external-assurance-is-imported-by-value.md": {
+    "mtime": 1787399472.6730428,
+    "seen": 1787717335.804661,
+    "ast_hash": "ed085a160282f107bf0b181f124675ad",
+    "semantic_hash": "ed085a160282f107bf0b181f124675ad"
+  },
+  "docs/adr/0075-host-policy-activates-external-assurance-providers.md": {
+    "mtime": 1787400453.767779,
+    "seen": 1787717335.804661,
+    "ast_hash": "c6565e00c1c556cae56cb9026683868c",
+    "semantic_hash": "c6565e00c1c556cae56cb9026683868c"
+  },
+  "docs/adr/0076-machine-providers-are-explicit-assessors.md": {
+    "mtime": 1787400454.4134407,
+    "seen": 1787717335.804661,
+    "ast_hash": "c03de452355a152db4513856e02f3fff",
+    "semantic_hash": "c03de452355a152db4513856e02f3fff"
+  },
+  "docs/adr/0077-external-assurance-executes-through-a-kernel-issued-context.md": {
+    "mtime": 1787400455.047093,
+    "seen": 1787717335.804661,
+    "ast_hash": "0350d1d86e25b7f9828c9a4abbfd9c88",
+    "semantic_hash": "0350d1d86e25b7f9828c9a4abbfd9c88"
+  },
+  "docs/adr/0078-provider-availability-fails-closed-without-silent-substitution.md": {
+    "mtime": 1787400775.132621,
+    "seen": 1787717335.804661,
+    "ast_hash": "b606218deb6fb51fe816046c0a9c24b7",
+    "semantic_hash": "b606218deb6fb51fe816046c0a9c24b7"
+  },
+  "docs/adr/0079-only-sealed-external-assessments-are-importable.md": {
+    "mtime": 1787400775.8290303,
+    "seen": 1787717335.804661,
+    "ast_hash": "a2455c036d8fe724e0726699aff4dffb",
+    "semantic_hash": "a2455c036d8fe724e0726699aff4dffb"
+  },
+  "docs/adr/0080-security-risk-acceptance-requires-decision-authority.md": {
+    "mtime": 1787400776.5110059,
+    "seen": 1787717335.804661,
+    "ast_hash": "01efddc09b2f20cd9fce4dc25458bf23",
+    "semantic_hash": "01efddc09b2f20cd9fce4dc25458bf23"
+  },
+  "docs/adr/0081-security-remediation-cannot-bypass-mission-rework.md": {
+    "mtime": 1787401516.8410265,
+    "seen": 1787717335.804661,
+    "ast_hash": "cec7f105dae93b95db72139338a8f691",
+    "semantic_hash": "cec7f105dae93b95db72139338a8f691"
+  },
+  "docs/adr/0082-security-findings-close-only-on-new-sealed-evidence.md": {
+    "mtime": 1787402250.433199,
+    "seen": 1787717335.804661,
+    "ast_hash": "1d94c3248daa249219101905e12f1554",
+    "semantic_hash": "1d94c3248daa249219101905e12f1554"
+  },
+  "docs/adr/0083-security-integration-proof-includes-unsafe-approval-outcomes.md": {
+    "mtime": 1787402643.9725838,
+    "seen": 1787717335.804661,
+    "ast_hash": "a2e7ca9ad000f69a619234ba0415a876",
+    "semantic_hash": "a2e7ca9ad000f69a619234ba0415a876"
+  },
+  "docs/adr/0084-submission-transport-integrity-is-not-gate-eligibility.md": {
+    "mtime": 1787429881.294325,
+    "seen": 1787717335.804661,
+    "ast_hash": "1206947964464ad9374fa8df093e8651",
+    "semantic_hash": "1206947964464ad9374fa8df093e8651"
+  },
+  "docs/adr/0085-external-assurance-runs-against-the-post-implementation-subject.md": {
+    "mtime": 1787433435.9816494,
+    "seen": 1787717335.804661,
+    "ast_hash": "9e921df0673eb3b1ef28e1944607c395",
+    "semantic_hash": "9e921df0673eb3b1ef28e1944607c395"
+  },
+  "docs/adr/0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md": {
+    "mtime": 1787513357.8525605,
+    "seen": 1787717335.804661,
+    "ast_hash": "64f730a9e7ffaf9e42db2f74b73682ec",
+    "semantic_hash": "64f730a9e7ffaf9e42db2f74b73682ec"
+  },
+  "docs/adr/0087-provider-cancellation-retry-reconciles-terminal-external-state.md": {
+    "mtime": 1787514915.6880245,
+    "seen": 1787717335.804661,
+    "ast_hash": "e32fce46fd544ede77f6328c3ce828cc",
+    "semantic_hash": "e32fce46fd544ede77f6328c3ce828cc"
+  },
+  "docs/adr/0088-external-assessment-failure-is-terminal-indeterminate-assurance.md": {
+    "mtime": 1787516252.4388292,
+    "seen": 1787717335.804661,
+    "ast_hash": "5a2781c93871580697832e426eb1a3b0",
+    "semantic_hash": "5a2781c93871580697832e426eb1a3b0"
+  },
+  "docs/adr/0089-assurance-retry-creates-a-successor-provider-invocation.md": {
+    "mtime": 1787519435.185081,
+    "seen": 1787717335.804661,
+    "ast_hash": "ffad7d08b7b29358587fdcb1f783a339",
+    "semantic_hash": "ffad7d08b7b29358587fdcb1f783a339"
+  },
+  "docs/adr/0090-repository-binding-is-a-process-local-assertion.md": {
+    "mtime": 1787519203.966455,
+    "seen": 1787717335.804661,
+    "ast_hash": "d9daf0137dfc7497e7221d58deae485c",
+    "semantic_hash": "d9daf0137dfc7497e7221d58deae485c"
+  },
+  "docs/testing-seams.md": {
+    "mtime": 1787433435.2131705,
+    "seen": 1787717335.804661,
+    "ast_hash": "d1f74973fb85a7a15dbab89ce448c5eb",
+    "semantic_hash": "d1f74973fb85a7a15dbab89ce448c5eb"
+  },
+  "research/codex-ecosystem-reuse-study.md": {
+    "mtime": 1787423970.105146,
+    "seen": 1787717335.804661,
+    "ast_hash": "07fe72808efdf0831e94750d3e07b586",
+    "semantic_hash": "07fe72808efdf0831e94750d3e07b586"
+  },
+  "research/deepseek-harness-source-study.md": {
+    "mtime": 1787369661.2654629,
+    "seen": 1787717335.804661,
+    "ast_hash": "4afd253912b090925f6984cde78740c6",
+    "semantic_hash": "4afd253912b090925f6984cde78740c6"
+  },
+  "control-plane-kernel-architecture.md": {
+    "mtime": 1787395711.6066315,
+    "seen": 1787717772.3075361,
+    "ast_hash": "e4883d5694cb468c42d4260ba483d163",
+    "semantic_hash": "e4883d5694cb468c42d4260ba483d163"
+  }
+}

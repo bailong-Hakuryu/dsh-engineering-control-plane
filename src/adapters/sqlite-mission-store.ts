@@ -184,12 +184,64 @@ function rollbackQuietly(db: DatabaseSync): void {
   }
 }
 
-async function createDatabaseFile(path: string): Promise<void> {
+async function createDatabaseFile(path: string): Promise<boolean> {
   try {
     const handle = await open(path, 'wx', 0o600)
     await handle.close()
+    return true
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+    return false
+  }
+}
+
+/** Prove an existing Store is safe to open for mutation without changing any source byte. */
+function preflightExistingDatabase(path: string): void {
+  const immutableUrl = pathToFileURL(path)
+  immutableUrl.searchParams.set('immutable', '1')
+  const db = new DatabaseSync(immutableUrl.href, { readOnly: true })
+  try {
+    const integrity = db.prepare('PRAGMA quick_check').get() as { quick_check?: unknown } | undefined
+    if (integrity?.quick_check !== 'ok') {
+      throw new MissionStoreFormatError('corrupt_store', `Mission database at "${path}" failed quick_check`)
+    }
+    const version = integerField(db.prepare('PRAGMA user_version').get(), 'user_version')
+    const applicationId = integerField(db.prepare('PRAGMA application_id').get(), 'application_id')
+    if (version > MISSION_STORE_SCHEMA_VERSION) {
+      throw new MissionStoreFormatError(
+        'unsupported_format',
+        `Mission database at "${path}" has schema ${version}; this build supports ${MISSION_STORE_SCHEMA_VERSION}`,
+      )
+    }
+    if (version === 0) {
+      if (applicationId !== 0 || userObjectCount(db) !== 0) {
+        throw new MissionStoreFormatError(
+          'corrupt_store',
+          `Mission database at "${path}" contains an unversioned or foreign schema`,
+        )
+      }
+      return
+    }
+    if (applicationId !== MISSION_STORE_APPLICATION_ID) {
+      throw new MissionStoreFormatError('corrupt_store', `Mission database at "${path}" has a foreign application id`)
+    }
+    validateSchema(db, path)
+    const rows = db.prepare(`
+      SELECT mission_id, revision, snapshot_json
+      FROM missions
+      ORDER BY mission_id
+    `).all() as unknown as MissionRow[]
+    for (const row of rows) {
+      const snapshot = decodeSnapshot(row, path) as MissionSnapshot & { readonly writeLease?: unknown }
+      if (version === 1 && (snapshot.writeLease !== undefined || typeof snapshot.updatedAt !== 'string')) {
+        throw new MissionStoreFormatError(
+          'corrupt_store',
+          `Mission '${snapshot.missionId}' cannot be migrated from schema 1`,
+        )
+      }
+    }
+  } finally {
+    db.close()
   }
 }
 
@@ -266,7 +318,8 @@ async function openDatabase(options: SqliteMissionStoreOptions): Promise<{ db: D
   const actual = options.path === ':memory:' ? options.path : resolve(options.path)
   if (actual !== ':memory:') {
     await mkdir(dirname(actual), { recursive: true, mode: 0o700 })
-    await createDatabaseFile(actual)
+    const created = await createDatabaseFile(actual)
+    if (!created) preflightExistingDatabase(actual)
   }
 
   const busyTimeoutMs = options.busyTimeoutMs ?? 5_000

@@ -145,6 +145,54 @@ describe('Effective Policy', () => {
     expect(() => resolveDeploymentConfig(invalid)).toThrow('embeds a credential-shaped argument')
   })
 
+  it('rejects token-shaped Assurance Provider values even under a benign configuration key', () => {
+    const credential = [
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+      'eyJzdWIiOiJwcm9kdWN0aW9uLXVzZXIifQ',
+      'c2lnbmF0dXJlLW11c3Qtbm90LWVzY2FwZQ',
+    ].join('.')
+    let activationFailure: unknown
+
+    try {
+      resolveAssuranceProviderActivations([{
+        providerId: 'fixture/token-shaped-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'required',
+        configuration: { endpointId: credential },
+      }])
+    } catch (error) {
+      activationFailure = error
+    }
+
+    expect(activationFailure).toBeInstanceOf(TypeError)
+    expect(String(activationFailure)).toBe(
+      "TypeError: Assurance Provider configuration value 'endpointId' is not a public identifier",
+    )
+    expect(String(activationFailure)).not.toContain(credential)
+  })
+
+  it('rejects known credential identifiers without disclosing their value', () => {
+    const credential = 'AKIAIOSFODNN7EXAMPLE'
+    let activationFailure: unknown
+
+    try {
+      resolveAssuranceProviderActivations([{
+        providerId: 'fixture/credential-identifier-provider',
+        providerVersion: '1.0.0-fixture.1',
+        activation: 'required',
+        configuration: { endpointId: credential },
+      }])
+    } catch (error) {
+      activationFailure = error
+    }
+
+    expect(activationFailure).toBeInstanceOf(TypeError)
+    expect(String(activationFailure)).toBe(
+      "TypeError: Assurance Provider configuration value 'endpointId' is not a public identifier",
+    )
+    expect(String(activationFailure)).not.toContain(credential)
+  })
+
   it('rejects every subagent provider except the fixed in-process spawn provider', () => {
     const invalid = {
       ...config(),

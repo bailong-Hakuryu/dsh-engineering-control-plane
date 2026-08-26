@@ -52,6 +52,7 @@ async function waitForInvocationState(
   agent: Agent,
   missionId: string,
   expected: readonly string[],
+  isObserved: () => boolean = () => true,
 ) {
   const deadline = Date.now() + 4_000
   let lastState: string | undefined
@@ -62,7 +63,7 @@ async function waitForInvocationState(
       new AbortController().signal,
     )
     lastState = snapshot.assuranceProviderInvocations?.[0]?.state
-    if (lastState !== undefined && expected.includes(lastState)) return snapshot
+    if (lastState !== undefined && expected.includes(lastState) && isObserved()) return snapshot
     await new Promise(resolve => setTimeout(resolve, 10))
   }
   throw new Error(`Provider invocation did not reach ${expected.join('/')} (last state: ${lastState ?? 'missing'})`)
@@ -622,13 +623,10 @@ describe('Assurance Provider startup registration and selection', () => {
       readonly request: AssuranceRequestV1
       readonly signal?: AbortSignal
     } | undefined
-    let reportInvoked!: () => void
-    const invoked = new Promise<void>(resolve => { reportInvoked = resolve })
     const contributorFiber = await ctx.plugin(invokingReferenceProviderContributor(
       descriptor,
       async (context, request, options) => {
         observed = { context, request, ...options?.signal === undefined ? {} : { signal: options.signal } }
-        reportInvoked()
         return new Promise<never>((_resolve, reject) => {
           const signal = options?.signal
           if (signal === undefined) return
@@ -649,19 +647,15 @@ describe('Assurance Provider startup registration and selection', () => {
         idempotencyKey: 'provider-invocation:start:1',
         objective: 'Invoke the exact frozen Assurance Provider through a Kernel-issued context',
       }, toolController.signal)
-      await Promise.race([
-        invoked,
-        new Promise<never>((_resolve, reject) => {
-          setTimeout(() => reject(new Error('Reference Provider was not invoked')), 750)
-        }),
-      ])
-      toolController.abort('tool call ended')
-
-      const snapshot = await ctx.engineeringControlPlane.status(
+      const snapshot = await waitForInvocationState(
+        ctx,
         agent,
         receipt.missionId,
-        new AbortController().signal,
+        ['begun'],
+        () => observed !== undefined,
       )
+      toolController.abort('tool call ended')
+
       expect(snapshot.assuranceProviderInvocations).toEqual([expect.objectContaining({
         schemaVersion: 1,
         attempt: 1,

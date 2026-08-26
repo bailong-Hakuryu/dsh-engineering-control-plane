@@ -9,7 +9,8 @@ const PROVIDER_CONFIGURATION_KEY = /^[a-z][A-Za-z0-9]{0,63}$/
 const PROVIDER_CONFIGURATION_VALUE = /^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,255}$/
 const EXTERNAL_ASSESSMENT_FAILURE_CODE = /^[a-z][a-z0-9_]{0,127}$/
 const SENSITIVE_CONFIGURATION_KEY = /(?:auth|cookie|credential|key|password|secret|token)/iu
-const SENSITIVE_CONFIGURATION_VALUE = /^(?:github_pat_|gh[pousr]_|[rs]k-|xox[baprs]-|bearer)/iu
+const SENSITIVE_CONFIGURATION_VALUE = /^(?:(?:github_pat_|gh[pousr]_|[rs]k-|xox[baprs]-|bearer)|AKIA[0-9A-Z]{16}$)/iu
+const COMPACT_JOSE = /^[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$/u
 
 /** Namespaced and versioned registration/selection key; not executable identity. */
 export interface AssuranceProviderDescriptorV1 {
@@ -108,6 +109,7 @@ export function parseAssuranceProviderConfigurationV1(
       || item !== item.trim()
       || !PROVIDER_CONFIGURATION_VALUE.test(item)
       || SENSITIVE_CONFIGURATION_VALUE.test(item)
+      || COMPACT_JOSE.test(item)
     ) {
       throw new TypeError(`Assurance Provider configuration value '${key}' is not a public identifier`)
     }

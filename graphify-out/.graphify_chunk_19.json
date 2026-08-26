@@ -1,0 +1,649 @@
+{
+  "nodes": [
+    {
+      "id": "docs_adr_0069_web_release_proof",
+      "label": "Web Release Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0069-web-release-proof-covers-projection-security-and-resync.md",
+      "rationale": "Browser smoke tests against packed installation ensure client compatibility beyond TypeScript compilation"
+    },
+    {
+      "id": "docs_adr_0070_migration_proof",
+      "label": "Migration Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0070-migration-proof-uses-versioned-legacy-fixtures.md",
+      "rationale": "Byte-level fixtures verify transactional migration, rollback on fault, and Safe Mode for corrupt stores"
+    },
+    {
+      "id": "docs_adr_0071_packed_installation",
+      "label": "Packed Installation",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md",
+      "rationale": "npm pack and tarball installation ensure plugin operates within declared peer dependencies and public exports"
+    },
+    {
+      "id": "docs_adr_0072_release_promotion",
+      "label": "Release Promotion",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md",
+      "rationale": "RC-to-stable requires passing all gates and manual dogfood mission to ensure production readiness"
+    },
+    {
+      "id": "docs_adr_0073_security_assurance_external",
+      "label": "Security Assurance External Provider",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md",
+      "rationale": "Security Assurance integrates through Provider boundary to maintain separation of concerns"
+    },
+    {
+      "id": "docs_adr_0074_external_assurance_by_value",
+      "label": "External Assurance By Value",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md",
+      "rationale": "Immutable digest-bound submissions prevent provider loss or mutation from altering Mission decisions"
+    },
+    {
+      "id": "docs_adr_0075_host_policy_activation",
+      "label": "Host Policy Activation",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md",
+      "rationale": "Host Policy controls provider selection to prevent unauthorized provider self-registration"
+    },
+    {
+      "id": "docs_adr_0076_machine_providers",
+      "label": "Machine Providers as Assessors",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0076-machine-providers-are-explicit-assessors.md",
+      "rationale": "Machine Provider distinction prevents scanners from impersonating independent Reviewer roles"
+    },
+    {
+      "id": "docs_adr_0077_kernel_issued_context",
+      "label": "Kernel-Issued Execution Context",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md",
+      "rationale": "Mediated execution context prevents external providers from accessing Store, Gate, or unrestricted host capabilities"
+    },
+    {
+      "id": "docs_adr_0078_provider_fail_closed",
+      "label": "Provider Fail-Closed",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md",
+      "rationale": "Missing providers trigger Safe Mode to prevent silent degradation of assurance requirements"
+    },
+    {
+      "id": "docs_adr_0079_sealed_assessments",
+      "label": "Sealed External Assessments",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0079-only-sealed-external-assessments-are-importable.md",
+      "rationale": "Only sealed assessments are importable to ensure evidence integrity"
+    },
+    {
+      "id": "docs_adr_0080_risk_acceptance_authority",
+      "label": "Security Risk Acceptance Authority",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0080-security-risk-acceptance-requires-decision-authority.md",
+      "rationale": "Decision Authority binding ensures risk acceptance cannot bypass governance controls"
+    },
+    {
+      "id": "docs_adr_0081_remediation_rework",
+      "label": "Security Remediation Through Rework",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md",
+      "rationale": "Security Assurance cannot apply changes directly to enforce separation of assessment and implementation"
+    },
+    {
+      "id": "docs_adr_0082_findings_new_evidence",
+      "label": "Findings Close on New Evidence",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md",
+      "rationale": "New sealed assessment required to close findings ensures patch verification is properly validated"
+    },
+    {
+      "id": "docs_adr_0083_unsafe_approval_outcomes",
+      "label": "Security Integration Proof",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md",
+      "rationale": "Unsafe Approval Rate measurement ensures integrated Quality Gate is useful and safe, not just functional"
+    },
+    {
+      "id": "docs_adr_0084_transport_integrity",
+      "label": "Submission Transport Integrity",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md",
+      "rationale": "Transport integrity separate from gate eligibility ensures digest verification doesn't imply assessment validity"
+    },
+    {
+      "id": "docs_adr_0085_post_implementation_subject",
+      "label": "Post-Implementation Subject",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md",
+      "rationale": "Provider execution after implementation ensures assessment runs against code that will reach Quality Gate"
+    },
+    {
+      "id": "docs_adr_0086_mission_cancellation_quiescence",
+      "label": "Mission Cancellation Quiescence",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md",
+      "rationale": "Explicit cancellation with quiescence proof prevents leaving unproven external work behind cancelled missions"
+    },
+    {
+      "id": "docs_adr_0087_cancellation_retry",
+      "label": "Provider Cancellation Retry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0087-provider-cancellation-retry-reconciles-terminal-external-state.md",
+      "rationale": "Idempotent cancellation retry reconciles external state after host restart interrupts cancellation transaction"
+    },
+    {
+      "id": "docs_adr_0088_external_failure_indeterminate",
+      "label": "External Assessment Failure",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0088-external-assessment-failure-is-terminal-indeterminate-assurance.md",
+      "rationale": "External failure produces indeterminate assessment to distinguish from security findings and safety approval"
+    },
+    {
+      "id": "docs_adr_0089_assurance_retry",
+      "label": "Assurance Retry",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md",
+      "rationale": "Successor invocation with linked history enables retry without replaying settled identities"
+    },
+    {
+      "id": "docs_adr_0090_repository_binding",
+      "label": "Repository Binding",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0090-repository-binding-is-a-process-local-assertion.md",
+      "rationale": "Process-local repository equality prevents path leakage while enabling same-repository validation"
+    },
+    {
+      "id": "research_codex_reuse_study",
+      "label": "Codex Ecosystem Reuse Study",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\codex-ecosystem-reuse-study.md",
+      "rationale": "Study identifies verified mechanisms for runtime ownership, cancellation, approval, and lifecycle from Codex ecosystem"
+    },
+    {
+      "id": "research_deepseek_harness_study",
+      "label": "DeepSeek Harness Source Study",
+      "file_type": "document",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md",
+      "rationale": "Comprehensive study maps Engineering Control Plane requirements to DeepSeek Harness extension points and establishes architecture boundaries"
+    },
+    {
+      "id": "concept_assurance_provider",
+      "label": "Assurance Provider",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "id": "concept_quality_gate",
+      "label": "Quality Gate",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "id": "concept_assurance_submission",
+      "label": "Assurance Submission",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "id": "concept_provider_invocation",
+      "label": "Provider Invocation",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "id": "concept_mission",
+      "label": "Mission",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "id": "concept_evidence_store",
+      "label": "Evidence Store",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "id": "concept_safe_mode",
+      "label": "Safe Mode",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "id": "concept_plugin_boundary",
+      "label": "Plugin Boundary",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md"
+    },
+    {
+      "id": "concept_assurance_execution_context",
+      "label": "Assurance Execution Context",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "id": "concept_control_plane_kernel",
+      "label": "Control Plane Kernel",
+      "file_type": "concept",
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_adr_0073_security_assurance_external",
+      "target": "concept_assurance_provider",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "docs_adr_0074_external_assurance_by_value",
+      "target": "concept_assurance_submission",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "source": "docs_adr_0075_host_policy_activation",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0077_kernel_issued_context",
+      "target": "concept_assurance_execution_context",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "source": "concept_assurance_execution_context",
+      "target": "concept_assurance_provider",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    },
+    {
+      "source": "docs_adr_0078_provider_fail_closed",
+      "target": "concept_safe_mode",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "source": "docs_adr_0079_sealed_assessments",
+      "target": "concept_assurance_submission",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0079-only-sealed-external-assessments-are-importable.md"
+    },
+    {
+      "source": "docs_adr_0081_remediation_rework",
+      "target": "concept_mission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md"
+    },
+    {
+      "source": "docs_adr_0082_findings_new_evidence",
+      "target": "concept_evidence_store",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md"
+    },
+    {
+      "source": "docs_adr_0083_unsafe_approval_outcomes",
+      "target": "concept_quality_gate",
+      "relation": "evaluates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "concept_assurance_submission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0086_mission_cancellation_quiescence",
+      "target": "concept_provider_invocation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0087_cancellation_retry",
+      "target": "concept_provider_invocation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0087-provider-cancellation-retry-reconciles-terminal-external-state.md"
+    },
+    {
+      "source": "docs_adr_0088_external_failure_indeterminate",
+      "target": "concept_assurance_submission",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0088-external-assessment-failure-is-terminal-indeterminate-assurance.md"
+    },
+    {
+      "source": "docs_adr_0089_assurance_retry",
+      "target": "concept_provider_invocation",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "source": "docs_adr_0090_repository_binding",
+      "target": "concept_assurance_execution_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0090-repository-binding-is-a-process-local-assertion.md"
+    },
+    {
+      "source": "docs_adr_0071_packed_installation",
+      "target": "concept_plugin_boundary",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0071-packed-installation-is-the-plugin-boundary-proof.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "concept_control_plane_kernel",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "concept_mission",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_codex_reuse_study",
+      "target": "concept_provider_invocation",
+      "relation": "influences",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\codex-ecosystem-reuse-study.md"
+    },
+    {
+      "source": "docs_adr_0074_external_assurance_by_value",
+      "target": "concept_evidence_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0074-external-assurance-is-imported-by-value.md"
+    },
+    {
+      "source": "docs_adr_0073_security_assurance_external",
+      "target": "concept_quality_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "docs_adr_0080_risk_acceptance_authority",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0080-security-risk-acceptance-requires-decision-authority.md"
+    },
+    {
+      "source": "docs_adr_0081_remediation_rework",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0081-security-remediation-cannot-bypass-mission-rework.md"
+    },
+    {
+      "source": "docs_adr_0082_findings_new_evidence",
+      "target": "docs_adr_0079_sealed_assessments",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0082-security-findings-close-only-on-new-sealed-evidence.md"
+    },
+    {
+      "source": "docs_adr_0086_mission_cancellation_quiescence",
+      "target": "docs_adr_0087_cancellation_retry",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0089_assurance_retry",
+      "target": "docs_adr_0088_external_failure_indeterminate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0089-assurance-retry-creates-a-successor-provider-invocation.md"
+    },
+    {
+      "source": "docs_adr_0069_web_release_proof",
+      "target": "docs_adr_0071_packed_installation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0069-web-release-proof-covers-projection-security-and-resync.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "docs_adr_0071_packed_installation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "docs_adr_0072_release_promotion",
+      "target": "docs_adr_0070_migration_proof",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    },
+    {
+      "source": "docs_adr_0078_provider_fail_closed",
+      "target": "docs_adr_0075_host_policy_activation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0078-provider-availability-fails-closed-without-silent-substitution.md"
+    },
+    {
+      "source": "docs_adr_0085_post_implementation_subject",
+      "target": "docs_adr_0075_host_policy_activation",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0085-external-assurance-runs-against-the-post-implementation-subject.md"
+    },
+    {
+      "source": "docs_adr_0084_transport_integrity",
+      "target": "docs_adr_0079_sealed_assessments",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "docs_adr_0083_unsafe_approval_outcomes",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0083-security-integration-proof-includes-unsafe-approval-outcomes.md"
+    },
+    {
+      "source": "concept_assurance_provider",
+      "target": "concept_control_plane_kernel",
+      "relation": "integrates_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "source": "concept_assurance_submission",
+      "target": "concept_quality_gate",
+      "relation": "provides_input_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0084-submission-transport-integrity-is-not-gate-eligibility.md"
+    },
+    {
+      "source": "concept_mission",
+      "target": "concept_quality_gate",
+      "relation": "evaluated_by",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "concept_mission",
+      "target": "concept_evidence_store",
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "research_deepseek_harness_study",
+      "target": "docs_adr_0070_migration_proof",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\research\\deepseek-harness-source-study.md"
+    },
+    {
+      "source": "docs_adr_0076_machine_providers",
+      "target": "concept_assurance_provider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0076-machine-providers-are-explicit-assessors.md"
+    },
+    {
+      "source": "docs_adr_0075_host_policy_activation",
+      "target": "docs_adr_0078_provider_fail_closed",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0075-host-policy-activates-external-assurance-providers.md"
+    },
+    {
+      "source": "docs_adr_0077_kernel_issued_context",
+      "target": "docs_adr_0073_security_assurance_external",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0077-external-assurance-executes-through-a-kernel-issued-context.md"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "external_provider_integration_pattern",
+      "label": "External Provider Integration Pattern",
+      "nodes": [
+        "docs_adr_0073_security_assurance_external",
+        "docs_adr_0074_external_assurance_by_value",
+        "docs_adr_0075_host_policy_activation",
+        "docs_adr_0077_kernel_issued_context",
+        "docs_adr_0078_provider_fail_closed"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0073-security-assurance-remains-an-external-provider.md"
+    },
+    {
+      "id": "provider_lifecycle_management",
+      "label": "Provider Lifecycle Management",
+      "nodes": [
+        "docs_adr_0086_mission_cancellation_quiescence",
+        "docs_adr_0087_cancellation_retry",
+        "docs_adr_0088_external_failure_indeterminate",
+        "docs_adr_0089_assurance_retry"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0086-explicit-mission-cancellation-quiesces-begun-assurance-providers.md"
+    },
+    {
+      "id": "release_qualification_loop",
+      "label": "Release Qualification Loop",
+      "nodes": [
+        "docs_adr_0069_web_release_proof",
+        "docs_adr_0070_migration_proof",
+        "docs_adr_0071_packed_installation",
+        "docs_adr_0072_release_promotion"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "D:\\Deepseek\\DSH Engineering Control Plane\\docs\\adr\\0072-release-promotion-requires-complete-evidence.md"
+    }
+  ],
+  "input_tokens": 38401,
+  "output_tokens": 6847
+}

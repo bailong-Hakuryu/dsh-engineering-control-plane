@@ -1,0 +1,16 @@
+{
+  "runs": [
+    {
+      "date": "2026-08-26T04:16:12.322885+00:00",
+      "input_tokens": 142588,
+      "output_tokens": 28372,
+      "files": 160,
+      "accounting_complete": false,
+      "note": "Recorded total is a lower bound because chunk 20 agent usage was not exposed by the runtime."
+    }
+  ],
+  "total_input_tokens": 142588,
+  "total_output_tokens": 28372,
+  "accounting_complete": false,
+  "note": "Recorded total is a lower bound because chunk 20 agent usage was not exposed by the runtime."
+}

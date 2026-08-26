@@ -69,6 +69,22 @@ interface ControlPlaneRuntime {
   readonly git: GitRepositoryAdapter
 }
 
+type ControlPlaneRuntimeState =
+  | { readonly kind: 'READY'; readonly runtime: ControlPlaneRuntime }
+  | { readonly kind: 'READ_ONLY_SAFE' }
+
+type ControlPlaneLifecycleState = 'STARTING' | 'READY' | 'READ_ONLY_SAFE' | 'QUIESCING' | 'STOPPED'
+
+/** Stable public failure for every operation unavailable in read-only Safe Mode. */
+export class ControlPlaneUnavailableError extends Error {
+  override readonly name = 'ControlPlaneUnavailableError'
+  readonly code = 'CONTROL_PLANE_UNAVAILABLE' as const
+
+  constructor() {
+    super('Engineering Control Plane is unavailable in read-only Safe Mode.')
+  }
+}
+
 interface RepositoryPolicyBinding {
   readonly verificationProfileName: string
   readonly assuranceProviderActivations: readonly AssuranceProviderActivationPolicyV1[]
@@ -168,23 +184,39 @@ export class EngineeringControlPlane extends Service {
   static inject = ['subagents', 'subprocess']
   static Config = ConfigSchema
 
-  private readonly ready: Promise<ControlPlaneRuntime>
+  private readonly ready: Promise<ControlPlaneRuntimeState>
   private readonly assuranceProviders = new AssuranceProviderRegistry()
   private readonly leaseHolderId = `host-${randomUUID()}`
+  private lifecycleState: ControlPlaneLifecycleState = 'STARTING'
   private disposed = false
 
   constructor(ctx: Context, config: PluginConfig) {
     super(ctx, 'engineeringControlPlane')
-    this.ready = this.initialize(config)
-    void this.ready.catch(() => {})
+    this.ready = this.initialize(config).then(
+      runtime => {
+        this.lifecycleState = 'READY'
+        return { kind: 'READY', runtime }
+      },
+      () => {
+        this.lifecycleState = 'READ_ONLY_SAFE'
+        return { kind: 'READ_ONLY_SAFE' }
+      },
+    )
     ctx.effect(async () => {
-      const runtime = await this.ready
+      const state = await this.ready
       return async () => {
+        this.lifecycleState = 'QUIESCING'
         this.disposed = true
-        runtime.assuranceInvocations.dispose()
         this.assuranceProviders.clear()
-        await runtime.runner.dispose()
-        await runtime.store.close()
+        try {
+          if (state.kind === 'READY') {
+            state.runtime.assuranceInvocations.dispose()
+            await state.runtime.runner.dispose()
+            await state.runtime.store.close()
+          }
+        } finally {
+          this.lifecycleState = 'STOPPED'
+        }
       }
     }, 'engineering control plane teardown')
   }
@@ -199,6 +231,7 @@ export class EngineeringControlPlane extends Service {
     descriptor: AssuranceProviderDescriptorV1,
     factory: AssuranceProviderFactoryV1,
   ): AssuranceProviderDisposer {
+    if (this.lifecycleState === 'READ_ONLY_SAFE') throw new ControlPlaneUnavailableError()
     if (this.disposed) throw new Error('Engineering Control Plane is disposing')
     return this.assuranceProviders.register(descriptor, factory)
   }
@@ -447,9 +480,10 @@ export class EngineeringControlPlane extends Service {
 
   private async runtime(): Promise<ControlPlaneRuntime> {
     if (this.disposed) throw new Error('Engineering Control Plane is disposing')
-    const runtime = await this.ready
+    const state = await this.ready
     if (this.disposed) throw new Error('Engineering Control Plane is disposing')
-    return runtime
+    if (state.kind === 'READ_ONLY_SAFE') throw new ControlPlaneUnavailableError()
+    return state.runtime
   }
 
   private async controlAuthority(
