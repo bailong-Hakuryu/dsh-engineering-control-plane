@@ -1,7 +1,8 @@
 {
   "name": "dsh-engineering-control-plane",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "license": "MIT",
   "description": "Evidence-backed engineering Mission governance for DeepSeek Harness",
   "type": "module",
   "packageManager": "pnpm@11.7.0",
@@ -45,12 +46,20 @@
     "lib/**/*.js",
     "lib/types/**/*.d.ts",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SECURITY.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "oxlint src tests --deny-warnings",
     "prepack": "pnpm build",
+    "pack:dry-run": "npm --cache .scratch/npm-cache pack --dry-run",
+    "release:check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm pack:dry-run",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest"

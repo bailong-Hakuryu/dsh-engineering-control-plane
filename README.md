@@ -18,6 +18,10 @@ The v0.1 package exposes five entry points:
   host-startup-only Provider contract; it exposes no model or browser
   registration authority.
 
+Version `0.1.0` is prepared as the local v0.1 acceptance package. Tagging,
+GitHub upload, and registry publication remain intentionally deferred until
+the delivered artifacts pass deployment-owner verification.
+
 ## Safety model
 
 - A canonical worktree can have only one non-terminal Mission.
@@ -53,7 +57,8 @@ pnpm run lint
 pnpm run typecheck
 pnpm test
 pnpm run build
-pnpm pack
+pnpm pack:dry-run
+pnpm release:check
 ```
 
 ## Install the packed bundle
@@ -166,7 +171,7 @@ activation policy:
 ```yaml
 assuranceProviders:
   - providerId: dsh/security-assurance
-    providerVersion: 0.0.0-development
+    providerVersion: 0.1.0-rc.1
     activation: required
     configuration:
       repositoryId: repo-00000000-0000-4000-8000-000000000000
