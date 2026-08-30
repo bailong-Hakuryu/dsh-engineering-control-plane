@@ -180,7 +180,7 @@ activation policy:
 ```yaml
 assuranceProviders:
   - providerId: dsh/security-assurance
-    providerVersion: 0.1.0-rc.6
+    providerVersion: 0.1.0-rc.7
     activation: required
     configuration:
       repositoryId: repo-00000000-0000-4000-8000-000000000000

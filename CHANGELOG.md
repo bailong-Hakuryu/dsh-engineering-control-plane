@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.6] - 2026-08-30
+
+- Redact and count sensitive assignments even when their values are shorter
+  than eight characters before Implementation Evidence is persisted.
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.7`.
+
 ## [0.1.5] - 2026-08-30
 
 - Durably settle synchronous and asynchronous Assurance Provider execution

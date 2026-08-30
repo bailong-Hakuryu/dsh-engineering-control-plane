@@ -56,7 +56,7 @@ export function redactPotentialSecrets(text: string): { readonly text: string; r
     (match, prefix: string) => replace(match, prefix),
   )
   redacted = redacted.replace(
-    /((?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|passwd|secret|token)\s*[:=]\s*["']?)([^\s"'\\]{8,})/giu,
+    /((?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|passwd|secret|token)\s*[:=]\s*["']?)([^\s"'\\]+)/giu,
     (match, prefix: string) => replace(match, prefix),
   )
   return { text: redacted, count }

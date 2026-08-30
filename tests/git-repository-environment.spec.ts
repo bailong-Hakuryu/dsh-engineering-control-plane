@@ -6,7 +6,10 @@ import { promisify } from 'node:util'
 import { Context } from '@deepseek-ai/cordis'
 import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
 import { afterEach, describe, expect, it } from 'vitest'
-import { GitRepositoryAdapter } from '../src/adapters/git-repository.ts'
+import {
+  GitRepositoryAdapter,
+  redactPotentialSecrets,
+} from '../src/adapters/git-repository.ts'
 import { HarnessCommandExecutor } from '../src/adapters/harness-command-executor.ts'
 
 const run = promisify(execFile)
@@ -28,6 +31,14 @@ afterEach(async () => {
 })
 
 describe('Git repository execution environment', () => {
+  it.each([
+    ['password=hunter2', 'password=[REDACTED]'],
+    ['token=x', 'token=[REDACTED]'],
+    ["api_key: 'tiny'", "api_key: '[REDACTED]'"],
+  ])('redacts short sensitive assignments before persistence: %s', (input, expected) => {
+    expect(redactPotentialSecrets(input)).toEqual({ text: expected, count: 1 })
+  })
+
   it('keeps ambient counted Git config atomic when credential-shaped names are scrubbed', async () => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-control-plane-git-environment-'))
     temporaryRoots.push(root)
