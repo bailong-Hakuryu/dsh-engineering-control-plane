@@ -15,7 +15,7 @@ const bundlePatch = readFileSync(new URL('../cordis.patch.yml', import.meta.url)
 
 describe('v0.1 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.1.6')
+    expect(packageJson.version).toBe('0.1.7')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')

@@ -314,7 +314,8 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
     if (
       snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
       || (
-        snapshot.blocked?.resumeStatus === 'REVIEWING'
+        snapshot.blocked?.reason.code !== 'needs_input'
+        && snapshot.blocked?.resumeStatus === 'REVIEWING'
         && hasSelectedAssuranceProviders
         && snapshot.gate?.kind === 'blocked'
         && retryableExternalAssuranceInvocations(snapshot).length === 0

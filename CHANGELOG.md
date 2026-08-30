@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.7] - 2026-08-30
+
+- Keep `mission_resume` legal for REVIEWING input blocks when the block reason
+  is `needs_input`, so operators can provide the requested information.
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.8`.
+
 ## [0.1.6] - 2026-08-30
 
 - Redact and count sensitive assignments even when their values are shorter
