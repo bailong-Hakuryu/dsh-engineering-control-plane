@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.1] - 2026-08-30
+
+- Enable a Node/pnpm direct-use Harness bundle rooted at the launcher cwd.
+- Mount the shared invariant registry required by both plugin companions in a
+  fresh Harness `0.1.2-alpha.1` Web profile.
+- Make Host verification ownership explicit in Planner and Developer contracts.
+- Restore `mission_resume` as a legal action for pre-assurance role input blocks.
+- Bind optional Security Assurance through a stable Host repository binding ID.
+- Qualify the package against DeepSeek Harness `0.1.2-alpha.1`.
+
 ## [0.1.0] - 2026-08-29
 
 ### Added

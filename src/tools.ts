@@ -313,7 +313,11 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
   if (snapshot.status === 'BLOCKED') {
     if (
       snapshot.blocked?.reason.code === 'assurance_execution_unavailable'
-      || (hasSelectedAssuranceProviders && retryableExternalAssuranceInvocations(snapshot).length === 0)
+      || (
+        snapshot.blocked?.resumeStatus === 'REVIEWING'
+        && hasSelectedAssuranceProviders
+        && retryableExternalAssuranceInvocations(snapshot).length === 0
+      )
     ) {
       return ['mission_status', 'mission_cancel']
     }

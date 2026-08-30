@@ -7,49 +7,72 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@deepseek-ai/schemastery':
+        specifier: ^3.18.1
+        version: 3.18.1
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: link:../deepseek-harness-master/vendor/cordis
-        version: link:../deepseek-harness-master/vendor/cordis
+        specifier: link:../deepseek-harness-latest/vendor/cordis
+        version: link:../deepseek-harness-latest/vendor/cordis
       '@deepseek-ai/cordis-plugin-loader':
-        specifier: link:../deepseek-harness-master/vendor/loader
-        version: link:../deepseek-harness-master/vendor/loader
+        specifier: link:../deepseek-harness-latest/vendor/loader
+        version: link:../deepseek-harness-latest/vendor/loader
       '@deepseek-ai/dsh-agent':
-        specifier: link:../deepseek-harness-master/packages/core/agent
-        version: link:../deepseek-harness-master/packages/core/agent
+        specifier: link:../deepseek-harness-latest/packages/core/agent
+        version: link:../deepseek-harness-latest/packages/core/agent
       '@deepseek-ai/dsh-home-paths':
-        specifier: link:../deepseek-harness-master/packages/util/home-paths
-        version: link:../deepseek-harness-master/packages/util/home-paths
+        specifier: link:../deepseek-harness-latest/packages/util/home-paths
+        version: link:../deepseek-harness-latest/packages/util/home-paths
       '@deepseek-ai/dsh-invariants':
-        specifier: link:../deepseek-harness-master/packages/runtime-diagnostics/invariants
-        version: link:../deepseek-harness-master/packages/runtime-diagnostics/invariants
+        specifier: link:../deepseek-harness-latest/packages/runtime-diagnostics/invariants
+        version: link:../deepseek-harness-latest/packages/runtime-diagnostics/invariants
       '@deepseek-ai/dsh-subagent':
-        specifier: link:../deepseek-harness-master/packages/subagent/subagent
-        version: link:../deepseek-harness-master/packages/subagent/subagent
+        specifier: link:../deepseek-harness-latest/packages/subagent/subagent
+        version: link:../deepseek-harness-latest/packages/subagent/subagent
       '@deepseek-ai/dsh-subprocess':
-        specifier: link:../deepseek-harness-master/packages/subprocess/subprocess
-        version: link:../deepseek-harness-master/packages/subprocess/subprocess
+        specifier: link:../deepseek-harness-latest/packages/subprocess/subprocess
+        version: link:../deepseek-harness-latest/packages/subprocess/subprocess
       '@deepseek-ai/dsh-subprocess-local':
-        specifier: link:../deepseek-harness-master/packages/subprocess/subprocess-local
-        version: link:../deepseek-harness-master/packages/subprocess/subprocess-local
+        specifier: link:../deepseek-harness-latest/packages/subprocess/subprocess-local
+        version: link:../deepseek-harness-latest/packages/subprocess/subprocess-local
       '@deepseek-ai/dsh-system-prompt':
-        specifier: link:../deepseek-harness-master/packages/core/system-prompt
-        version: link:../deepseek-harness-master/packages/core/system-prompt
+        specifier: link:../deepseek-harness-latest/packages/core/system-prompt
+        version: link:../deepseek-harness-latest/packages/core/system-prompt
       '@deepseek-ai/dsh-tools':
-        specifier: link:../deepseek-harness-master/packages/core/tools
-        version: link:../deepseek-harness-master/packages/core/tools
-      '@deepseek-ai/schemastery':
-        specifier: link:../deepseek-harness-master/vendor/schemastery
-        version: link:../deepseek-harness-master/vendor/schemastery
+        specifier: link:../deepseek-harness-latest/packages/core/tools
+        version: link:../deepseek-harness-latest/packages/core/tools
       '@types/node':
-        specifier: link:../deepseek-harness-master/node_modules/@types/node
-        version: link:../deepseek-harness-master/node_modules/@types/node
+        specifier: link:../deepseek-harness-latest/node_modules/@types/node
+        version: link:../deepseek-harness-latest/node_modules/@types/node
       oxlint:
-        specifier: link:../deepseek-harness-master/node_modules/oxlint
-        version: link:../deepseek-harness-master/node_modules/oxlint
+        specifier: link:../deepseek-harness-latest/node_modules/oxlint
+        version: link:../deepseek-harness-latest/node_modules/oxlint
       typescript:
-        specifier: link:../deepseek-harness-master/node_modules/typescript
-        version: link:../deepseek-harness-master/node_modules/typescript
+        specifier: link:../deepseek-harness-latest/node_modules/typescript
+        version: link:../deepseek-harness-latest/node_modules/typescript
       vitest:
-        specifier: link:../deepseek-harness-master/node_modules/vitest
-        version: link:../deepseek-harness-master/node_modules/vitest
+        specifier: link:../deepseek-harness-latest/node_modules/vitest
+        version: link:../deepseek-harness-latest/node_modules/vitest
+
+packages:
+
+  '@deepseek-ai/cosmokit@1.8.2':
+    resolution: {integrity: sha512-muBOKtSrUKU5m/xpq8ZXWL6hQ/jgd4PhU2PqH97bcxIiLEJfNwZOGQEx4t/aS/GgxRAR+ra9pMHPMtTHU4sqqA==}
+
+  '@deepseek-ai/schemastery@3.18.1':
+    resolution: {integrity: sha512-Qn0FCSwCQnpnj6SB31I6i2sIKgKWnkbJM8O0EU91Gv2UsYVvtZTl6IA0sCwk2e2MZf5S8w5hpq9QkeVvK9qwxg==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+snapshots:
+
+  '@deepseek-ai/cosmokit@1.8.2': {}
+
+  '@deepseek-ai/schemastery@3.18.1':
+    dependencies:
+      '@deepseek-ai/cosmokit': 1.8.2
+      '@standard-schema/spec': 1.1.0
+
+  '@standard-schema/spec@1.1.0': {}

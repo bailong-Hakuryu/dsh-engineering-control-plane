@@ -101,11 +101,13 @@ describe('MissionRunner happy path', () => {
       },
     }, authority)
     const requestedRoles: RoleName[] = []
+    const rolePrompts = new Map<RoleName, string>()
     const host: MissionExecutionHost = {
       evidenceStore,
       roleExecutor: {
         async start(request: RoleExecutionRequest) {
           requestedRoles.push(request.role)
+          rolePrompts.set(request.role, request.prompt)
           return {
             trace: {
               provider: 'scripted',
@@ -150,6 +152,17 @@ describe('MissionRunner happy path', () => {
     await runner.launch(started.missionId, authority, host).settled
 
     expect(requestedRoles).toEqual(['planner', 'developer', 'tester', 'reviewer'])
+    const plannerPrompt = JSON.parse(rolePrompts.get('planner') ?? '{}') as {
+      executionContract?: string[]
+    }
+    const developerPrompt = JSON.parse(rolePrompts.get('developer') ?? '{}') as {
+      executionContract?: string[]
+    }
+    expect(plannerPrompt.executionContract?.join(' ')).toContain('Host verification')
+    expect(plannerPrompt.executionContract?.join(' ')).toContain('validation-only Mission')
+    expect(developerPrompt.executionContract?.join(' ')).toContain('after outcome implemented')
+    expect(developerPrompt.executionContract?.join(' ')).toContain('empty changedAreas')
+    expect(developerPrompt.executionContract?.join(' ')).toContain('Do not return needs_input')
     await expect(kernel.snapshot(started.missionId, authority)).resolves.toMatchObject({
       status: 'APPROVED',
       attempt: 1,

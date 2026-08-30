@@ -39,6 +39,7 @@ export function registerScriptedEngineeringProvider(
   const provider: SubagentProvider = {
     name: 'spawn',
     capabilities: {
+      agentOptions: true,
       outputSchema: true,
       depthLimit: true,
       toolFilter: true,

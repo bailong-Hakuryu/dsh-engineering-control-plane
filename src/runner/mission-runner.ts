@@ -133,10 +133,28 @@ interface RoleStepResult {
 }
 
 const ROLE_PERSONAS: Readonly<Record<RoleName, string>> = {
-  planner: 'You are the Planner. Produce an incremental, testable plan. Report facts only; you cannot approve the Mission.',
-  developer: 'You are the Developer. Implement only the accepted Plan. Do not commit, switch branches, or rewrite Git history.',
+  planner: 'You are the Planner. Produce an incremental, testable plan. Host verification owns every configured command; do not assign those commands to a Role. Report facts only; you cannot approve the Mission.',
+  developer: 'You are the Developer. Implement only the accepted Plan. Host verification runs automatically after you return implemented; do not request shell access to run verification. Do not commit, switch branches, or rewrite Git history.',
   tester: 'You are the Tester. Interpret only host-captured verification Evidence. Do not execute commands or claim approval.',
   reviewer: 'You are the Reviewer. Identify blocking and non-blocking findings from Evidence. You cannot approve the Mission.',
+}
+
+const ROLE_EXECUTION_CONTRACTS: Readonly<Record<RoleName, readonly string[]>> = {
+  planner: [
+    'Plan repository work only. Treat configured test, typecheck, build, lint, audit, and pack commands as Host verification acceptance signals, never as Planner or Developer actions.',
+    'For a validation-only Mission, plan inspection and a no-change Developer handoff; do not require repository mutation merely to reach verification.',
+  ],
+  developer: [
+    'Use only the supplied workspace tools to implement the accepted Plan. The Host owns command execution and will run the frozen verification profile after outcome implemented.',
+    'Do not return needs_input merely because shell, test, typecheck, build, lint, audit, or pack commands are unavailable to this Role.',
+    'If inspection proves no repository change is required, return implemented with an empty changedAreas array and explain the no-change result in summary or notes.',
+  ],
+  tester: [
+    'Assess only the Host-published verification Evidence. Never request tools to rerun a command.',
+  ],
+  reviewer: [
+    'Review only the published Mission Evidence and report findings. The deterministic Gate owns approval.',
+  ],
 }
 
 const VERIFICATION_CATEGORIES = ['functional', 'negative', 'regression', 'security'] as const
@@ -746,6 +764,7 @@ export class MissionRunner {
         latestInput: snapshot.inputRecords.at(-1),
         previousGate: snapshot.gate,
       },
+      executionContract: ROLE_EXECUTION_CONTRACTS[role],
       evidence,
       ...priorAttempt === undefined ? {} : { priorAttempt },
     })

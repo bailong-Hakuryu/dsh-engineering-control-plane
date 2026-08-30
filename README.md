@@ -63,8 +63,13 @@ pnpm release:check
 
 ## Install the packed bundle
 
-The shipped bundle rows are deliberately disabled because repository authority
-and verification policy cannot have safe universal defaults.
+The shipped bundle is directly usable for a Node/pnpm repository. It supplies
+the shared invariant registry omitted by the Harness `0.1.2-alpha.1` Web
+profile and binds the Harness launcher's current working directory as the deployment-owned Repository,
+enables the Mission tools and invariant, and freezes `pnpm test`, `pnpm run
+typecheck`, and `pnpm run build` as Host verification commands. Start Harness
+from the repository you intend to govern. Deployments using another build system
+must replace the complete `engineering-control-plane` config row in their profile.
 
 The normal Harness base bundle already loads the `subagents` registry, the
 `@deepseek-ai/dsh-subagent-spawn-in-process` backend as provider `spawn`, and a
@@ -73,12 +78,16 @@ capabilities before enabling this plugin; their absence is treated as an
 operational failure and can never be converted into approval.
 
 ```sh
-dsh plugin --profile engineering add ./dsh-engineering-control-plane-0.1.0.tgz
+dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.1.tgz
+dsh --profile web --dump-config
+dsh --profile web
 ```
 
-Add the following later-layer rows to the profile's `cordis.patch.yml`. Replace
-the repository root and commands with deployment-owned values. A later row
-replaces the complete earlier row, so keep `id`, `name` and the full `config`.
+No activation row or generated repository identifier is required. When Security
+Assurance is also installed, the optional Provider resolves the stable
+`current-workspace` Host binding at invocation time. A later row replaces the
+complete earlier row, so custom deployments must keep `id`, `name`, and the full
+`config`.
 
 ```yaml
 - insert:

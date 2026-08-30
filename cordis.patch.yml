@@ -1,15 +1,68 @@
 - insert:
-    # Repository authority and verification policy are deployment-owned. The
-    # bundle therefore installs dormant rows; activate them in a later profile
-    # patch only after supplying the complete Service configuration.
+    # Direct-use Node/pnpm profile. The launcher cwd is the deployment-owned
+    # repository root; later profile rows may replace this complete config.
+    # Harness 0.1.2-alpha.1 does not mount the invariant registry in Web by
+    # default, so this shared direct-use row must precede both companions.
+    - id: engineering-control-plane-invariants
+      name: '@deepseek-ai/dsh-invariants'
+
     - id: engineering-control-plane
       name: dsh-engineering-control-plane
-      disabled: true
+      config:
+        subagentProvider: spawn
+        maxSubagentDepth: 1
+        repositories:
+          - root: !!js process.cwd()
+            verificationProfile: node-pnpm
+            assuranceProviders:
+              - providerId: dsh/security-assurance
+                providerVersion: 0.1.0-rc.2
+                activation: when-available
+                configuration:
+                  repositoryBindingId: current-workspace
+        rolePolicies:
+          planner:
+            allowTools: [read, glob, grep, lsp]
+            denyTools: []
+          developer:
+            allowTools: [read, write, edit, str_replace_editor, glob, grep, lsp]
+            denyTools: []
+          tester:
+            allowTools: [read, glob, grep]
+            denyTools: []
+          reviewer:
+            allowTools: [read, glob, grep]
+            denyTools: []
+        verificationProfiles:
+          - name: node-pnpm
+            categories:
+              functional:
+                mode: commands
+                commands:
+                  - name: test
+                    argv: [pnpm, test]
+                    timeoutMs: 180000
+                    environmentNames: []
+              negative:
+                mode: commands
+                commands:
+                  - name: typecheck
+                    argv: [pnpm, run, typecheck]
+                    timeoutMs: 180000
+                    environmentNames: []
+              regression:
+                mode: commands
+                commands:
+                  - name: build
+                    argv: [pnpm, run, build]
+                    timeoutMs: 180000
+                    environmentNames: []
+              security:
+                mode: not_applicable
+                reason: 'Security Assurance owns this category when its optional Host Provider is installed.'
 
     - id: engineering-control-plane-tools
       name: dsh-engineering-control-plane/tools
-      disabled: true
 
     - id: engineering-control-plane-invariant
       name: dsh-engineering-control-plane/invariant
-      disabled: true

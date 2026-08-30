@@ -322,6 +322,39 @@ describe('Mission tool Adapter', () => {
     ])
   })
 
+  it('keeps Resume legal when a role needs input before any selected Assurance Provider runs', () => {
+    const blocked: MissionSnapshot = {
+      ...snapshot(),
+      status: 'BLOCKED',
+      blocked: {
+        reason: { code: 'needs_input', detail: 'Clarify the implementation requirement.' },
+        resumeStatus: 'IMPLEMENTING',
+        blockedAt: '2026-08-30T00:00:00.000Z',
+      },
+      assuranceProviderSelections: [{
+        schemaVersion: 1,
+        attempt: 1,
+        providers: [{
+          schemaVersion: 1,
+          descriptor: {
+            schemaVersion: 1,
+            providerId: 'dsh/security-assurance',
+            providerVersion: '0.1.0-rc.2',
+          },
+          activation: 'required',
+        }],
+      }],
+      assuranceProviderInvocations: [],
+      writeLease: { fencingToken: 1, releasedAt: '2026-08-30T00:00:00.000Z' },
+    }
+
+    expect(missionTools.statusValue(blocked).legalNextActions).toEqual([
+      'mission_status',
+      'mission_resume',
+      'mission_cancel',
+    ])
+  })
+
   it('advertises Rework after a failed external Assurance Gate', () => {
     const reworkRequired: MissionSnapshot = {
       ...snapshot(),
