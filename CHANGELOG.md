@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.3] - 2026-08-30
+
+- Remove legacy `lsp` and `str_replace_editor` names from the direct-use role
+  policies so Harness `0.1.2-alpha.1` can construct Planner and Developer tool
+  restrictions.
+- Bind the optional Security Assurance policy to `0.1.0-rc.4`.
+
 ## [0.1.2] - 2026-08-30
 
 - Bind the direct-use optional Security Assurance policy to

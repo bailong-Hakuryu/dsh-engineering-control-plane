@@ -16,16 +16,16 @@
             verificationProfile: node-pnpm
             assuranceProviders:
               - providerId: dsh/security-assurance
-                providerVersion: 0.1.0-rc.3
+                providerVersion: 0.1.0-rc.4
                 activation: when-available
                 configuration:
                   repositoryBindingId: current-workspace
         rolePolicies:
           planner:
-            allowTools: [read, glob, grep, lsp]
+            allowTools: [read, glob, grep]
             denyTools: []
           developer:
-            allowTools: [read, write, edit, str_replace_editor, glob, grep, lsp]
+            allowTools: [read, write, edit, glob, grep]
             denyTools: []
           tester:
             allowTools: [read, glob, grep]
