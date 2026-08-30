@@ -452,16 +452,11 @@ export class AssuranceProviderInvocationCoordinator {
     if (this.disposed) return
     const controller = new AbortController()
     this.active.set(invocationId, controller)
-    let outcome: Promise<AssuranceProviderOutcomeV1>
-    try {
+    const outcome: Promise<AssuranceProviderOutcomeV1> = Promise.resolve().then(() => {
       const execute = operation === 'assess' ? provider.assess : provider.recover
       if (execute === undefined) throw new Error('Provider recovery operation is unavailable')
-      outcome = Promise.resolve(execute.call(provider, context, request, { signal: controller.signal }))
-    } catch {
-      this.active.delete(invocationId)
-      this.report(`Assurance Provider invocation '${invocationId}' failed after it began`)
-      return
-    }
+      return execute.call(provider, context, request, { signal: controller.signal })
+    })
     let execution!: Promise<void>
     execution = outcome.then(
       result => this.acceptOutcome(
@@ -472,8 +467,22 @@ export class AssuranceProviderInvocationCoordinator {
         authority,
         controller,
       ),
-      () => {
+      async () => {
         this.report(`Assurance Provider invocation '${invocationId}' failed after it began`)
+        await this.settleWithRetry(
+          invocationId,
+          context,
+          {
+            kind: 'external_failure',
+            failure: parseExternalAssessmentFailureV1({
+              schemaVersion: 1,
+              reason: 'failed',
+              code: 'provider_execution_failed',
+            }),
+          },
+          authority,
+          controller,
+        )
       },
     ).catch(() => {
       this.report(`Assurance Provider invocation '${invocationId}' outcome could not be imported`)

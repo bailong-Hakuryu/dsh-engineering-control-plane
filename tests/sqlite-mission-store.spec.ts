@@ -289,4 +289,36 @@ describe('SqliteMissionStore', () => {
     })
     reopened.close()
   })
+
+  it.each([
+    ['status', "UPDATE missions SET status = 'ANALYZING' WHERE mission_id = 'mission-projection'"],
+    ['canonical root', "UPDATE missions SET canonical_root = 'D:/tampered-root' WHERE mission_id = 'mission-projection'"],
+  ])('rejects a database whose %s projection disagrees with its snapshot', async (_field, update) => {
+    const path = await temporaryDatabase()
+    const store = await openSqliteMissionStore({ path })
+    const kernel = createControlPlaneKernel({
+      store,
+      nextMissionId: () => 'mission-projection',
+      now: () => '2026-08-22T16:00:00.000Z',
+      resolveEffectivePolicy: () => policy,
+    })
+    await kernel.dispatch({
+      kind: 'start',
+      idempotencyKey: 'projection-start',
+      input: { objective: 'Keep SQLite projections bound to their snapshot' },
+    }, authority)
+    await store.close()
+
+    const tamper = new DatabaseSync(path)
+    tamper.exec(update)
+    tamper.close()
+
+    try {
+      const reopened = await openSqliteMissionStore({ path })
+      await reopened.close()
+      throw new Error('Expected a corrupt Store projection to be rejected')
+    } catch (error) {
+      expect(error).toMatchObject({ code: 'corrupt_store' })
+    }
+  })
 })

@@ -500,4 +500,129 @@ describe('AssuranceProviderInvocationCoordinator process lifecycle', () => {
       coordinator.dispose()
     }
   })
+
+  it.each([
+    ['synchronous throw', () => { throw new Error('fixture synchronous Provider failure') }],
+    ['rejected Promise', () => Promise.reject(new Error('fixture asynchronous Provider failure'))],
+  ] as const)('durably settles a begun invocation after a Provider %s', async (_kind, assess) => {
+    const descriptor = {
+      schemaVersion: 1 as const,
+      providerId: 'fixture/execution-failure-provider',
+      providerVersion: '1.0.0-fixture.1',
+    }
+    const repository = {
+      canonicalRoot: 'D:/execution-failure-fixture',
+      branch: 'main',
+      head: '1'.repeat(40),
+      workspaceFingerprint: 'sha256:' + '2'.repeat(64),
+    }
+    const invocationId = 'mission-execution-failure:assurance:1:1'
+    let snapshot = {
+      missionId: 'mission-execution-failure',
+      revision: 1,
+      repository,
+      effectivePolicyDigest: 'sha256:' + '3'.repeat(64),
+      status: 'IMPLEMENTING',
+      attempt: 1,
+      updatedAt: '2026-08-23T03:30:00.000Z',
+      assuranceSubjects: [{
+        schemaVersion: 1,
+        attempt: 1,
+        subject: {
+          kind: 'git_worktree',
+          branch: repository.branch,
+          head: repository.head,
+          workspaceFingerprint: repository.workspaceFingerprint,
+        },
+        implementationEvidenceRecordId: 'implementation-1',
+        frozenAt: '2026-08-23T03:30:00.000Z',
+      }],
+      assuranceProviderInvocations: [{
+        schemaVersion: 1,
+        invocationId,
+        attempt: 1,
+        descriptor,
+        state: 'prepared',
+        preparedAt: '2026-08-23T03:30:00.000Z',
+      }],
+    } as unknown as MissionSnapshot
+    const authority = {
+      principalId: 'service:execution-failure',
+      repository,
+      actions: ['read', 'orchestrate'],
+    } satisfies MissionAuthority
+    const kernel: ControlPlaneKernel = {
+      async snapshot() {
+        return structuredClone(snapshot)
+      },
+      async dispatch(command) {
+        if (command.kind === 'begin_assurance_provider_invocation') {
+          snapshot = {
+            ...snapshot,
+            revision: snapshot.revision + 1,
+            assuranceProviderInvocations: [{
+              ...snapshot.assuranceProviderInvocations![0]!,
+              state: 'begun',
+              begunAt: snapshot.updatedAt,
+            }],
+          } as MissionSnapshot
+        } else if (
+          command.kind === 'settle_assurance_provider_invocation'
+          && command.outcome.kind === 'external_failure'
+        ) {
+          snapshot = {
+            ...snapshot,
+            revision: snapshot.revision + 1,
+            assuranceProviderInvocations: [{
+              ...snapshot.assuranceProviderInvocations![0]!,
+              state: 'external_failed',
+              failedAt: snapshot.updatedAt,
+              failure: command.outcome.failure,
+            }],
+          } as MissionSnapshot
+        } else {
+          throw new Error('Fixture received an unexpected command')
+        }
+        return {
+          missionId: snapshot.missionId,
+          revision: snapshot.revision,
+          status: snapshot.status,
+          attempt: snapshot.attempt,
+          acceptedAt: snapshot.updatedAt,
+        }
+      },
+    }
+    const registry = new AssuranceProviderRegistry()
+    registry.register(descriptor, normalizedDescriptor => ({
+      descriptor: normalizedDescriptor,
+      assess,
+    }))
+    registry.closeRegistration()
+    const coordinator = new AssuranceProviderInvocationCoordinator({
+      kernel,
+      registry,
+      evidenceStore: {
+        async publish() {
+          throw new Error('Evidence publication must not run for a failed Provider')
+        },
+      },
+      maxSubmissionBytes: 16_384,
+      onError: () => {},
+    })
+
+    try {
+      const settled = await coordinator.execute(snapshot, authority, new AbortController().signal)
+      expect(settled.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        invocationId,
+        state: 'external_failed',
+        failure: {
+          schemaVersion: 1,
+          reason: 'failed',
+          code: 'provider_execution_failed',
+        },
+      })])
+    } finally {
+      coordinator.dispose()
+    }
+  })
 })

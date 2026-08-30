@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.5] - 2026-08-30
+
+- Durably settle synchronous and asynchronous Assurance Provider execution
+  failures as redacted `external_failed` outcomes instead of leaving `begun`
+  invocations behind.
+- Reject SQLite stores whose indexed Repository root or Mission status
+  disagrees with the authoritative snapshot JSON.
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.6`.
+
 ## [0.1.4] - 2026-08-30
 
 - Bind Assurance evidence validation to the frozen subject of the matching

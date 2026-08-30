@@ -52,7 +52,9 @@ export class MissionStoreFormatError extends Error {
 
 interface MissionRow {
   readonly mission_id: string
+  readonly canonical_root: string
   readonly revision: number
+  readonly status: string
   readonly snapshot_json: string
 }
 
@@ -227,7 +229,7 @@ function preflightExistingDatabase(path: string): void {
     }
     validateSchema(db, path)
     const rows = db.prepare(`
-      SELECT mission_id, revision, snapshot_json
+      SELECT mission_id, canonical_root, revision, status, snapshot_json
       FROM missions
       ORDER BY mission_id
     `).all() as unknown as MissionRow[]
@@ -285,7 +287,7 @@ async function migrateIfRequired(db: DatabaseSync, path: string, onDisk: number)
   beginImmediate(db)
   try {
     const rows = db.prepare(`
-      SELECT mission_id, revision, snapshot_json
+      SELECT mission_id, canonical_root, revision, status, snapshot_json
       FROM missions
       ORDER BY mission_id
     `).all() as unknown as MissionRow[]
@@ -363,7 +365,16 @@ function decodeSnapshot(row: MissionRow, path: string): MissionSnapshot {
   if (typeof value !== 'object' || value === null) {
     throw new MissionStoreFormatError('corrupt_store', `Mission '${row.mission_id}' is not an object`)
   }
-  if (Reflect.get(value, 'missionId') !== row.mission_id || Reflect.get(value, 'revision') !== row.revision) {
+  const repository = Reflect.get(value, 'repository')
+  const canonicalRoot = typeof repository === 'object' && repository !== null
+    ? Reflect.get(repository, 'canonicalRoot')
+    : undefined
+  if (
+    Reflect.get(value, 'missionId') !== row.mission_id
+    || canonicalRoot !== row.canonical_root
+    || Reflect.get(value, 'revision') !== row.revision
+    || Reflect.get(value, 'status') !== row.status
+  ) {
     throw new MissionStoreFormatError(
       'corrupt_store',
       `Mission '${row.mission_id}' indexed fields disagree with its snapshot`,
@@ -391,7 +402,7 @@ export class SqliteMissionStore implements MissionStore {
     try {
       this.validateForMutation()
       const replay = this.db.prepare(`
-        SELECT m.mission_id, m.revision, m.snapshot_json
+        SELECT m.mission_id, m.canonical_root, m.revision, m.status, m.snapshot_json
         FROM starts AS s
         JOIN missions AS m ON m.mission_id = s.mission_id
         WHERE s.idempotency_key = ?
@@ -402,7 +413,7 @@ export class SqliteMissionStore implements MissionStore {
       }
 
       const active = this.db.prepare(`
-        SELECT mission_id, revision, snapshot_json
+        SELECT mission_id, canonical_root, revision, status, snapshot_json
         FROM missions
         WHERE canonical_root = ? AND status NOT IN ('APPROVED', 'CANCELLED')
       `).get(canonicalRoot) as MissionRow | undefined
@@ -438,7 +449,7 @@ export class SqliteMissionStore implements MissionStore {
     this.ensureOpen()
     validateIdentity(this.db, this.path)
     const row = this.db.prepare(`
-      SELECT mission_id, revision, snapshot_json
+      SELECT mission_id, canonical_root, revision, status, snapshot_json
       FROM missions
       WHERE mission_id = ?
     `).get(missionId) as MissionRow | undefined
@@ -455,7 +466,7 @@ export class SqliteMissionStore implements MissionStore {
     try {
       this.validateForMutation()
       const row = this.db.prepare(`
-        SELECT mission_id, revision, snapshot_json
+        SELECT mission_id, canonical_root, revision, status, snapshot_json
         FROM missions
         WHERE mission_id = ?
       `).get(missionId) as MissionRow | undefined
@@ -500,7 +511,7 @@ export class SqliteMissionStore implements MissionStore {
     this.ensureOpen()
     validateIdentity(this.db, this.path)
     const rows = this.db.prepare(`
-      SELECT mission_id, revision, snapshot_json
+      SELECT mission_id, canonical_root, revision, status, snapshot_json
       FROM missions
       WHERE status NOT IN ('APPROVED', 'CANCELLED')
       ORDER BY updated_at, mission_id
@@ -556,7 +567,7 @@ export function inspectSqliteMissionStore(path: string): SqliteMissionStoreInspe
     validateIdentity(db, actual)
     validateSchema(db, actual)
     const rows = db.prepare(`
-      SELECT mission_id, revision, snapshot_json
+      SELECT mission_id, canonical_root, revision, status, snapshot_json
       FROM missions
       ORDER BY updated_at, mission_id
     `).all() as unknown as MissionRow[]
