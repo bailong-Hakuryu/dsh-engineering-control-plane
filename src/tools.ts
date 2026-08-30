@@ -316,6 +316,7 @@ function legalNextActions(snapshot: MissionSnapshot): StatusValue['legalNextActi
       || (
         snapshot.blocked?.resumeStatus === 'REVIEWING'
         && hasSelectedAssuranceProviders
+        && snapshot.gate?.kind === 'blocked'
         && retryableExternalAssuranceInvocations(snapshot).length === 0
       )
     ) {

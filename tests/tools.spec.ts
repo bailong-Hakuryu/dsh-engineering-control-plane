@@ -322,13 +322,13 @@ describe('Mission tool Adapter', () => {
     ])
   })
 
-  it('keeps Resume legal when a role needs input before any selected Assurance Provider runs', () => {
+  it('keeps Resume legal when REVIEWING needs input outside a blocked Assurance Gate', () => {
     const blocked: MissionSnapshot = {
       ...snapshot(),
       status: 'BLOCKED',
       blocked: {
         reason: { code: 'needs_input', detail: 'Clarify the implementation requirement.' },
-        resumeStatus: 'IMPLEMENTING',
+        resumeStatus: 'REVIEWING',
         blockedAt: '2026-08-30T00:00:00.000Z',
       },
       assuranceProviderSelections: [{

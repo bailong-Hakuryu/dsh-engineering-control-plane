@@ -118,6 +118,12 @@ describe('read-only control-plane doctor', () => {
       providerId: 'fixture/doctor-provider',
       providerVersion: '1.0.0-fixture.1',
     }
+    const attemptSubject = {
+      kind: 'git_worktree' as const,
+      branch: repository.branch,
+      head: repository.head,
+      workspaceFingerprint: `sha256:${'6'.repeat(64)}`,
+    }
     const assurancePolicy: EffectivePolicy = {
       ...policy,
       assuranceProviderActivations: [{
@@ -178,12 +184,7 @@ describe('read-only control-plane doctor', () => {
       missionId: started.missionId,
       expectedRevision: revision,
       implementationEvidenceRecordId: implementationEvidence.recordId,
-      subject: {
-        kind: 'git_worktree',
-        branch: repository.branch,
-        head: repository.head,
-        workspaceFingerprint: repository.workspaceFingerprint,
-      },
+      subject: attemptSubject,
     }, authority)).revision
     const prepared = await kernel.snapshot(started.missionId, authority)
     const invocationId = prepared.assuranceProviderInvocations?.[0]?.invocationId
@@ -201,12 +202,7 @@ describe('read-only control-plane doctor', () => {
         missionId: started.missionId,
         attempt: 1,
         provider: descriptor,
-        subject: {
-          kind: 'git_worktree',
-          branch: repository.branch,
-          head: repository.head,
-          workspaceFingerprint: repository.workspaceFingerprint,
-        },
+        subject: attemptSubject,
         effectivePolicyDigest: assurancePolicy.digest,
       },
       externalAssessment: {
@@ -270,12 +266,7 @@ describe('read-only control-plane doctor', () => {
           missionId: started.missionId,
           attempt: 1,
           provider: descriptor,
-          subject: {
-            kind: 'git_worktree',
-            branch: repository.branch,
-            head: repository.head,
-            workspaceFingerprint: repository.workspaceFingerprint,
-          },
+          subject: attemptSubject,
           effectivePolicyDigest: assurancePolicy.digest,
         },
         submissionDigest: submission.digest.value,

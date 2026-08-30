@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.4] - 2026-08-30
+
+- Bind Assurance evidence validation to the frozen subject of the matching
+  attempt, avoiding false positives after repository edits.
+- Keep `mission_resume` legal for REVIEWING input blocks unless the Assurance
+  Quality Gate itself is blocked.
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.5`.
+
 ## [0.1.3] - 2026-08-30
 
 - Remove legacy `lsp` and `str_replace_editor` names from the direct-use role

@@ -186,18 +186,17 @@ export async function inspectControlPlane(
         })
       } else {
         try {
+          const attemptSubject = snapshot.assuranceSubjects?.find(item => item.attempt === invocation.attempt)?.subject
+          if (attemptSubject === undefined) {
+            throw new TypeError('Invocation has no frozen Attempt Subject')
+          }
           const payload = await evidenceStore.read(referenced)
           const validated = validateAssuranceSubmissionV1(payload, {
             invocationId: invocation.invocationId,
             missionId: snapshot.missionId,
             attempt: invocation.attempt,
             provider: invocation.descriptor,
-            subject: {
-              kind: 'git_worktree',
-              branch: snapshot.repository.branch,
-              head: snapshot.repository.head,
-              workspaceFingerprint: snapshot.repository.workspaceFingerprint,
-            },
+            subject: attemptSubject,
             effectivePolicyDigest: snapshot.effectivePolicyDigest,
           }, snapshot.effectivePolicy.artifactBudgets?.maxRecordBytes)
           if (
