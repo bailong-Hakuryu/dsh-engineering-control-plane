@@ -16,7 +16,7 @@
             verificationProfile: node-pnpm
             assuranceProviders:
               - providerId: dsh/security-assurance
-                providerVersion: 0.1.0-rc.2
+                providerVersion: 0.1.0-rc.3
                 activation: when-available
                 configuration:
                   repositoryBindingId: current-workspace

@@ -14,7 +14,7 @@ const packageJson = JSON.parse(
 
 describe('v0.1 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.1.1')
+    expect(packageJson.version).toBe('0.1.2')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')

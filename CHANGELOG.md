@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.2] - 2026-08-30
+
+- Bind the direct-use optional Security Assurance policy to
+  `dsh/security-assurance@0.1.0-rc.3`, whose startup now fences repository
+  registration before invariant admission.
+
 ## [0.1.1] - 2026-08-30
 
 - Enable a Node/pnpm direct-use Harness bundle rooted at the launcher cwd.
