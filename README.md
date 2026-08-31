@@ -17,10 +17,6 @@
 
 它适合希望把“让 Agent 改代码”变成可审计流程的团队：每个 Mission 都有明确的身份、Attempt、策略快照、验证结果和最终状态。
 
-<p align="right">
-  <img src="assets/mascot-sticker.png" alt="工程治理角色贴纸" width="220">
-</p>
-
 ### 主要能力
 
 - 一个工作区同时只允许一个非终态 Mission。
