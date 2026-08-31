@@ -1,3 +1,4 @@
+import { extname } from 'node:path'
 import type { SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
 
 export interface CommandExecutionSpec {
@@ -28,21 +29,34 @@ export interface HarnessCommandExecutorOptions {
   readonly maxStdoutBytes?: number
   readonly maxStderrBytes?: number
   readonly terminationGraceMs?: number
+  readonly platform?: NodeJS.Platform
+  readonly windowsCommandInterpreter?: string
 }
 
 const ENVIRONMENT_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
 const COUNTED_GIT_CONFIG_ENVIRONMENT = /^GIT_CONFIG_(?:COUNT|KEY_[0-9]+|VALUE_[0-9]+)$/iu
+const WINDOWS_COMMAND_SHIM_EXTENSION = /^\.(?:bat|cmd)$/iu
+const WINDOWS_COMMAND_META = /[\r\n"&|<>()^%!]/u
 
-/** Managed argv-only command executor over `ctx.subprocess`; it never invokes a shell. */
+/**
+ * Managed argv-only command executor over `ctx.subprocess`. Windows batch
+ * shims require `cmd.exe`; that compatibility path accepts only arguments
+ * without command-interpreter metacharacters and keeps the original argv in
+ * Evidence.
+ */
 export class HarnessCommandExecutor {
   private readonly maxStdoutBytes: number
   private readonly maxStderrBytes: number
   private readonly terminationGraceMs: number
+  private readonly platform: NodeJS.Platform
+  private readonly windowsCommandInterpreter: string
 
   constructor(private readonly options: HarnessCommandExecutorOptions) {
     this.maxStdoutBytes = options.maxStdoutBytes ?? 4 * 1024 * 1024
     this.maxStderrBytes = options.maxStderrBytes ?? 4 * 1024 * 1024
     this.terminationGraceMs = options.terminationGraceMs ?? 2_000
+    this.platform = options.platform ?? process.platform
+    this.windowsCommandInterpreter = options.windowsCommandInterpreter ?? process.env.ComSpec ?? 'cmd.exe'
     for (const [name, value] of Object.entries({
       maxStdoutBytes: this.maxStdoutBytes,
       maxStderrBytes: this.maxStderrBytes,
@@ -86,13 +100,29 @@ export class HarnessCommandExecutor {
     }, spec.timeoutMs)
 
     try {
+      const resolvedEnvironment = Object.fromEntries(
+        Object.entries(env).filter((entry): entry is [string, string] => entry[1] !== undefined),
+      )
       const executable = await this.options.subprocess.resolveExecutable(
         spec.argv[0]!,
-        Object.fromEntries(Object.entries(env).filter((entry): entry is [string, string] => entry[1] !== undefined)),
+        resolvedEnvironment,
         controller.signal,
       )
+      let spawnArgv = [executable, ...spec.argv.slice(1)]
+      if (this.platform === 'win32' && WINDOWS_COMMAND_SHIM_EXTENSION.test(extname(executable))) {
+        const unsafeIndex = spawnArgv.findIndex(argument => WINDOWS_COMMAND_META.test(argument))
+        if (unsafeIndex !== -1) {
+          throw new Error(`Windows command shim argv[${unsafeIndex}] contains unsupported command-interpreter metacharacters`)
+        }
+        const commandInterpreter = await this.options.subprocess.resolveExecutable(
+          this.windowsCommandInterpreter,
+          resolvedEnvironment,
+          controller.signal,
+        )
+        spawnArgv = [commandInterpreter, '/d', '/s', '/v:off', '/c', 'call', ...spawnArgv]
+      }
       const handle = this.options.subprocess.spawn({
-        argv: [executable, ...spec.argv.slice(1)],
+        argv: spawnArgv,
         cwd: spec.cwd,
         stdio: {
           stdin: 'ignore',

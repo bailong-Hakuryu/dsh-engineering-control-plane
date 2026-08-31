@@ -18,7 +18,7 @@ The v0.1 package exposes five entry points:
   host-startup-only Provider contract; it exposes no model or browser
   registration authority.
 
-Version `0.1.3` is prepared as the local v0.1 acceptance package. Tagging,
+Version `0.1.8` is prepared as the local v0.1 acceptance package. Tagging,
 GitHub upload, and registry publication remain intentionally deferred until
 the delivered artifacts pass deployment-owner verification.
 
@@ -78,7 +78,7 @@ capabilities before enabling this plugin; their absence is treated as an
 operational failure and can never be converted into approval.
 
 ```sh
-dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.3.tgz
+dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.8.tgz
 dsh --profile web --dump-config
 dsh --profile web
 ```

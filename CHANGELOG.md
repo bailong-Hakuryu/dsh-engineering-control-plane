@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.8] - 2026-08-31
+
+- Execute resolved Windows `.cmd` and `.bat` package-manager shims through a
+  metacharacter-restricted `cmd.exe` compatibility path, allowing the shipped
+  `pnpm` verification profile to collect real exit codes on Windows.
+- Normalize an empty optional Role Output `question` to omission when the role
+  has completed, matching the Harness schema while retaining strict non-empty
+  questions for `needs_input` outcomes.
+- Add live Windows shim and captured reviewer-output regression coverage.
+
 ## [0.1.7] - 2026-08-30
 
 - Keep `mission_resume` legal for REVIEWING input blocks when the block reason

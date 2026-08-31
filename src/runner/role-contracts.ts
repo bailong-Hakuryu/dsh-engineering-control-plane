@@ -150,6 +150,7 @@ function optionalQuestion(value: Record<string, unknown>, needsInput: boolean): 
     if (needsInput) throw new Error('needs_input role output requires question')
     return undefined
   }
+  if (!needsInput && typeof question === 'string' && question.trim().length === 0) return undefined
   return nonemptyString(question, 'question')
 }
 
