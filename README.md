@@ -5,6 +5,10 @@
 [![Release](https://img.shields.io/github/v/release/bailong-Hakuryu/dsh-engineering-control-plane?display_name=tag)](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+<p align="center">
+  <img src="assets/hero-engineering-control-plane.png" alt="工程控制平面主视觉" width="100%">
+</p>
+
 ## 中文
 
 ### 这是什么
@@ -12,6 +16,10 @@
 <code>dsh-engineering-control-plane</code> 为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 提供受治理的工程任务执行。它把一次实现、修复、重构或发布验证请求固定为一个可追踪的 Mission，并由宿主负责计划、执行、验证、证据和质量门禁。
 
 它适合希望把“让 Agent 改代码”变成可审计流程的团队：每个 Mission 都有明确的身份、Attempt、策略快照、验证结果和最终状态。
+
+<p align="right">
+  <img src="assets/mascot-sticker.png" alt="工程治理角色贴纸" width="220">
+</p>
 
 ### 主要能力
 
