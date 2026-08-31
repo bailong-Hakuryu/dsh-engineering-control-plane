@@ -4,8 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-- Add public Linux and Windows CI against the qualified Harness
-  `0.1.2-alpha.1` source layout.
+- Add public Linux, macOS, and Windows CI against the qualified Harness
+  `0.1.2-alpha.1` source layout, including a fresh packed-profile installation
+  and live Web probe.
 - Bind the direct-use Security Assurance provider to `0.1.0-rc.10`.
 
 ## [0.1.9] - 2026-08-31

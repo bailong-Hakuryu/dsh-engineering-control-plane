@@ -20,9 +20,11 @@ pnpm release:check
 ```
 
 This covers lint, type checking, the complete deterministic test suite, a clean
-build, and npm pack inspection. The dual-plugin packed installation and real
-browser integration are additionally exercised by the Security Assurance
-candidate's `pnpm release:check`.
+build, npm pack inspection, and installation of the packed artifact into a
+fresh Harness `0.1.2-alpha.1` Web profile with a live HTTP probe. Public CI
+repeats that gate on Ubuntu, macOS, and Windows. The dual-plugin packed
+installation is additionally exercised by the Security Assurance candidate's
+`pnpm release:check`.
 
 ## Acceptance gates
 

@@ -56,10 +56,11 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "oxlint src tests --deny-warnings",
+    "lint": "oxlint src tests scripts --deny-warnings",
     "prepack": "pnpm build",
     "pack:dry-run": "npm --cache .scratch/npm-cache pack --dry-run",
-    "release:check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm pack:dry-run",
+    "pack:profile-smoke": "node scripts/latest-harness-profile-smoke.mjs",
+    "release:check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm pack:dry-run && pnpm pack:profile-smoke",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest"
