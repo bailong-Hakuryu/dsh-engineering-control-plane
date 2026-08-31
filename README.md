@@ -1,57 +1,138 @@
 # DSH Engineering Control Plane
 
-`dsh-engineering-control-plane` is an evidence-backed Mission governance plugin
-for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Harness
-provides replaceable subagent and subprocess capabilities; this package owns the
-authoritative Mission lifecycle, policy snapshot, Evidence manifest and Quality
-Gate.
+> DeepSeek Harness 的工程任务编排与发布门禁插件 · 中文默认，English below
 
-The v0.1 package exposes five entry points:
+[![Release](https://img.shields.io/github/v/release/bailong-Hakuryu/dsh-engineering-control-plane?display_name=tag)](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- `dsh-engineering-control-plane` — the host-side Cordis Service and portable
-  Control Plane Kernel contracts.
-- `dsh-engineering-control-plane/tools` — five strict model tools.
-- `dsh-engineering-control-plane/client` — a browser-safe, revision-aware
-  projection store. It is a cache, never Mission authority.
-- `dsh-engineering-control-plane/invariant` — startup readiness diagnostics.
-- `dsh-engineering-control-plane/assurance-provider` — the strict,
-  host-startup-only Provider contract; it exposes no model or browser
-  registration authority.
+## 中文
 
-Version `0.1.9` is prepared as the local v0.1 acceptance package. Tagging,
-GitHub upload, and registry publication remain intentionally deferred until
-the delivered artifacts pass deployment-owner verification.
+### 这是什么
 
-## Safety model
+<code>dsh-engineering-control-plane</code> 为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 提供受治理的工程任务执行。它把一次实现、修复、重构或发布验证请求固定为一个可追踪的 Mission，并由宿主负责计划、执行、验证、证据和质量门禁。
 
-- A canonical worktree can have only one non-terminal Mission.
-- The host derives repository identity and freezes branch, HEAD and Effective
-  Policy at Mission start.
-- Planner, Tester and Reviewer are read-only. Developer can edit or stage files,
-  but cannot commit, switch branches or rewrite history.
-- Verification commands come only from a host-owned repository mapping.
-- Only the deterministic Gate can produce `APPROVED`.
-- Missing, corrupt, redacted, truncated or indeterminate decision Evidence fails
-  closed.
-- Cancellation first quiesces child execution and every begun external
-Assurance Provider, captures final Git/index/worktree state, then atomically
-indexes that Evidence and marks the Mission cancelled. Cancellation reserves
-terminal Invocation settlement before aborting process-local Provider work, so
-an abort-triggered assessment failure cannot replace the Provider's separate
-quiescence proof.
+它适合希望把“让 Agent 改代码”变成可审计流程的团队：每个 Mission 都有明确的身份、Attempt、策略快照、验证结果和最终状态。
 
-Durable state is stored under `$DSH_HOME/control-plane`:
+### 主要能力
 
-```text
-control-plane.sqlite
-missions/<mission-id>/attempt-####/records/<record-id>.json
-```
+- 一个工作区同时只允许一个非终态 Mission。
+- 在启动时冻结仓库身份、分支、HEAD 和有效策略。
+- Planner、Tester、Reviewer 只读；Developer 不能提交、切换分支或改写历史。
+- 验证命令来自宿主配置，不由模型临时编造。
+- 只有确定性 Quality Gate 可以产生 <code>APPROVED</code>。
+- 缺失、损坏、截断或不确定的证据会 fail closed。
+- 支持可恢复的 <code>BLOCKED</code>、<code>REWORK_REQUIRED</code>、取消和重启恢复。
+- 持久化 SQLite、Evidence 清单和不可变版本化 Receipt/Snapshot。
 
-## Build and verify
+### 安装（Harness Web）
 
-Node.js `^22.19.0` or `>=24.0.0` is required.
+要求 Node.js <code>^22.19.0 || >=24.0.0</code>，以及可用的 DeepSeek Harness CLI。先安装 Control Plane，再安装可选的 Security Assurance Provider：
 
-```sh
+~~~powershell
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.9.tgz
+dsh --profile web --dump-config
+dsh web
+~~~
+
+从 GitHub 下载：[v0.1.9 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.9)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+
+默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
+
+~~~text
+pnpm test
+pnpm run typecheck
+pnpm run build
+~~~
+
+启动 Harness 时，请把终端当前目录设为要治理的 Git 仓库。安装后先执行 <code>dsh --profile web --dump-config</code> 检查最终组合，再执行 <code>dsh web</code>。
+
+### 用户如何调用
+
+插件同时支持被动路由和主动指令：
+
+**被动调用（推荐）**：直接描述工程目标，模型会把实现、修复、迁移和发布验证请求路由到 Mission 工具。
+
+~~~text
+请为当前仓库实现这个功能，并在完成后运行完整验证。
+请修复这个问题，所有修改必须经过 Mission 发布门禁。
+~~~
+
+**主动调用**：在 Harness Web 或 CLI 输入：
+
+~~~text
+/mission 为当前仓库执行一次发布前验证，要求测试、类型检查和构建全部通过
+~~~
+
+如果确实不需要治理流程，可以明确写出“直接模式，不创建 Mission”。插件不会在委派的 Mission 子角色中创建嵌套 Mission。
+
+### 工具与生命周期
+
+| 工具 | 用途 | 是否改变状态 |
+| --- | --- | --- |
+| <code>mission_start</code> | 冻结目标、策略和 Attempt，创建 Mission | 是 |
+| <code>mission_status</code> | 读取权威快照、Gate 和合法下一步 | 否 |
+| <code>mission_resume</code> | 从 <code>BLOCKED</code> 恢复同一 Attempt | 是 |
+| <code>mission_cancel</code> | 先停止子任务与外部 Provider，再终态取消 | 是 |
+| <code>mission_rework</code> | 从 <code>REWORK_REQUIRED</code> 创建新 Attempt | 是 |
+
+所有变更操作都必须带上 <code>mission_status</code> 返回的精确 <code>revision</code>。过期 revision 会被拒绝，不会自动合并或重试。
+
+典型生命周期：
+
+~~~text
+mission_start
+    → planner → developer → tester → reviewer
+    → evidence capture → quality gate
+    → APPROVED / REWORK_REQUIRED / BLOCKED / CANCELLED
+~~~
+
+### 只读完整性检查
+
+安装包提供不修改状态的 doctor 命令，用于检查 SQLite 身份、Schema、Lease、Evidence 引用和摘要绑定：
+
+~~~powershell
+dsh-control-plane doctor --pretty
+dsh-control-plane doctor --dsh-home D:\path\to\dsh-home --pretty
+~~~
+
+退出码：<code>0</code> 表示通过，<code>1</code> 表示发现完整性或可用性问题，<code>2</code> 表示命令本身无法执行。doctor 不会创建、迁移、修复、清空或删除数据。
+
+### 持久化与入口
+
+持久化目录默认为：
+
+~~~text
+$DSH_HOME/control-plane/
+├── control-plane.sqlite
+└── missions/<mission-id>/attempt-####/records/<record-id>.json
+~~~
+
+公开入口：
+
+| 入口 | 作用 |
+| --- | --- |
+| <code>dsh-engineering-control-plane</code> | Cordis Service 与 Kernel 契约 |
+| <code>dsh-engineering-control-plane/tools</code> | 五个严格模型工具 |
+| <code>dsh-engineering-control-plane/client</code> | 浏览器安全的版本化投影缓存，不拥有权威状态 |
+| <code>dsh-engineering-control-plane/invariant</code> | 启动就绪与不变量诊断 |
+| <code>dsh-engineering-control-plane/assurance-provider</code> | 可选的 Security Assurance Provider 契约 |
+
+### 与 Security Assurance 联用
+
+安装 <code>dsh-security-assurance</code> 后，Control Plane 会按精确的 Provider ID、版本和 <code>current-workspace</code> 绑定调用安全评估。安全评估结果只满足外部安全义务；最终 <code>APPROVED</code> 仍由 Control Plane 根据全部工程证据和 Reviewer 结果计算。
+
+两个插件不共享 SQLite、可写 Evidence 目录、事务句柄或 Kernel 对象。
+
+### v0.1 边界
+
+- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>，Harness 仍处于开发预览阶段。
+- 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
+- <code>client</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
+- 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
+
+### 开发与验证
+
+~~~powershell
 pnpm install
 pnpm run lint
 pnpm run typecheck
@@ -59,300 +140,85 @@ pnpm test
 pnpm run build
 pnpm pack:dry-run
 pnpm release:check
-```
+~~~
 
-## Install the packed bundle
+当前 <code>v0.1.9</code> 发布门禁已通过：33 个测试文件、150 个测试，类型检查、构建和打包检查均通过。
 
-The shipped bundle is directly usable for a Node/pnpm repository. It supplies
-the shared invariant registry omitted by the Harness `0.1.2-alpha.1` Web
-profile and binds the Harness launcher's current working directory as the deployment-owned Repository,
-enables the Mission tools and invariant, and freezes `pnpm test`, `pnpm run
-typecheck`, and `pnpm run build` as Host verification commands. Start Harness
-from the repository you intend to govern. Deployments using another build system
-must replace the complete `engineering-control-plane` config row in their profile.
+设计依据和完整决策记录见：[CONTEXT.md](CONTEXT.md)、[docs/adr/](docs/adr/)、[docs/implementation-specification.md](docs/implementation-specification.md)。安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
-The normal Harness base bundle already loads the `subagents` registry, the
-`@deepseek-ai/dsh-subagent-spawn-in-process` backend as provider `spawn`, and a
-`subprocess` implementation. A custom host composition must load those three
-capabilities before enabling this plugin; their absence is treated as an
-operational failure and can never be converted into approval.
+<details>
+<summary>English</summary>
 
-```sh
-dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.9.tgz
+## What it is
+
+<code>dsh-engineering-control-plane</code> is a governed engineering workflow plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It turns an implementation, fix, refactor, migration, or release-validation request into an auditable Mission with explicit policy, attempts, evidence, verification, and a deterministic Quality Gate.
+
+## Highlights
+
+- One non-terminal Mission per canonical worktree.
+- Repository identity, branch, HEAD, and Effective Policy are frozen at start.
+- Planner, Tester, and Reviewer are read-only; Developer cannot commit, switch branches, or rewrite history.
+- Verification commands come from host-owned configuration.
+- Only the deterministic Quality Gate can produce <code>APPROVED</code>.
+- Missing, corrupt, truncated, or indeterminate evidence fails closed.
+- Durable SQLite state, Evidence manifests, immutable Receipts, and versioned Snapshots.
+
+## Install in Harness Web
+
+Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
+
+~~~powershell
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.9.tgz
 dsh --profile web --dump-config
-dsh --profile web
-```
+dsh web
+~~~
 
-No activation row or generated repository identifier is required. When Security
-Assurance is also installed, the optional Provider resolves the stable
-`current-workspace` Host binding at invocation time. A later row replaces the
-complete earlier row, so custom deployments must keep `id`, `name`, and the full
-`config`.
+Download the package from the [v0.1.9 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.9). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
 
-```yaml
-- insert:
-    - id: engineering-control-plane
-      name: dsh-engineering-control-plane
-      config:
-        subagentProvider: spawn
-        maxSubagentDepth: 1
+## Invocation
 
-        repositories:
-          - root: 'D:/absolute/path/to/repository'
-            verificationProfile: project-default
-            assuranceProviders: []
+Users can describe an engineering goal in natural language, or explicitly run:
 
-        rolePolicies:
-          planner:
-            allowTools: [read, glob, grep]
-            denyTools: []
-          developer:
-            allowTools: [read, write, edit, glob, grep]
-            denyTools: []
-          tester:
-            allowTools: [read, glob, grep]
-            denyTools: []
-          reviewer:
-            allowTools: [read, glob, grep]
-            denyTools: []
+~~~text
+/mission Run release validation for the current repository; tests, typecheck, and build must pass.
+~~~
 
-        verificationProfiles:
-          - name: project-default
-            categories:
-              functional:
-                mode: commands
-                commands:
-                  - name: unit-tests
-                    argv: [pnpm, test]
-                    timeoutMs: 120000
-                    environmentNames: []
-              negative:
-                mode: commands
-                commands:
-                  - name: typecheck
-                    argv: [pnpm, run, typecheck]
-                    timeoutMs: 120000
-                    environmentNames: []
-              regression:
-                mode: commands
-                commands:
-                  - name: build
-                    argv: [pnpm, run, build]
-                    timeoutMs: 120000
-                    environmentNames: []
-              security:
-                mode: not_applicable
-                reason: 'No project security command is defined yet; deployment owner accepted this explicit exception.'
+Use “direct mode, do not create a Mission” when governance is intentionally not required. Nested Mission creation is rejected inside delegated Mission roles.
 
-        artifactBudgets:
-          maxRecordBytes: 16777216
-          maxStdoutBytes: 4194304
-          maxStderrBytes: 4194304
-          maxUntrackedFiles: 256
-          maxUntrackedBytes: 33554432
-
-        database:
-          journalMode: wal
-          busyTimeoutMs: 5000
-        gitCommand: git
-        gitCommandTimeoutMs: 30000
-        terminationGraceMs: 2000
-
-    - id: engineering-control-plane-tools
-      name: dsh-engineering-control-plane/tools
-
-    - id: engineering-control-plane-invariant
-      name: dsh-engineering-control-plane/invariant
-```
-
-Inspect the resulting composition before booting it:
-
-```sh
-dsh --profile engineering --dump-config
-dsh --profile engineering
-```
-
-## Assurance Provider activation
-
-Repository mappings may bind exact startup registrations with Host-owned
-activation policy:
-
-```yaml
-assuranceProviders:
-  - providerId: dsh/security-assurance
-    providerVersion: 0.1.0-rc.9
-    activation: required
-    configuration:
-      repositoryId: repo-00000000-0000-4000-8000-000000000000
-```
-
-`disabled` never selects a Provider. `when-available` selects only the exact
-registered ID and version when present. `required` rejects Mission acceptance
-when that exact registration is absent. Selected registration keys are copied
-by value into Effective Policy and Attempt 1 history. The same atomic Start
-prepares one durable invocation identity per selected Provider; no factory,
-Provider object, credential, Registry handle, or Execution Context is persisted.
-Optional `configuration` is limited to bounded public identifier strings. It is
-detached and frozen into Effective Policy, Attempt selection, and the durable
-Invocation before being exposed on `AssuranceRequestV1`; credential-shaped keys
-and known credential value prefixes are rejected before Mission acceptance.
-
-Mission Start freezes the obligation and durable invocation identity, but does
-not assess the baseline checkout or block engineering execution. After the
-Developer finishes, the Runner publishes implementation Evidence and freezes a
-post-implementation, path-free Git Subject for that Attempt. Only then does the
-host resolve the frozen exact ID and version, durably change the invocation from
-`prepared` to `begun`, and call `assess()`. The Kernel-issued Context is frozen
-and non-serializable. It exposes Mission, Attempt, Effective Policy digest, and
-the frozen Subject identity, but no repository path, Store, Gate, Ledger,
-process, or network capability. A lost or invalid registration becomes
-`unavailable`; there is no version fallback or substitution. Host restart never
-replays `assess()` for an invocation that already reached `begun`: startup
-blocks the Mission without calling the Provider. A later explicit Mission
-resume may call the exact Provider's optional `recover()` operation, which must
-reconcile the same external assessment. A missing recovery operation fails
-closed as an invalid Provider. Service disposal sends an independent abort
-signal to live Provider work; the originating tool-call signal does not own
-that work.
-
-The Context also exposes one non-enumerable, process-local
-`matchesCanonicalRepository()` assertion. An Adapter can compare a canonical
-root resolved inside its own Host-owned Repository Registry without receiving
-the Mission path. The root, matcher, and comparison result never enter Provider
-configuration, SQLite, Evidence, Submission, model tools, or Remote. A Provider
-whose configured Repository does not match the Mission Repository must fail
-before starting its external assessment.
-
-Concurrent replay admission joins one process-local promise before Provider
-factory resolution, so every replay waits for the same durable result; the
-`prepared → begun` compare-and-swap remains the cross-process authority for
-calling `assess()`. If a registration disappears
-during admission, the begun Invocation becomes `unavailable` without calling
-the detached instance.
-
-Explicit Mission cancellation is a separate operation from Service disposal.
-After the Runner is stopped, every still-`begun` exact Provider must implement
-`cancel()` and return a bounded proof that its external Assessment was canceled,
-was already terminal, or never started. The Kernel records that proof as a
-monotonic `terminated` Invocation before final repository capture and Mission
-cancellation. Missing registration, missing cancellation support, malformed
-proof, or timeout fails closed in Cancellation Quarantine; host unload never
-calls `cancel()` and therefore cannot turn restart recovery into cancellation.
-If external cancellation commits before the Kernel records `terminated`, the
-Invocation remains `begun`. A later explicit `mission_cancel` resolves the same
-exact Provider again; an already-terminal external Assessment is valid
-quiescence proof, after which the Kernel can record `terminated` and complete
-Mission cancellation. Startup itself never performs this semantic retry.
-
-One fulfilled `sealed_submission` is detached and strictly checked for exact
-schema, Invocation, Mission, Attempt, Provider, Subject, and Effective Policy
-bindings. Every typed JSON artifact and the outer payload has a canonical
-digest. The complete self-contained value is copied into the Control Plane's
-Evidence Store before one Kernel revision atomically indexes that Evidence and
-settles the Invocation. Malformed, unsealed, mismatched, redacted, or
-digest-mismatched values are durably rejected without importing Evidence. The
-public `sealAssuranceSubmissionV1()` constructor creates the provider-neutral
-credential-free transport envelope; its Submission Digest is not the
-Provider's Source Seal. A local Evidence publication failure is recorded as
-operational `import_failed`, not misclassified as a Provider rejection.
-
-A Provider that cannot supply a sealed Submission returns the strict public
-`ExternalAssessmentFailureV1` value instead. The Control Plane detaches and
-revalidates that value, durably settles the Invocation as `external_failed`,
-and derives an `indeterminate` Assurance Assessment without importing any
-Provider Evidence. `blocked`, `canceled`, and `failed` external reasons all
-block the Gate: absence of sealed proof is never converted into Rework or
-approval. The bounded Provider code remains audit detail and does not control
-Gate policy.
-
-When a `blocked` or `canceled` external result blocks the Gate,
-`mission_status` advertises `mission_resume`. An exact-revision Resume is the
-only Assurance Retry trigger:
-the Kernel preserves the failed Invocation, Assessment, Result, and Gate
-decision, then atomically prepares a successor Invocation against the same
-Attempt and frozen Subject. The Runner invokes `assess()` only for that new
-identity and evaluates a new current Result for the requirement. It never
-replays or rewrites the failed Invocation, silently retries during startup, or
-turns an operational external failure into a new Rework Attempt. Repeated Gate
-rounds also publish immutable versioned Final Report views while keeping the
-first `final-report.md` path stable.
-An external `failed` reason remains indeterminate and blocks the Gate, but is
-terminal for the frozen Provider composition: Status advertises cancellation,
-not a same-Attempt retry that cannot repair invalid frozen configuration.
-
-After transport import, the Runner re-reads the Control Plane Evidence copy and
-applies the provider-neutral V1 eligibility profile. Composition, policy,
-coverage, Source Seal, provenance, Evidence, and exact Subject bindings must use
-the standard `dsh/assurance-provider-*` schemas. The Kernel then derives an
-immutable Machine Provider Assurance Assessment and Assurance Result; it never
-accepts a Provider's claimed outcome as a Gate decision. An eligible
-`satisfied` result satisfies only that external requirement, an eligible
-`failed` result requires Rework, and an `indeterminate`, unavailable, rejected,
-unreadable, or incomplete Provider blocks the Gate. The remaining engineering
-Evidence and Reviewer findings still decide whether the Mission can be
-`APPROVED`.
-
-Rework preserves the prior Attempt's Subject, Submission, Assessment, Result,
-and Gate history. It copies the frozen Provider obligations into the new
-Attempt, prepares fresh invocation identities, and requires a new
-post-implementation Subject and assessment before the next Gate decision.
-`mission_status` exposes bounded Assurance Result history and advertises
-`mission_rework` after an eligible failed Assurance Result; a Gate-blocking
-External Assessment Failure instead advertises `mission_resume` for the
-same-Attempt Assurance Retry described above.
-
-The closure is proven with Reference Fake Providers through the public Cordis
-seam and with the optional real DSH Security Assurance
-`control-plane-provider` Adapter. Installing this package alone still implies
-no Security plugin runtime. Conformance covers a provider-neutral
-`external_failure`, explicit same-Attempt retry through a new Invocation, and a
-real Adapter retry that starts a distinct Security Assessment.
+The package exposes <code>mission_start</code>, <code>mission_status</code>, <code>mission_resume</code>, <code>mission_cancel</code>, and <code>mission_rework</code>. Every mutation requires the exact revision returned by <code>mission_status</code>; stale control intent is rejected.
 
 ## Read-only doctor
 
-The package installs a diagnostic command that validates the SQLite identity and
-schema, Mission lease invariants, Evidence references and Evidence digests, and
-the binding between a settled Invocation and its imported Submission payload.
-It never creates, migrates, repairs, clears or deletes state.
-
-```sh
+~~~powershell
 dsh-control-plane doctor --pretty
-dsh-control-plane doctor --dsh-home 'D:/custom/dsh-home' --pretty
-```
+~~~
 
-Exit code `0` means every inspected invariant passed, `1` means the report found
-an integrity or availability issue, and `2` means invocation failed.
+The doctor checks SQLite identity, schema, leases, Evidence references, and digest bindings without creating, repairing, migrating, clearing, or deleting state. Exit codes are <code>0</code> (pass), <code>1</code> (issue found), and <code>2</code> (invocation failure).
 
-## Model tool surface
+## Public entries
 
-Top-level users can state an implementation request normally; the
-`mission_start` tool advertises Mission as the default route for implement,
-fix, refactor, migration, and governed release-validation work. Saying
-"direct mode, do not create a Mission" keeps the ordinary agent workflow.
-Interactive Web and CLI users can also use the deterministic shortcut:
+- <code>dsh-engineering-control-plane</code>: Cordis Service and Kernel contracts
+- <code>dsh-engineering-control-plane/tools</code>: strict model tools
+- <code>dsh-engineering-control-plane/client</code>: browser-safe projection cache
+- <code>dsh-engineering-control-plane/invariant</code>: startup diagnostics
+- <code>dsh-engineering-control-plane/assurance-provider</code>: optional Security Assurance contract
 
-```text
-/mission <objective>
-```
+## Development
 
-The command submits a normal model-visible request and the model still calls
-the typed tools below. It is rejected inside delegated Mission roles, preventing
-nested Missions.
+~~~powershell
+pnpm install
+pnpm run lint
+pnpm run typecheck
+pnpm test
+pnpm run build
+pnpm pack:dry-run
+pnpm release:check
+~~~
 
-- `mission_start` atomically accepts one Mission for the calling Agent's cwd.
-- `mission_status` returns a bounded authoritative snapshot and current revision.
-- `mission_resume` resumes only `BLOCKED`, in the same Attempt, and is the
-  explicit trigger for a retryable External Assessment Failure.
-- `mission_cancel` quiesces and terminally cancels an exact revision.
-- `mission_rework` starts a new Attempt only from `REWORK_REQUIRED`.
+Release <code>v0.1.9</code> passed its gate with 33 test files and 150 tests. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
 
-Every mutation after start requires the exact revision returned by
-`mission_status`. Stale control intent is rejected and never retried or merged.
+</details>
 
-## Web projection
+## License
 
-The `./client` entry contains no Node-only imports. Install an authoritative full
-snapshot first, then apply only contiguous whole-snapshot events. A stale event is
-ignored; a revision gap returns `resync_required`. v0.1 deliberately leaves the
-transport and UI surface to the host integration rather than creating a second
-Mission store in the browser.
+[MIT](LICENSE)
