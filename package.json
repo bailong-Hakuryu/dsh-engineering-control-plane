@@ -1,6 +1,6 @@
 {
   "name": "dsh-engineering-control-plane",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": false,
   "license": "MIT",
   "description": "Evidence-backed engineering Mission governance for DeepSeek Harness",
@@ -67,11 +67,18 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-agent": "0.1.2-alpha.1",
+    "@deepseek-ai/dsh-commands": "0.1.2-alpha.1",
     "@deepseek-ai/dsh-home-paths": "0.1.2-alpha.1",
     "@deepseek-ai/dsh-invariants": "0.1.2-alpha.1",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.1",
     "@deepseek-ai/dsh-subagent": "0.1.2-alpha.1",
     "@deepseek-ai/dsh-subprocess": "0.1.2-alpha.1",
     "@deepseek-ai/dsh-tools": "0.1.2-alpha.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-commands": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.1"
@@ -80,8 +87,11 @@
     "@deepseek-ai/cordis": "link:../deepseek-harness-latest/vendor/cordis",
     "@deepseek-ai/cordis-plugin-loader": "link:../deepseek-harness-latest/vendor/loader",
     "@deepseek-ai/dsh-agent": "link:../deepseek-harness-latest/packages/core/agent",
+    "@deepseek-ai/dsh-commands": "link:../deepseek-harness-latest/packages/interaction/commands",
     "@deepseek-ai/dsh-home-paths": "link:../deepseek-harness-latest/packages/util/home-paths",
     "@deepseek-ai/dsh-invariants": "link:../deepseek-harness-latest/packages/runtime-diagnostics/invariants",
+    "@deepseek-ai/dsh-llm": "link:../deepseek-harness-latest/packages/llm/llm",
+    "@deepseek-ai/dsh-session": "link:../deepseek-harness-latest/packages/core/session",
     "@deepseek-ai/dsh-subagent": "link:../deepseek-harness-latest/packages/subagent/subagent",
     "@deepseek-ai/dsh-subprocess": "link:../deepseek-harness-latest/packages/subprocess/subprocess",
     "@deepseek-ai/dsh-subprocess-local": "link:../deepseek-harness-latest/packages/subprocess/subprocess-local",

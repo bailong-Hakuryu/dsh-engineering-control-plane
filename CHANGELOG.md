@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.9] - 2026-08-31
+
+- Route top-level natural-language implementation requests through the
+  `mission_start` tool while preserving an explicit direct-mode opt-out.
+- Add the `/mission <objective>` Web/CLI command, which submits a normalized
+  Mission request without exposing the command to delegated Mission roles.
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.9`.
+
 ## [0.1.8] - 2026-08-31
 
 - Execute resolved Windows `.cmd` and `.bat` package-manager shims through a

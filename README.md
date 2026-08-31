@@ -18,7 +18,7 @@ The v0.1 package exposes five entry points:
   host-startup-only Provider contract; it exposes no model or browser
   registration authority.
 
-Version `0.1.8` is prepared as the local v0.1 acceptance package. Tagging,
+Version `0.1.9` is prepared as the local v0.1 acceptance package. Tagging,
 GitHub upload, and registry publication remain intentionally deferred until
 the delivered artifacts pass deployment-owner verification.
 
@@ -78,7 +78,7 @@ capabilities before enabling this plugin; their absence is treated as an
 operational failure and can never be converted into approval.
 
 ```sh
-dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.8.tgz
+dsh plugin --profile web add ./dsh-engineering-control-plane-0.1.9.tgz
 dsh --profile web --dump-config
 dsh --profile web
 ```
@@ -180,7 +180,7 @@ activation policy:
 ```yaml
 assuranceProviders:
   - providerId: dsh/security-assurance
-    providerVersion: 0.1.0-rc.8
+    providerVersion: 0.1.0-rc.9
     activation: required
     configuration:
       repositoryId: repo-00000000-0000-4000-8000-000000000000
@@ -324,6 +324,20 @@ Exit code `0` means every inspected invariant passed, `1` means the report found
 an integrity or availability issue, and `2` means invocation failed.
 
 ## Model tool surface
+
+Top-level users can state an implementation request normally; the
+`mission_start` tool advertises Mission as the default route for implement,
+fix, refactor, migration, and governed release-validation work. Saying
+"direct mode, do not create a Mission" keeps the ordinary agent workflow.
+Interactive Web and CLI users can also use the deterministic shortcut:
+
+```text
+/mission <objective>
+```
+
+The command submits a normal model-visible request and the model still calls
+the typed tools below. It is rejected inside delegated Mission roles, preventing
+nested Missions.
 
 - `mission_start` atomically accepts one Mission for the calling Agent's cwd.
 - `mission_status` returns a bounded authoritative snapshot and current revision.

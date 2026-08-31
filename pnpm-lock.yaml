@@ -21,12 +21,21 @@ importers:
       '@deepseek-ai/dsh-agent':
         specifier: link:../deepseek-harness-latest/packages/core/agent
         version: link:../deepseek-harness-latest/packages/core/agent
+      '@deepseek-ai/dsh-commands':
+        specifier: link:../deepseek-harness-latest/packages/interaction/commands
+        version: link:../deepseek-harness-latest/packages/interaction/commands
       '@deepseek-ai/dsh-home-paths':
         specifier: link:../deepseek-harness-latest/packages/util/home-paths
         version: link:../deepseek-harness-latest/packages/util/home-paths
       '@deepseek-ai/dsh-invariants':
         specifier: link:../deepseek-harness-latest/packages/runtime-diagnostics/invariants
         version: link:../deepseek-harness-latest/packages/runtime-diagnostics/invariants
+      '@deepseek-ai/dsh-llm':
+        specifier: link:../deepseek-harness-latest/packages/llm/llm
+        version: link:../deepseek-harness-latest/packages/llm/llm
+      '@deepseek-ai/dsh-session':
+        specifier: link:../deepseek-harness-latest/packages/core/session
+        version: link:../deepseek-harness-latest/packages/core/session
       '@deepseek-ai/dsh-subagent':
         specifier: link:../deepseek-harness-latest/packages/subagent/subagent
         version: link:../deepseek-harness-latest/packages/subagent/subagent

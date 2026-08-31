@@ -1,5 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
+import type {} from '@deepseek-ai/dsh-commands'
+import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import {
   defineTool,
   ToolArgsError,
@@ -16,6 +18,20 @@ import type {} from './index.js'
 
 export const name = 'engineering-control-plane-tools'
 export const inject = ['tools', 'engineeringControlPlane']
+
+export const MISSION_COMMAND_NAME = 'mission'
+
+/** Build the model-visible routing request owned by the explicit `/mission` command. */
+export function missionCommandPrompt(objective: string): string {
+  return [
+    'Start a governed Engineering Control Plane Mission for the user objective below.',
+    'Call mission_start before making repository changes. Derive observable acceptance criteria and explicit safety constraints from the objective and current workspace.',
+    'After acceptance, let the Mission runtime own implementation and verification; report authoritative receipts and follow only legalNextActions from mission_status.',
+    '',
+    'User objective:',
+    objective,
+  ].join('\n')
+}
 
 const MISSION_STATUSES = [
   'CREATED',
@@ -429,9 +445,14 @@ export function apply(ctx: Context): void {
   ctx.tools.register(strictTool(defineTool({
     name: 'mission_start',
     description:
-      'Atomically start one evidence-backed engineering Mission in the calling Agent Session cwd. '
+      'Default top-level entry point when the user asks to implement, fix, refactor, migrate, or run governed '
+      + 'release validation in a repository. Call before repository mutation unless the user explicitly requests '
+      + 'direct/ordinary mode without a Mission. Do not use for a read-only explanation, review, or diagnosis, '
+      + 'and never start a nested Mission from a delegated role. Atomically start one evidence-backed engineering '
+      + 'Mission in the calling Agent Session cwd. '
       + 'The host selects repository identity, subagents, models, tools and verification policy. '
-      + 'Do not call when a Mission is already non-terminal for this worktree.',
+      + 'Do not call when a Mission is already non-terminal for this worktree. After acceptance, the Mission '
+      + 'runtime owns implementation and verification; do not duplicate that work directly.',
     parameters: {
       objective: { type: 'string', required: true, description: 'Concrete engineering outcome to deliver.' },
       context: { type: 'string', description: 'Optional bounded context not already captured by the objective.' },
@@ -532,4 +553,33 @@ export function apply(ctx: Context): void {
       }, exec.signal))
     },
   })))
+
+  // Optional interactive surface. The command steers an ordinary user request
+  // so the model still exercises the same typed Mission tools and receipts.
+  ctx.inject(['commands'], (commandCtx) => {
+    commandCtx.commands.register({
+      name: MISSION_COMMAND_NAME,
+      description: 'Start a governed engineering Mission',
+      input: { hint: '<objective>' },
+      handler: ({ agent, rawInput }) => {
+        if (agent.session.header.origin === 'subagent') {
+          return { kind: 'error', text: '/mission is available only in a top-level session.' }
+        }
+        const objective = rawInput.trim()
+        if (objective.length === 0) {
+          return { kind: 'error', text: 'Usage: /mission <objective>' }
+        }
+        agent.steer(createUserMessage({
+          content: [{ type: 'text', text: missionCommandPrompt(objective) }],
+          source: {
+            kind: 'plugin',
+            plugin: 'dsh-engineering-control-plane',
+            form: 'instructions',
+            summary: 'Start a governed engineering Mission.',
+          },
+        }))
+        return { kind: 'success', text: 'Mission request submitted.' }
+      },
+    })
+  })
 }
