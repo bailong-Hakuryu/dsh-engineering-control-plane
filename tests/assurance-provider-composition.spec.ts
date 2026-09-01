@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
@@ -36,7 +36,7 @@ afterEach(async () => {
 })
 
 async function cleanRepository(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-repo-'))
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'dsh-control-plane-provider-repo-')))
   temporaryRoots.push(root)
   await run('git', ['init', '-b', 'main'], { cwd: root })
   await run('git', ['config', 'user.email', 'fixture@example.invalid'], { cwd: root })
