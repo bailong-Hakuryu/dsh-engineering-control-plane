@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Declare compatibility with DeepSeek Harness `0.1.2-alpha.2` through
+  `0.1.2-alpha.4` alongside the primary `0.1.2-alpha.1` target as an exact,
+  explicit set in the peer dependency ranges; the set is verified daily by
+  the Security Assurance-owned Harness Compatibility dual-plugin matrix
+  (ADR 0092).
+- Annotate the exported configuration schema constants with their schemastery
+  type so declaration emit stays portable against the cosmokit `Dict`
+  reference surfaced by Harness `0.1.2-alpha.2` and later.
+- Keep the command-routing test fixture's session header compatible across
+  the supported Harness window; `0.1.2-alpha.4` added a required `isSeeded`
+  header flag.
 - Publish versioned, path-free Git workspace and byte-exact produced-change
   fingerprint algorithms, and bind both into Assurance Execution Subjects so
   Providers can independently verify the exact Mission output they assess.

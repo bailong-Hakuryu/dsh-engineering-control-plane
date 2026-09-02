@@ -2,7 +2,7 @@ import { Context, Service } from '@deepseek-ai/cordis'
 import { Inbox, type Agent, type AgentStatus } from '@deepseek-ai/dsh-agent'
 import CommandRuntime from '@deepseek-ai/dsh-commands'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
+import { SESSION_FORMAT_VERSION, Session, SessionId, type SessionHeader } from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import { describe, expect, it, vi } from 'vitest'
@@ -16,12 +16,16 @@ class StubControlPlane extends Service {
 
 function stubAgent(origin?: 'subagent'): { agent: Agent; steer: ReturnType<typeof vi.fn> } {
   const id = SessionId(`command-routing-${Math.random()}`)
+  // Harness `0.1.2-alpha.4` added a required, runtime-validated `isSeeded`
+  // header flag (ADR 0092); a fresh unseeded fixture supplies it while staying
+  // header-compatible with earlier versions that do not declare it.
   const session = Session.create(id, [], {
     version: SESSION_FORMAT_VERSION,
     id,
     createdAt: Date.now(),
+    isSeeded: false,
     ...origin === undefined ? {} : { origin },
-  })
+  } as SessionHeader)
   let status: AgentStatus = 'idle'
   const steer = vi.fn()
   const agent: Agent = {

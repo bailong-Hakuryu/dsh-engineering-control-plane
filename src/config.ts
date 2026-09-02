@@ -93,7 +93,7 @@ const assuranceProviderActivation = z.object({
 })
 
 /** Schemastery configuration surface; every execution/gate choice is host-owned. */
-export const Config = z.object({
+export const Config: z<Config> = z.object({
   dshHome: z.string(),
   subagentProvider: z.const('spawn').required(),
   maxSubagentDepth: z.number().default(1),

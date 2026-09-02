@@ -50,7 +50,7 @@ import {
 } from './runner/mission-runner.js'
 
 export interface Config extends PluginConfig {}
-export const Config = ConfigSchema
+export const Config: typeof ConfigSchema = ConfigSchema
 export * from './kernel/index.js'
 
 declare module '@deepseek-ai/cordis' {
@@ -182,7 +182,7 @@ function assertExpectedRevision(snapshot: MissionSnapshot, expectedRevision: num
 /** Cordis Service Capability adapting Harness execution seams to the Control Plane Kernel. */
 export class EngineeringControlPlane extends Service {
   static inject = ['subagents', 'subprocess']
-  static Config = ConfigSchema
+  static Config: typeof ConfigSchema = ConfigSchema
 
   private readonly ready: Promise<ControlPlaneRuntimeState>
   private readonly assuranceProviders = new AssuranceProviderRegistry()
