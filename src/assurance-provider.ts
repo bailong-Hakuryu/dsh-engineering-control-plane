@@ -7,7 +7,17 @@ export {
   sealAssuranceSubmissionV1,
   validateAssuranceSubmissionV1,
 } from './assurance-provider/submission.js'
+export {
+  ASSURANCE_PRODUCED_CHANGE_FINGERPRINT_ALGORITHM_V1,
+  ASSURANCE_WORKSPACE_FINGERPRINT_ALGORITHM_V1,
+  computeAssuranceProducedChangeFingerprintV1,
+  computeAssuranceWorkspaceFingerprintV1,
+} from './assurance-provider/workspace-fingerprint.js'
 export type { ValidatedAssuranceSubmissionV1 } from './assurance-provider/submission.js'
+export type {
+  AssuranceProducedChangeFingerprintInputV1,
+  AssuranceWorkspaceFingerprintInputV1,
+} from './assurance-provider/workspace-fingerprint.js'
 export type {
   AssuranceClaimedOutcomeV1,
   AssuranceExecutionContext,

@@ -123,6 +123,7 @@ describe('read-only control-plane doctor', () => {
       branch: repository.branch,
       head: repository.head,
       workspaceFingerprint: `sha256:${'6'.repeat(64)}`,
+      producedChangeFingerprint: `sha256:${'7'.repeat(64)}`,
     }
     const assurancePolicy: EffectivePolicy = {
       ...policy,

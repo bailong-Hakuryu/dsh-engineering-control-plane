@@ -273,6 +273,7 @@ function sameSubmissionBinding(
     && binding.subject.branch === frozenSubject.branch
     && binding.subject.head === frozenSubject.head
     && binding.subject.workspaceFingerprint === frozenSubject.workspaceFingerprint
+    && binding.subject.producedChangeFingerprint === frozenSubject.producedChangeFingerprint
     && binding.effectivePolicyDigest === snapshot.effectivePolicyDigest
 }
 
@@ -803,6 +804,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             || command.subject.branch !== current.repository.branch
             || command.subject.head !== current.repository.head
             || !SHA256.test(command.subject.workspaceFingerprint)
+            || !SHA256.test(command.subject.producedChangeFingerprint)
           ) {
             throw new MissionError(
               'illegal_transition',
@@ -828,6 +830,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                   branch: command.subject.branch,
                   head: command.subject.head,
                   workspaceFingerprint: command.subject.workspaceFingerprint,
+                  producedChangeFingerprint: command.subject.producedChangeFingerprint,
                 },
                 implementationEvidenceRecordId: implementationEvidence.recordId,
                 frozenAt,

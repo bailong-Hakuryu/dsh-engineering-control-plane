@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ASSURANCE_PRODUCED_CHANGE_FINGERPRINT_ALGORITHM_V1,
+  ASSURANCE_WORKSPACE_FINGERPRINT_ALGORITHM_V1,
+  computeAssuranceProducedChangeFingerprintV1,
+  computeAssuranceWorkspaceFingerprintV1,
   sealAssuranceSubmissionV1,
   validateAssuranceSubmissionV1,
   type AssuranceSubmissionBindingV1,
@@ -19,6 +23,7 @@ const binding: AssuranceSubmissionBindingV1 = {
     branch: 'main',
     head: 'a'.repeat(40),
     workspaceFingerprint: `sha256:${'b'.repeat(64)}`,
+    producedChangeFingerprint: `sha256:${'d'.repeat(64)}`,
   },
   effectivePolicyDigest: `sha256:${'c'.repeat(64)}`,
 }
@@ -85,6 +90,30 @@ function submission() {
 }
 
 describe('public Assurance Provider contract', () => {
+  it('publishes one deterministic V1 Git workspace fingerprint protocol', () => {
+    expect(ASSURANCE_WORKSPACE_FINGERPRINT_ALGORITHM_V1).toBe(
+      'sha256-git-branch-nul-head-nul-porcelain-v2-z-v1',
+    )
+    expect(ASSURANCE_PRODUCED_CHANGE_FINGERPRINT_ALGORITHM_V1).toBe(
+      'sha256-git-base-diff-untracked-v1',
+    )
+    expect(computeAssuranceWorkspaceFingerprintV1({
+      branch: 'main',
+      head: 'a'.repeat(40),
+      status: '1 .M N... 100644 100644 100644 abc abc package.json\0? report.json\0',
+    })).toBe('sha256:888cce44dbba4a9e9f9c5e78cc2823eeadad0d77fde6416fffb79b4b3d44988a')
+    expect(() => computeAssuranceWorkspaceFingerprintV1({
+      branch: ' main',
+      head: 'a'.repeat(40),
+      status: '',
+    })).toThrow('canonical non-empty name')
+    expect(computeAssuranceProducedChangeFingerprintV1({
+      baseCommit: 'a'.repeat(40),
+      trackedDiff: 'diff --git a/package.json b/package.json\n',
+      untrackedFiles: [{ path: 'report.json', digest: `sha256:${'b'.repeat(64)}` }],
+    })).toBe('sha256:922e098c1f4fc513b60b2c5a1a63eec75293e2836e67f4d00c8db0d63433a74b')
+  })
+
   it('validates a sealed Provider result against exact Kernel-issued binding facts', () => {
     const candidate = submission()
     const validated = validateAssuranceSubmissionV1(candidate, binding)

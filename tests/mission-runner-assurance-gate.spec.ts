@@ -318,6 +318,7 @@ describe('MissionRunner external Assurance Gate closure', () => {
           branch: repository.branch,
           head: repository.head,
           workspaceFingerprint: postImplementationFingerprint,
+          producedChangeFingerprint: `sha256:${'3'.repeat(64)}`,
         },
         implementationSecretCount: 0,
         workspacePolicyViolations: [],

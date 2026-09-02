@@ -25,6 +25,7 @@
 - 验证命令来自宿主配置，不由模型临时编造。
 - 只有确定性 Quality Gate 可以产生 <code>APPROVED</code>。
 - 缺失、损坏、截断或不确定的证据会 fail closed。
+- 外部 Assurance Subject 同时绑定 Git 状态与 baseline→produced change 的逐字节指纹。
 - 支持可恢复的 <code>BLOCKED</code>、<code>REWORK_REQUIRED</code>、取消和重启恢复。
 - 持久化 SQLite、Evidence 清单和不可变版本化 Receipt/Snapshot。
 
@@ -123,7 +124,7 @@ $DSH_HOME/control-plane/
 
 ### 与 Security Assurance 联用
 
-安装 <code>dsh-security-assurance</code> 后，Control Plane 会按精确的 Provider ID、版本和 <code>current-workspace</code> 绑定调用安全评估。安全评估结果只满足外部安全义务；最终 <code>APPROVED</code> 仍由 Control Plane 根据全部工程证据和 Reviewer 结果计算。
+安装 <code>dsh-security-assurance</code> 后，Control Plane 会按精确的 Provider ID、版本和 <code>current-workspace</code> 绑定调用安全评估，并把 baseline HEAD、Git 状态指纹和逐字节产出变更指纹冻结进执行 Subject。安全评估结果只满足外部安全义务；最终 <code>APPROVED</code> 仍由 Control Plane 根据全部工程证据和 Reviewer 结果计算。
 
 两个插件不共享 SQLite、可写 Evidence 目录、事务句柄或 Kernel 对象。
 
@@ -147,7 +148,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-当前 <code>main</code> 分支发布门禁已通过：33 个测试文件、150 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
+当前 <code>main</code> 分支发布门禁已通过：33 个测试文件、151 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
 
 设计依据和完整决策记录见：[CONTEXT.md](CONTEXT.md)、[docs/adr/](docs/adr/)、[docs/implementation-specification.md](docs/implementation-specification.md)。安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
@@ -166,6 +167,7 @@ pnpm release:check
 - Verification commands come from host-owned configuration.
 - Only the deterministic Quality Gate can produce <code>APPROVED</code>.
 - Missing, corrupt, truncated, or indeterminate evidence fails closed.
+- External Assurance Subjects bind both Git state and a byte-exact baseline-to-produced-change fingerprint.
 - Durable SQLite state, Evidence manifests, immutable Receipts, and versioned Snapshots.
 
 ## Install in Harness Web
@@ -208,6 +210,8 @@ The doctor checks SQLite identity, schema, leases, Evidence references, and dige
 - <code>dsh-engineering-control-plane/invariant</code>: startup diagnostics
 - <code>dsh-engineering-control-plane/assurance-provider</code>: optional Security Assurance contract
 
+When Security Assurance is selected, the Control Plane freezes the baseline HEAD, Git-status fingerprint, and byte-exact produced-change fingerprint into the post-implementation execution Subject. The Provider can independently verify the exact Mission output without receiving a repository path.
+
 ## Development
 
 ~~~powershell
@@ -221,7 +225,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-The current <code>main</code> branch gate passes 33 test files and 150 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
+The current <code>main</code> branch gate passes 33 test files and 151 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
 
 </details>
 

@@ -89,6 +89,7 @@ async function freezePostImplementationSubject(
       branch: repository.branch,
       head: repository.head,
       workspaceFingerprint: `sha256:${'5'.repeat(64)}`,
+      producedChangeFingerprint: `sha256:${'6'.repeat(64)}`,
     },
   }, authority)
   return kernel.snapshot(started.missionId, authority)

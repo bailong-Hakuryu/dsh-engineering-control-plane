@@ -93,6 +93,10 @@ describe('source plugin Loader contracts', () => {
       'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
       'validateAssuranceSubmissionV1',
+      'ASSURANCE_PRODUCED_CHANGE_FINGERPRINT_ALGORITHM_V1',
+      'ASSURANCE_WORKSPACE_FINGERPRINT_ALGORITHM_V1',
+      'computeAssuranceProducedChangeFingerprintV1',
+      'computeAssuranceWorkspaceFingerprintV1',
     ])
   })
 

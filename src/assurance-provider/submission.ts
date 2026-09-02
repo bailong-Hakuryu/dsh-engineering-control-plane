@@ -291,7 +291,11 @@ function parseDigest(
 
 function parseSubject(candidate: unknown) {
   const value = record(candidate, 'Submission Subject')
-  exactKeys(value, ['kind', 'branch', 'head', 'workspaceFingerprint'], 'Submission Subject')
+  exactKeys(
+    value,
+    ['kind', 'branch', 'head', 'workspaceFingerprint', 'producedChangeFingerprint'],
+    'Submission Subject',
+  )
   if (value.kind !== 'git_worktree') {
     throw invalid('malformed_submission', "Submission Subject kind must be 'git_worktree'")
   }
@@ -308,6 +312,11 @@ function parseSubject(candidate: unknown) {
     workspaceFingerprint: canonicalString(
       value.workspaceFingerprint,
       'Submission Subject workspaceFingerprint',
+      SHA256,
+    ),
+    producedChangeFingerprint: canonicalString(
+      value.producedChangeFingerprint,
+      'Submission Subject producedChangeFingerprint',
       SHA256,
     ),
   }
@@ -498,6 +507,7 @@ function sameSubject(
     && left.branch === right.branch
     && left.head === right.head
     && left.workspaceFingerprint === right.workspaceFingerprint
+    && left.producedChangeFingerprint === right.producedChangeFingerprint
 }
 
 function requireExpectedBinding(

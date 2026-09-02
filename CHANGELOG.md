@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Publish versioned, path-free Git workspace and byte-exact produced-change
+  fingerprint algorithms, and bind both into Assurance Execution Subjects so
+  Providers can independently verify the exact Mission output they assess.
 - Add public Linux, macOS, and Windows CI against the qualified Harness
   `0.1.2-alpha.1` source layout, including a fresh packed-profile installation
   and live Web probe.

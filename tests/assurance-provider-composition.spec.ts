@@ -294,6 +294,10 @@ describe('Assurance Provider startup registration and selection', () => {
       'parseExternalAssessmentFailureV1',
       'sealAssuranceSubmissionV1',
       'validateAssuranceSubmissionV1',
+      'ASSURANCE_PRODUCED_CHANGE_FINGERPRINT_ALGORITHM_V1',
+      'ASSURANCE_WORKSPACE_FINGERPRINT_ALGORITHM_V1',
+      'computeAssuranceProducedChangeFingerprintV1',
+      'computeAssuranceWorkspaceFingerprintV1',
     ])
     expect('registerAssuranceProvider' in toolsPlugin).toBe(false)
     expect('registerAssuranceProvider' in clientPlugin).toBe(false)

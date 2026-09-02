@@ -129,6 +129,7 @@ describe('MissionRunner happy path', () => {
           branch: repository.branch,
           head: repository.head,
           workspaceFingerprint: `sha256:${'a'.repeat(64)}`,
+          producedChangeFingerprint: `sha256:${'b'.repeat(64)}`,
         },
         implementationSecretCount: 0,
         workspacePolicyViolations: [],

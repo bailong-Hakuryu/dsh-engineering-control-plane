@@ -124,6 +124,7 @@ export interface AssuranceExecutionSubjectV1 {
   readonly branch: string
   readonly head: string
   readonly workspaceFingerprint: string
+  readonly producedChangeFingerprint: string
 }
 
 /** Kernel-issued, non-serializable capability supplied only during assessment. */

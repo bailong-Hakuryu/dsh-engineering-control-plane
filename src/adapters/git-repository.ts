@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto'
 import { lstat, readFile, realpath } from 'node:fs/promises'
 import { isAbsolute, resolve, sep } from 'node:path'
+import {
+  computeAssuranceProducedChangeFingerprintV1,
+  computeAssuranceWorkspaceFingerprintV1,
+} from '../assurance-provider/workspace-fingerprint.js'
 import type { RepositoryIdentity } from '../kernel/types.js'
 import type { ImplementationCapture } from '../runner/mission-runner.js'
 import type { RepositoryObservation, RepositoryObserver } from './harness-role-executor.js'
@@ -113,7 +117,7 @@ export class GitRepositoryAdapter implements RepositoryObserver {
     return {
       branch,
       head,
-      workspaceFingerprint: sha256(`${branch}\0${head}\0${status}`),
+      workspaceFingerprint: computeAssuranceWorkspaceFingerprintV1({ branch, head, status }),
     }
   }
 
@@ -218,6 +222,11 @@ export class GitRepositoryAdapter implements RepositoryObserver {
         branch: current.branch,
         head: current.head,
         workspaceFingerprint: current.workspaceFingerprint,
+        producedChangeFingerprint: computeAssuranceProducedChangeFingerprintV1({
+          baseCommit: current.head,
+          trackedDiff: diffResult.stdout,
+          untrackedFiles: untracked.map(file => ({ path: file.path, digest: file.digest })),
+        }),
       },
       implementationSecretCount: secretCount,
       workspacePolicyViolations: [...new Set(workspacePolicyViolations)],

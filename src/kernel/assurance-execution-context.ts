@@ -41,6 +41,7 @@ export function issueAssuranceProviderInvocationV1(
     branch: frozenSubject.branch,
     head: frozenSubject.head,
     workspaceFingerprint: frozenSubject.workspaceFingerprint,
+    producedChangeFingerprint: frozenSubject.producedChangeFingerprint,
   })
   const context = {
     schemaVersion: 1 as const,

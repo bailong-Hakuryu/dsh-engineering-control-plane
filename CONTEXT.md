@@ -120,6 +120,10 @@ _Avoid_: Current directory, workspace label, path argument
 A digest-bound observation of the repository and worktree state expected at a recovery boundary.
 _Avoid_: Git diff, clean flag
 
+**Produced Change Fingerprint**:
+A path-free digest binding one Git Baseline to the raw tracked patch and every admitted untracked file byte produced by an Attempt.
+_Avoid_: Workspace Fingerprint, Git status, Developer report
+
 **Workspace Drift**:
 An externally caused mismatch between the live repository and the Workspace Fingerprint governing the active Mission boundary; v0.2 preserves and blocks on it rather than adopting or reverting it.
 _Avoid_: Developer implementation, automatic new baseline, engineering failure
@@ -297,7 +301,7 @@ An immutable, digest-bound Provider export that binds an external assessment to 
 _Avoid_: Shared database row, report path, Provider-owned Gate decision
 
 **Attempt Assurance Subject**:
-The immutable, path-free Git branch, HEAD, and Workspace Fingerprint frozen only after one Attempt's implementation Evidence is published and used to bind every external assessment for that Attempt.
+The immutable, path-free Git branch, HEAD, Workspace Fingerprint, and Produced Change Fingerprint frozen only after one Attempt's implementation Evidence is published and used to bind every external assessment for that Attempt.
 _Avoid_: Mission baseline, repository path, mutable checkout, Provider-selected subject
 
 **Submission Digest**:

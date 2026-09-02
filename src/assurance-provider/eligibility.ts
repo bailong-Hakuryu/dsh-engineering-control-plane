@@ -38,6 +38,7 @@ function sameSubject(left: Record<string, unknown>, right: AssuranceSubmissionV1
     && left.branch === right.branch
     && left.head === right.head
     && left.workspaceFingerprint === right.workspaceFingerprint
+    && left.producedChangeFingerprint === right.producedChangeFingerprint
 }
 
 function standardArtifact(artifact: AssuranceSubmissionArtifactV1, schemaId: string): Record<string, unknown> {
@@ -118,7 +119,10 @@ export function evaluateAssuranceSubmissionEligibilityV1(
       standardArtifact(payload.sourceSeal, 'dsh/assurance-provider-source-seal'),
       ['schemaVersion', 'state', 'subject', 'evidenceDigests'],
     )
-    const subject = record(value.subject, ['kind', 'branch', 'head', 'workspaceFingerprint'])
+    const subject = record(
+      value.subject,
+      ['kind', 'branch', 'head', 'workspaceFingerprint', 'producedChangeFingerprint'],
+    )
     const evidenceDigests = payload.evidence.map(artifact => artifact.digest.value)
     if (
       value.schemaVersion !== 1

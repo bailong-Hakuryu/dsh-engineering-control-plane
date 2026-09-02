@@ -18,6 +18,7 @@ function goldenDraft() {
         branch: 'main',
         head: '0123456789abcdef0123456789abcdef01234567',
         workspaceFingerprint: `sha256:${'1'.repeat(64)}`,
+        producedChangeFingerprint: `sha256:${'3'.repeat(64)}`,
       },
       effectivePolicyDigest: `sha256:${'2'.repeat(64)}`,
     },
@@ -130,9 +131,9 @@ describe('Assurance Submission digest contract', () => {
         schemaVersion: 1,
         algorithm: 'sha256',
         mediaType: 'application/vnd.dsh.assurance-submission-payload+json',
-        byteLength: 2896,
+        byteLength: 2998,
         canonicalization: 'dsh-canonical-json-v1',
-        value: 'sha256:32843bbfd5ce26584b1a19a655ce01c9866c1df2c938e1981baf8b0762effce9',
+        value: 'sha256:9cece057f14e6adc3becf06efe17f83bd35577c24a79e9669a9d8786d7c5076d',
       },
     })
   })
