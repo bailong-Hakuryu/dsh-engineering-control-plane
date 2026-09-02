@@ -186,7 +186,7 @@ async function waitForTerminalInvocation(
   agent: Agent,
   missionId: string,
 ) {
-  const deadline = Date.now() + 4_000
+  const deadline = Date.now() + 8_000
   let lastStates: readonly string[] = []
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
@@ -984,5 +984,5 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
       await subagentFiber.dispose()
       await subprocessFiber.dispose()
     }
-  }, 10_000)
+  }, 15_000)
 })

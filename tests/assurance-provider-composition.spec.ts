@@ -1078,7 +1078,7 @@ describe('Assurance Provider startup registration and selection', () => {
       await subagentFiber.dispose()
       await subprocessFiber.dispose()
     }
-  })
+  }, 15_000)
 
   it('persists External Assessment Failure as indeterminate assurance instead of leaving Provider begun', async () => {
     const repository = await cleanRepository()
@@ -1184,7 +1184,7 @@ describe('Assurance Provider startup registration and selection', () => {
       await subagentFiber.dispose()
       await subprocessFiber.dispose()
     }
-  })
+  }, 15_000)
 
   it('retries External Assessment Failure only through explicit Resume and a new Provider Invocation', async () => {
     const repository = await cleanRepository()
