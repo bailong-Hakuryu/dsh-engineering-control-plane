@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-labelledby="title description">
+  <title id="title">DSH Engineering Control Plane Mission flow</title>
+  <desc id="description">A governed Mission advances through six ordered phases before a deterministic Quality Gate returns approved, rework required, or blocked. Repository identity, policy, evidence, revisions, leases, cancellation, recovery, and doctor diagnostics remain controlled by the Kernel.</desc>
+  <defs>
+    <linearGradient id="cp-background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080c18"/>
+      <stop offset="0.56" stop-color="#0c1325"/>
+      <stop offset="1" stop-color="#101a31"/>
+    </linearGradient>
+    <linearGradient id="cp-card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#151f39"/>
+      <stop offset="1" stop-color="#0e172a"/>
+    </linearGradient>
+    <linearGradient id="cp-active" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#243d83"/>
+      <stop offset="1" stop-color="#192b5c"/>
+    </linearGradient>
+    <linearGradient id="cp-gate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d2a29"/>
+      <stop offset="1" stop-color="#10223a"/>
+    </linearGradient>
+    <filter id="cp-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="cp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6689ff"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="760" rx="28" fill="url(#cp-background)"/>
+  <rect x="1.5" y="1.5" width="1597" height="757" rx="26.5" fill="none" stroke="#334b94" stroke-width="3"/>
+  <path d="M 50 116 H 1550" stroke="#263655" stroke-width="1"/>
+
+  <g font-family="Inter, Segoe UI, Microsoft YaHei, sans-serif">
+    <g transform="translate(58 42)">
+      <rect width="34" height="34" rx="10" fill="#173169" stroke="#6890ff"/>
+      <path d="M 9 18 H 25 M 17 10 V 26" stroke="#9eb8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="17" cy="18" r="4" fill="#6f94ff"/>
+      <text x="50" y="25" fill="#f4f7ff" font-size="25" font-weight="800" letter-spacing="1.1">ENGINEERING CONTROL PLANE</text>
+      <text x="50" y="54" fill="#82a6ff" font-size="16">Mission orchestration · evidence · deterministic release gate</text>
+    </g>
+    <g transform="translate(1130 45)">
+      <rect width="412" height="42" rx="12" fill="#111d35" stroke="#3d5ba5"/>
+      <circle cx="24" cy="21" r="5" fill="#70e2b0"/>
+      <text x="220" y="27" text-anchor="middle" textLength="337" lengthAdjust="spacingAndGlyphs" fill="#a9bcf7" font-size="15" font-weight="700">REVISIONED · RECOVERABLE · FAIL-CLOSED</text>
+    </g>
+
+    <text x="58" y="148" fill="#91a2c5" font-size="14" font-weight="700" letter-spacing="1.7">ONE ORDERED MISSION ATTEMPT</text>
+
+    <g stroke="#4d6ed0" stroke-width="2.5" fill="none" marker-end="url(#cp-arrow)">
+      <path d="M 224 244 H 248"/>
+      <path d="M 416 244 H 440"/>
+      <path d="M 608 244 H 632"/>
+      <path d="M 800 244 H 824"/>
+      <path d="M 992 244 H 1016"/>
+      <path d="M 1184 244 H 1208"/>
+    </g>
+
+    <g transform="translate(56 168)">
+      <rect width="168" height="152" rx="17" fill="url(#cp-card)" stroke="#3a4a69" stroke-width="2"/>
+      <circle cx="28" cy="29" r="16" fill="#273552"/>
+      <text x="28" y="35" text-anchor="middle" fill="#b9c7e8" font-size="13" font-weight="800">01</text>
+      <text x="20" y="72" fill="#f2f5ff" font-size="19" font-weight="800">CREATED</text>
+      <text x="20" y="100" fill="#8394b6" font-size="14">目标与约束入账</text>
+      <text x="20" y="126" fill="#6882c5" font-size="13" font-family="Cascadia Mono, Consolas, monospace">revision: 1</text>
+    </g>
+
+    <g transform="translate(248 168)">
+      <rect width="168" height="152" rx="17" fill="url(#cp-card)" stroke="#4668c9" stroke-width="2"/>
+      <circle cx="28" cy="29" r="16" fill="#203e82"/>
+      <text x="28" y="35" text-anchor="middle" fill="#9fbaff" font-size="13" font-weight="800">02</text>
+      <text x="20" y="72" fill="#f2f5ff" font-size="18" font-weight="800">ANALYZING</text>
+      <text x="20" y="100" fill="#8394b6" font-size="14">仓库影响分析</text>
+      <text x="20" y="126" fill="#6882c5" font-size="13" font-family="Cascadia Mono, Consolas, monospace">read-only role</text>
+    </g>
+
+    <g transform="translate(440 168)">
+      <rect width="168" height="152" rx="17" fill="url(#cp-card)" stroke="#4668c9" stroke-width="2"/>
+      <circle cx="28" cy="29" r="16" fill="#203e82"/>
+      <text x="28" y="35" text-anchor="middle" fill="#9fbaff" font-size="13" font-weight="800">03</text>
+      <text x="20" y="72" fill="#f2f5ff" font-size="19" font-weight="800">PLANNING</text>
+      <text x="20" y="100" fill="#8394b6" font-size="14">技术方案与验收</text>
+      <text x="20" y="126" fill="#6882c5" font-size="13" font-family="Cascadia Mono, Consolas, monospace">frozen plan</text>
+    </g>
+
+    <g transform="translate(632 160)" filter="url(#cp-glow)">
+      <rect width="168" height="168" rx="18" fill="url(#cp-active)" stroke="#6d95ff" stroke-width="3"/>
+      <circle cx="28" cy="31" r="17" fill="#3466e6"/>
+      <text x="28" y="37" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="800">04</text>
+      <text x="20" y="77" fill="#ffffff" font-size="18" font-weight="800">IMPLEMENTING</text>
+      <text x="20" y="106" fill="#b6c8f4" font-size="14">唯一可写角色</text>
+      <text x="20" y="132" fill="#7fd4ff" font-size="13" font-family="Cascadia Mono, Consolas, monospace">workspace digest</text>
+      <rect x="20" y="144" width="128" height="3" rx="1.5" fill="#70e2b0"/>
+    </g>
+
+    <g transform="translate(824 168)">
+      <rect width="168" height="152" rx="17" fill="url(#cp-card)" stroke="#4668c9" stroke-width="2"/>
+      <circle cx="28" cy="29" r="16" fill="#203e82"/>
+      <text x="28" y="35" text-anchor="middle" fill="#9fbaff" font-size="13" font-weight="800">05</text>
+      <text x="20" y="72" fill="#f2f5ff" font-size="19" font-weight="800">VERIFYING</text>
+      <text x="20" y="100" fill="#8394b6" font-size="14">宿主冻结的命令</text>
+      <text x="20" y="126" fill="#6882c5" font-size="13" font-family="Cascadia Mono, Consolas, monospace">test · type · build</text>
+    </g>
+
+    <g transform="translate(1016 168)">
+      <rect width="168" height="152" rx="17" fill="url(#cp-card)" stroke="#4668c9" stroke-width="2"/>
+      <circle cx="28" cy="29" r="16" fill="#203e82"/>
+      <text x="28" y="35" text-anchor="middle" fill="#9fbaff" font-size="13" font-weight="800">06</text>
+      <text x="20" y="72" fill="#f2f5ff" font-size="19" font-weight="800">REVIEWING</text>
+      <text x="20" y="100" fill="#8394b6" font-size="14">只读审查结论</text>
+      <text x="20" y="126" fill="#6882c5" font-size="13" font-family="Cascadia Mono, Consolas, monospace">blocking findings</text>
+    </g>
+
+    <g transform="translate(1208 150)">
+      <rect width="334" height="188" rx="20" fill="url(#cp-gate)" stroke="#54c995" stroke-width="2.5"/>
+      <text x="22" y="36" fill="#9fe6c5" font-size="14" font-weight="800" letter-spacing="1.5">DETERMINISTIC QUALITY GATE</text>
+      <text x="22" y="62" fill="#f0fff9" font-size="18" font-weight="800">只计算已绑定的事实</text>
+      <g transform="translate(22 82)">
+        <rect width="91" height="38" rx="10" fill="#123c2d" stroke="#49c487"/>
+        <text x="45.5" y="25" text-anchor="middle" fill="#8ce3b9" font-size="13" font-weight="800">APPROVED</text>
+        <rect x="101" width="111" height="38" rx="10" fill="#3a2c1b" stroke="#e9ac5a"/>
+        <text x="156.5" y="25" text-anchor="middle" fill="#f0c47e" font-size="12" font-weight="800">REWORK</text>
+        <rect x="222" width="68" height="38" rx="10" fill="#35202a" stroke="#e26b85"/>
+        <text x="256" y="25" text-anchor="middle" fill="#f39aaf" font-size="12" font-weight="800">BLOCKED</text>
+      </g>
+      <text x="22" y="148" fill="#8fa2c4" font-size="13">缺证据或不确定 → BLOCKED</text>
+      <text x="22" y="171" fill="#8fa2c4" font-size="13">验证/审查/安全失败 → REWORK_REQUIRED</text>
+    </g>
+
+    <g transform="translate(56 382)">
+      <rect width="472" height="286" rx="20" fill="#0c1526" stroke="#3d59a7" stroke-width="2"/>
+      <rect x="20" y="20" width="44" height="44" rx="12" fill="#172d61"/>
+      <path d="M 31 42 H 53 M 42 31 V 53" stroke="#87a7ff" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="78" y="42" fill="#eef3ff" font-size="21" font-weight="800">Authority &amp; immutable context</text>
+      <text x="78" y="64" fill="#7899ed" font-size="14">启动时冻结，模型运行时不能改写</text>
+      <g transform="translate(20 88)" font-family="Cascadia Mono, Consolas, monospace" font-size="14">
+        <rect width="432" height="116" rx="13" fill="#090f1c" stroke="#26385f"/>
+        <text x="18" y="29" fill="#7fd4ff">repository</text><text x="126" y="29" fill="#aab7d4">branch · HEAD · identity</text>
+        <text x="18" y="56" fill="#7fd4ff">policy</text><text x="126" y="56" fill="#aab7d4">effective snapshot</text>
+        <text x="18" y="83" fill="#7fd4ff">commands</text><text x="126" y="83" fill="#aab7d4">Host-configured only</text>
+        <text x="18" y="106" fill="#70e2b0">roles</text><text x="126" y="106" fill="#aab7d4">Planner / Developer / Tester / Reviewer</text>
+      </g>
+      <text x="20" y="242" fill="#94a6c7" font-size="14">Developer 可写；其他角色保持只读边界。</text>
+      <text x="20" y="267" fill="#61769e" font-size="13" font-family="Cascadia Mono, Consolas, monospace">Mission Contract → Attempt → immutable records</text>
+    </g>
+
+    <g transform="translate(548 382)">
+      <rect width="472" height="286" rx="20" fill="#0c1526" stroke="#3d59a7" stroke-width="2"/>
+      <rect x="20" y="20" width="44" height="44" rx="12" fill="#172d61"/>
+      <path d="M 30 48 L 39 39 L 45 45 L 56 32" fill="none" stroke="#70e2b0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="78" y="42" fill="#eef3ff" font-size="21" font-weight="800">Evidence plane</text>
+      <text x="78" y="64" fill="#7899ed" font-size="14">摘要绑定、可验证、缺失即 fail closed</text>
+      <g transform="translate(20 88)">
+        <rect width="206" height="54" rx="12" fill="#101c31" stroke="#2c477c"/>
+        <text x="16" y="23" fill="#b8c7e6" font-size="14" font-weight="700">Implementation Evidence</text>
+        <text x="16" y="43" fill="#6f87b3" font-size="12">workspace fingerprint</text>
+        <rect x="226" width="206" height="54" rx="12" fill="#101c31" stroke="#2c477c"/>
+        <text x="242" y="23" fill="#b8c7e6" font-size="14" font-weight="700">Verification Evidence</text>
+        <text x="242" y="43" fill="#6f87b3" font-size="12">test · typecheck · build</text>
+        <rect y="68" width="206" height="54" rx="12" fill="#101c31" stroke="#2c477c"/>
+        <text x="16" y="91" fill="#b8c7e6" font-size="14" font-weight="700">Reviewer Findings</text>
+        <text x="16" y="111" fill="#6f87b3" font-size="12">blocking / non-blocking</text>
+        <rect x="226" y="68" width="206" height="54" rx="12" fill="#101c31" stroke="#2c477c"/>
+        <text x="242" y="91" fill="#b8c7e6" font-size="14" font-weight="700">Assurance Results</text>
+        <text x="242" y="111" fill="#6f87b3" font-size="12">optional external obligation</text>
+      </g>
+      <rect x="20" y="226" width="432" height="40" rx="10" fill="#113124" stroke="#3ead78"/>
+      <text x="236" y="251" text-anchor="middle" fill="#8ce3b9" font-size="14" font-weight="800">Only the Gate can emit APPROVED</text>
+    </g>
+
+    <g transform="translate(1040 382)">
+      <rect width="502" height="286" rx="20" fill="#0c1526" stroke="#3d59a7" stroke-width="2"/>
+      <rect x="20" y="20" width="44" height="44" rx="12" fill="#172d61"/>
+      <path d="M 31 34 H 53 V 55 H 31 Z M 36 39 H 48 M 36 45 H 48 M 36 51 H 44" fill="none" stroke="#87a7ff" stroke-width="2"/>
+      <text x="78" y="42" fill="#eef3ff" font-size="21" font-weight="800">Concurrency &amp; recovery</text>
+      <text x="78" y="64" fill="#7899ed" font-size="14">乐观并发、租约隔离、崩溃后可诊断</text>
+      <g transform="translate(20 91)">
+        <circle cx="11" cy="8" r="5" fill="#6e91ff"/>
+        <text x="28" y="13" fill="#c8d4ef" font-size="15" font-weight="700">revision CAS</text>
+        <text x="168" y="13" fill="#7489b2" font-size="13">过期写入返回冲突</text>
+        <circle cx="11" cy="52" r="5" fill="#6e91ff"/>
+        <text x="28" y="57" fill="#c8d4ef" font-size="15" font-weight="700">two leases</text>
+        <text x="168" y="57" fill="#7489b2" font-size="13">执行租约 / 仓库写租约</text>
+        <circle cx="11" cy="96" r="5" fill="#e9ac5a"/>
+        <text x="28" y="101" fill="#c8d4ef" font-size="15" font-weight="700">cancel &amp; resume</text>
+        <text x="168" y="101" fill="#7489b2" font-size="13">先静默外部工作，再持久化终态</text>
+        <circle cx="11" cy="140" r="5" fill="#70e2b0"/>
+        <text x="28" y="145" fill="#c8d4ef" font-size="15" font-weight="700">read-only doctor</text>
+        <text x="168" y="145" fill="#7489b2" font-size="13">检查 SQLite / Lease / Evidence</text>
+      </g>
+      <rect x="20" y="241" width="462" height="25" rx="8" fill="#151f34"/>
+      <text x="33" y="258" fill="#7f94bc" font-size="12" font-family="Cascadia Mono, Consolas, monospace">CREATED → … → REVIEWING → GATE → terminal state</text>
+    </g>
+
+    <text x="58" y="716" fill="#53698f" font-size="13" font-family="Cascadia Mono, Consolas, monospace">CONTROL BOUNDARY  /  authoritative Kernel state · immutable Evidence · explicit legal next actions</text>
+  </g>
+</svg>

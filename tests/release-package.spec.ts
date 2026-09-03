@@ -20,6 +20,7 @@ describe('v0.1 release package', () => {
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')
     expect(packageJson.files).toEqual(expect.arrayContaining([
+      'assets/*.svg',
       'README.md',
       'CHANGELOG.md',
       'LICENSE',

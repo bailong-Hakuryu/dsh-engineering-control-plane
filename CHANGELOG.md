@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 - Declare compatibility with DeepSeek Harness `0.1.2-alpha.2` through
-  `0.1.2-alpha.4` alongside the primary `0.1.2-alpha.1` target as an exact,
+  `0.1.2-alpha.5` alongside the primary `0.1.2-alpha.1` target as an exact,
   explicit set in the peer dependency ranges; the set is verified daily by
   the Security Assurance-owned Harness Compatibility dual-plugin matrix
   (ADR 0092).

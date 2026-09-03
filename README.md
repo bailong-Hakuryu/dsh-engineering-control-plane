@@ -17,6 +17,14 @@
 
 它适合希望把“让 Agent 改代码”变成可审计流程的团队：每个 Mission 都有明确的身份、Attempt、策略快照、验证结果和最终状态。
 
+### Mission 如何流转
+
+<p align="center">
+  <img src="assets/control-plane-mission-flow.svg" alt="Engineering Control Plane Mission 状态流、证据平面、Quality Gate 与并发恢复边界" width="100%">
+</p>
+
+Mission 只按单向阶段推进；角色输出、验证结果、外部 Assurance 和工作区指纹先形成摘要绑定的 Evidence，再由确定性 Quality Gate 计算终态。revision CAS、执行租约与仓库写租约负责拒绝并发漂移，取消和恢复也必须经过持久化协议。
+
 ### 主要能力
 
 - 一个工作区同时只允许一个非终态 Mission。
@@ -130,7 +138,7 @@ $DSH_HOME/control-plane/
 
 ### v0.1 边界
 
-- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> ~ <code>0.1.2-alpha.4</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
+- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> ~ <code>0.1.2-alpha.5</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
 - 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
 - <code>client</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
 - 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
@@ -158,6 +166,14 @@ pnpm release:check
 ## What it is
 
 <code>dsh-engineering-control-plane</code> is a governed engineering workflow plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It turns an implementation, fix, refactor, migration, or release-validation request into an auditable Mission with explicit policy, attempts, evidence, verification, and a deterministic Quality Gate.
+
+## Mission at a glance
+
+<p align="center">
+  <img src="assets/control-plane-mission-flow.svg" alt="Engineering Control Plane Mission phases, evidence plane, Quality Gate, concurrency, and recovery boundaries" width="100%">
+</p>
+
+Each Mission advances through one ordered phase sequence. Digest-bound role output, verification, optional external assurance, and workspace evidence feed the deterministic Quality Gate; revision CAS and separate execution/write leases reject stale or conflicting mutation.
 
 ## Highlights
 
