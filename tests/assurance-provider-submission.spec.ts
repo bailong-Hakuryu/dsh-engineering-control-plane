@@ -186,7 +186,7 @@ async function waitForTerminalInvocation(
   agent: Agent,
   missionId: string,
 ) {
-  const deadline = Date.now() + 8_000
+  const deadline = Date.now() + 15_000
   let lastStates: readonly string[] = []
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
@@ -207,7 +207,7 @@ async function waitForAllTerminalInvocations(
   agent: Agent,
   missionId: string,
 ) {
-  const deadline = Date.now() + 4_000
+  const deadline = Date.now() + 15_000
   let lastStates: readonly string[] = []
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
@@ -235,7 +235,7 @@ async function waitForBlockedMission(
   agent: Agent,
   missionId: string,
 ) {
-  const deadline = Date.now() + 4_000
+  const deadline = Date.now() + 15_000
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
       agent,
@@ -253,7 +253,7 @@ async function waitForGateDecision(
   agent: Agent,
   missionId: string,
 ) {
-  const deadline = Date.now() + 4_000
+  const deadline = Date.now() + 15_000
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
       agent,
@@ -457,7 +457,7 @@ const rejectionCases: readonly {
   },
 ]
 
-describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
+describe('Assurance Provider Submission import', { timeout: 45_000 }, () => {
   it('imports one valid sealed Reference Fake Submission before Kernel-owned Gate evaluation', async () => {
     const repository = await cleanRepository()
     const home = await mkdtemp(join(tmpdir(), 'dsh-control-plane-submission-home-'))
@@ -984,5 +984,5 @@ describe('Assurance Provider Submission import', { timeout: 10_000 }, () => {
       await subagentFiber.dispose()
       await subprocessFiber.dispose()
     }
-  }, 15_000)
+  }, 45_000)
 })

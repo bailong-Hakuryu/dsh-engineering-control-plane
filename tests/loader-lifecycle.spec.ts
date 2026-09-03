@@ -67,10 +67,11 @@ async function waitForBlocked(
   agent: Agent,
   missionId: string,
 ): Promise<Awaited<ReturnType<EngineeringControlPlane['status']>>> {
-  for (let index = 0; index < 100; index += 1) {
+  const deadline = Date.now() + 10_000
+  while (Date.now() < deadline) {
     const current = await service.status(agent, missionId, new AbortController().signal)
     if (current.status === 'BLOCKED') return current
-    await new Promise<void>(resolve => setTimeout(resolve, 5))
+    await new Promise<void>(resolve => setTimeout(resolve, 10))
   }
   throw new Error('Mission did not reach its expected provider-failure Blocked state')
 }

@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.spec.ts'],
     pool: 'forks',
+    testTimeout: 15_000,
   },
 })

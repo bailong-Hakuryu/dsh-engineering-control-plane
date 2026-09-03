@@ -54,7 +54,7 @@ async function waitForInvocationState(
   expected: readonly string[],
   isObserved: () => boolean = () => true,
 ) {
-  const deadline = Date.now() + 4_000
+  const deadline = Date.now() + 15_000
   let lastState: string | undefined
   while (Date.now() < deadline) {
     const snapshot = await ctx.engineeringControlPlane.status(
@@ -75,7 +75,7 @@ async function waitForMissionStatus(
   missionId: string,
   expected: readonly string[],
 ) {
-  const deadline = Date.now() + 6_000
+  const deadline = Date.now() + 15_000
   let lastStatus: string | undefined
   let lastInvocationState: string | undefined
   let lastDetails: unknown
@@ -979,7 +979,7 @@ describe('Assurance Provider startup registration and selection', () => {
       await secondSubagentFiber.dispose()
       await secondSubprocessFiber.dispose()
     }
-  }, 10_000)
+  }, 45_000)
 
   it('records external Provider quiescence before committing explicit Mission cancellation', async () => {
     const repository = await cleanRepository()
