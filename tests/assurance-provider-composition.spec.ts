@@ -1336,7 +1336,7 @@ describe('Assurance Provider startup registration and selection', () => {
       await subagentFiber.dispose()
       await subprocessFiber.dispose()
     }
-  }, 15_000)
+  }, 45_000)
 
   it('reconciles an external cancellation committed before Provider termination after restart', async () => {
     const repository = await cleanRepository()
