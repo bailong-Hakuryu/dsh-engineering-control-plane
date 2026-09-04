@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Add DeepSeek Harness `0.1.3-alpha.1` to the exact peer dependency
+  disjunction after the Security Assurance-owned dual-plugin semantic matrix
+  passed outside its expected closed-version admission failure.
 - Declare compatibility with DeepSeek Harness `0.1.2-alpha.2` through
   `0.1.2-rc.1` alongside the primary `0.1.2-alpha.1` target as an exact,
   explicit set in the peer dependency ranges; the set is verified daily by

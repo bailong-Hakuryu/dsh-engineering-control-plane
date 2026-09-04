@@ -10,6 +10,7 @@ const packageJson = JSON.parse(
   publishConfig?: { access?: string }
   files?: string[]
   scripts?: Record<string, string>
+  peerDependencies?: Record<string, string>
 }
 const bundlePatch = readFileSync(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
 
@@ -39,5 +40,29 @@ describe('v0.1 release package', () => {
     expect(bundlePatch).not.toContain('str_replace_editor')
     expect(bundlePatch).toContain('allowTools: [read, glob, grep]')
     expect(bundlePatch).toContain('allowTools: [read, write, edit, glob, grep]')
+  })
+
+  it('declares the exact Harness versions verified by the joint matrix', () => {
+    const expectedRange = [
+      '0.1.2-alpha.1',
+      '0.1.2-alpha.2',
+      '0.1.2-alpha.3',
+      '0.1.2-alpha.4',
+      '0.1.2-alpha.5',
+      '0.1.2-rc.1',
+      '0.1.3-alpha.1',
+    ].join(' || ')
+    for (const name of [
+      '@deepseek-ai/dsh-agent',
+      '@deepseek-ai/dsh-commands',
+      '@deepseek-ai/dsh-home-paths',
+      '@deepseek-ai/dsh-invariants',
+      '@deepseek-ai/dsh-llm',
+      '@deepseek-ai/dsh-subagent',
+      '@deepseek-ai/dsh-subprocess',
+      '@deepseek-ai/dsh-tools',
+    ]) {
+      expect(packageJson.peerDependencies?.[name]).toBe(expectedRange)
+    }
   })
 })
