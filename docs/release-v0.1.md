@@ -3,7 +3,7 @@
 ## Package
 
 - Package: `dsh-engineering-control-plane`
-- Version: `0.1.9`
+- Version: `0.1.10`
 - Node.js: `^22.19.0 || >=24.0.0`
 - License: MIT
 

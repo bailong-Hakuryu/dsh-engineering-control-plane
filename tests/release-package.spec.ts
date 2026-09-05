@@ -13,10 +13,19 @@ const packageJson = JSON.parse(
   peerDependencies?: Record<string, string>
 }
 const bundlePatch = readFileSync(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
+const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8')
+
+function releaseSection(version: string): string {
+  const heading = `## [${version}]`
+  const start = changelog.indexOf(heading)
+  if (start < 0) return ''
+  const next = changelog.indexOf('\n## [', start + heading.length)
+  return changelog.slice(start, next < 0 ? undefined : next)
+}
 
 describe('v0.1 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.1.9')
+    expect(packageJson.version).toBe('0.1.10')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')
@@ -64,5 +73,16 @@ describe('v0.1 release package', () => {
     ]) {
       expect(packageJson.peerDependencies?.[name]).toBe(expectedRange)
     }
+  })
+
+  it('cuts the current changelog without rewriting the published v0.1.9 boundary', () => {
+    const current = releaseSection(packageJson.version)
+    const published = releaseSection('0.1.9')
+
+    expect(current).toContain('0.1.3-alpha.1')
+    expect(current).toContain('produced-change')
+    expect(current).toContain('0.1.0-rc.11')
+    expect(published).toContain('/mission <objective>')
+    expect(published).not.toContain('0.1.3-alpha.1')
   })
 })

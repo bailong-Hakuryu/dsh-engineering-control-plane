@@ -42,12 +42,12 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 要求 Node.js <code>^22.19.0 || >=24.0.0</code>，以及可用的 DeepSeek Harness CLI。先安装 Control Plane，再安装可选的 Security Assurance Provider：
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.9.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.10.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-从 GitHub 下载：[v0.1.9 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.9)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+从 GitHub 下载：[v0.1.10 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.10)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
 默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
 
@@ -191,12 +191,12 @@ Each Mission advances through one ordered phase sequence. Digest-bound role outp
 Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.9.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.10.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.1.9 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.9). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+Download the package from the [v0.1.10 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.10). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
 
 ## Invocation
 

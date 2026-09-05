@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-09-05
+
+- Bind the direct-use Security Assurance provider to `0.1.0-rc.11`.
 - Add DeepSeek Harness `0.1.3-alpha.1` to the exact peer dependency
   disjunction after the Security Assurance-owned dual-plugin semantic matrix
   passed outside its expected closed-version admission failure.
