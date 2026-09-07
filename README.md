@@ -18,6 +18,8 @@
 
 它适合希望把“让 Agent 改代码”变成可审计流程的团队：每个 Mission 都有明确的身份、Attempt、策略快照、验证结果和最终状态。
 
+如果 Agent 能改代码，却不能回答“谁改的、改前是什么、证据是否完整、为什么最终放行”，那只是不可审计的写操作。Control Plane 把这条边界固定为 <code>Mission → Evidence → Quality Gate → Receipt</code>。
+
 ### Mission 如何流转
 
 <p align="center">
@@ -38,9 +40,13 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 - 支持可恢复的 <code>BLOCKED</code>、<code>REWORK_REQUIRED</code>、取消和重启恢复。
 - 持久化 SQLite、Evidence 清单和不可变版本化 Receipt/Snapshot。
 
-### 安装（Harness Web）
+### 3 分钟最短安装（Harness Web）
 
 要求 Node.js <code>^22.19.0 || >=24.0.0</code>，以及可用的 DeepSeek Harness CLI。先安装 Control Plane，再安装可选的 Security Assurance Provider：
+
+1. 下载对应 Release 的 tarball。
+2. 用下面的命令安装并检查最终组合。
+3. 在目标 Git 仓库目录启动 Harness Web。
 
 ~~~powershell
 dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.10.tgz
@@ -176,6 +182,8 @@ pnpm release:check
 
 Each Mission advances through one ordered phase sequence. Digest-bound role output, verification, optional external assurance, and workspace evidence feed the deterministic Quality Gate; revision CAS and separate execution/write leases reject stale or conflicting mutation.
 
+If an agent can change code but cannot answer who changed it, what was frozen beforehand, whether the evidence is complete, or why the result was released, that is an unauditable write operation. Control Plane fixes the boundary as <code>Mission → Evidence → Quality Gate → Receipt</code>.
+
 ## Highlights
 
 - One non-terminal Mission per canonical worktree.
@@ -187,9 +195,13 @@ Each Mission advances through one ordered phase sequence. Digest-bound role outp
 - External Assurance Subjects bind both Git state and a byte-exact baseline-to-produced-change fingerprint.
 - Durable SQLite state, Evidence manifests, immutable Receipts, and versioned Snapshots.
 
-## Install in Harness Web
+## Three-minute install in Harness Web
 
 Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
+
+1. Download the tarball from the matching Release.
+2. Install it and inspect the composed profile with the commands below.
+3. Start Harness Web from the Git repository you want to govern.
 
 ~~~powershell
 dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.10.tgz
