@@ -3,6 +3,7 @@
 > DeepSeek Harness 的工程任务编排与发布门禁插件 · 中文默认，English below
 
 [![Release](https://img.shields.io/github/v/release/bailong-Hakuryu/dsh-engineering-control-plane?display_name=tag)](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases)
+[![Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml/badge.svg)](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 <p align="center">
@@ -156,7 +157,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-当前 <code>main</code> 分支发布门禁已通过：33 个测试文件、151 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
+当前 <code>main</code> 分支发布门禁已通过：33 个测试文件、153 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
 
 设计依据和完整决策记录见：[CONTEXT.md](CONTEXT.md)、[docs/adr/](docs/adr/)、[docs/implementation-specification.md](docs/implementation-specification.md)。安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
@@ -241,7 +242,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-The current <code>main</code> branch gate passes 33 test files and 152 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
+The current <code>main</code> branch gate passes 33 test files and 153 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. The [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) workflow also validates the dual-plugin matrix against the declared Harness versions. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
 
 </details>
 
