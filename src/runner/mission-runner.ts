@@ -151,11 +151,38 @@ const ROLE_EXECUTION_CONTRACTS: Readonly<Record<RoleName, readonly string[]>> = 
   ],
   tester: [
     'Assess only the Host-published verification Evidence. Never request tools to rerun a command.',
+    'Assurance evaluation, independent review, the Quality Gate, final-report, and terminal Mission state occur after this Role. Never report their current absence as a finding or needs_input condition.',
   ],
   reviewer: [
     'Review only the published Mission Evidence and report findings. The deterministic Gate owns approval.',
+    'Use assuranceContext for Kernel-owned Provider selection, exact version, Assessment, and Result facts; do not require those facts to be repeated in verification command output.',
+    'When published Mission Evidence identifies explicit target paths, assess every named target and summarize per-target coverage.',
+    'The Quality Gate, final-report, and terminal Mission state occur after this Role. Never report their current absence as a finding or needs_input condition.',
+    'Do not repeat a Tester finding that concerns Evidence explicitly deferred beyond the Tester evidence boundary.',
   ],
 }
+
+const ROLE_PHASE_CONTEXT = {
+  planner: {
+    stage: 'planning',
+    deferredSystemEvidence: ['implementation', 'verification', 'test-report', 'assurance-assessment', 'assurance-result', 'review-report', 'quality-gate', 'final-report', 'terminal-mission-state'],
+  },
+  developer: {
+    stage: 'implementation',
+    deferredSystemEvidence: ['implementation', 'verification', 'test-report', 'assurance-assessment', 'assurance-result', 'review-report', 'quality-gate', 'final-report', 'terminal-mission-state'],
+  },
+  tester: {
+    stage: 'verification-assessment',
+    deferredSystemEvidence: ['assurance-assessment', 'assurance-result', 'review-report', 'quality-gate', 'final-report', 'terminal-mission-state'],
+  },
+  reviewer: {
+    stage: 'independent-review',
+    deferredSystemEvidence: ['quality-gate', 'final-report', 'terminal-mission-state'],
+  },
+} as const satisfies Readonly<Record<RoleName, {
+  readonly stage: string
+  readonly deferredSystemEvidence: readonly string[]
+}>>
 
 const VERIFICATION_CATEGORIES = ['functional', 'negative', 'regression', 'security'] as const
 const CANCELLATION_QUIESCENCE = Symbol('dsh-control-plane-cancellation-quiescence')
@@ -224,6 +251,34 @@ function needsFinalReport(snapshot: MissionSnapshot): boolean {
   )).length
   const gateDecisionCount = snapshot.gateHistory.filter(record => record.attempt === snapshot.attempt).length
   return reportCount <= gateDecisionCount
+}
+
+function currentAssuranceContext(snapshot: MissionSnapshot): {
+  readonly schemaVersion: 1
+  readonly providers: readonly {
+    readonly descriptor: {
+      readonly schemaVersion: 1
+      readonly providerId: string
+      readonly providerVersion: string
+    }
+    readonly activation: 'when-available' | 'required'
+  }[]
+  readonly assessments: NonNullable<MissionSnapshot['assuranceAssessments']>
+  readonly results: NonNullable<MissionSnapshot['assuranceResults']>
+} {
+  const providers = snapshot.assuranceProviderSelections
+    ?.find(selection => selection.attempt === snapshot.attempt)
+    ?.providers.map(provider => ({
+      descriptor: provider.descriptor,
+      activation: provider.activation,
+    })) ?? []
+  return {
+    schemaVersion: 1,
+    providers,
+    assessments: (snapshot.assuranceAssessments ?? [])
+      .filter(assessment => assessment.attempt === snapshot.attempt),
+    results: latestAssuranceResults(snapshot),
+  }
 }
 
 /** Process-local execution owner over durable Kernel state; deliberately not a Harness Job. */
@@ -472,12 +527,6 @@ export class MissionRunner {
         }
         snapshot = await host.runAssuranceProviders(snapshot, authority, signal)
       }
-      const priorReviewer = await this.readRoleOutput(snapshot, host.evidenceStore, 'review-report', 'reviewer')
-      if (priorReviewer?.outcome !== 'reviewed') {
-        const reviewer = await this.executeRole(snapshot, authority, host, 'reviewer', signal)
-        snapshot = reviewer.snapshot
-        if (reviewer.paused) return
-      }
       if (
         hasSelectedAssuranceProviders(snapshot)
         && activeAssuranceProviderInvocations(snapshot).some(invocation => (
@@ -494,6 +543,12 @@ export class MissionRunner {
           eligibilities: await this.assuranceEligibilities(snapshot, host.evidenceStore),
         }, authority)
         snapshot = await this.options.kernel.snapshot(evaluated.missionId, authority)
+      }
+      const priorReviewer = await this.readRoleOutput(snapshot, host.evidenceStore, 'review-report', 'reviewer')
+      if (priorReviewer?.outcome !== 'reviewed') {
+        const reviewer = await this.executeRole(snapshot, authority, host, 'reviewer', signal)
+        snapshot = reviewer.snapshot
+        if (reviewer.paused) return
       }
       if (needsFinalReport(snapshot)) {
         const preliminaryInput = await this.buildGateInput(snapshot, host.evidenceStore, false)
@@ -765,6 +820,11 @@ export class MissionRunner {
         previousGate: snapshot.gate,
       },
       executionContract: ROLE_EXECUTION_CONTRACTS[role],
+      phaseContext: {
+        schemaVersion: 1,
+        ...ROLE_PHASE_CONTEXT[role],
+      },
+      ...role === 'reviewer' ? { assuranceContext: currentAssuranceContext(snapshot) } : {},
       evidence,
       ...priorAttempt === undefined ? {} : { priorAttempt },
     })

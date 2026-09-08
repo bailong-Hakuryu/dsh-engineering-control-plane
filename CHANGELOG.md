@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Make delegated role prompts phase-aware, expose current Kernel-owned
+  Assurance facts to independent review, and evaluate Provider submissions
+  before review so future Gate artifacts and exact Provider pins cannot become
+  false blocking findings.
+
 ## [0.1.10] - 2026-09-05
 
 - Bind the direct-use Security Assurance provider to `0.1.0-rc.11`.

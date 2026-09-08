@@ -23,6 +23,7 @@ import {
 import {
   createMissionRunner,
   type MissionExecutionHost,
+  type RoleExecutionRequest,
 } from '../src/runner/mission-runner.ts'
 
 const temporaryRoots: string[] = []
@@ -95,6 +96,47 @@ const roleOutputs: Readonly<Record<RoleName, unknown>> = {
     summary: 'No blocking engineering finding remains.',
     findings: [],
   },
+}
+
+function phaseAwareAssessmentOutput(request: RoleExecutionRequest): unknown {
+  if (request.role !== 'tester' && request.role !== 'reviewer') return roleOutputs[request.role]
+  const prompt = JSON.parse(request.prompt) as {
+    phaseContext?: { deferredSystemEvidence?: string[] }
+    assuranceContext?: {
+      assessments?: Array<{ assessor?: { provider?: AssuranceProviderDescriptorV1 } }>
+    }
+    evidence?: { 'test-report'?: { findings?: Array<{ code: string; severity: 'blocking' | 'non_blocking' }> } }
+  }
+  const deferred = prompt.phaseContext?.deferredSystemEvidence ?? []
+  const findings = request.role === 'reviewer'
+    ? [...(prompt.evidence?.['test-report']?.findings ?? [])]
+    : []
+  if (!deferred.includes('quality-gate') || !deferred.includes('final-report')) {
+    findings.push({
+      code: 'future-gate-and-final-report-missing',
+      severity: 'blocking',
+    })
+  }
+  if (
+    request.role === 'reviewer'
+    && !prompt.assuranceContext?.assessments?.some(assessment => (
+      assessment.assessor?.provider?.providerId === descriptor.providerId
+      && assessment.assessor.provider.providerVersion === descriptor.providerVersion
+    ))
+  ) {
+    findings.push({
+      code: 'assurance-provider-exact-pin-unattested',
+      severity: 'blocking',
+    })
+  }
+  return {
+    schemaVersion: 1,
+    outcome: request.role === 'tester' ? 'assessed' : 'reviewed',
+    summary: findings.length === 0
+      ? 'Every fact owned by this evidence phase is satisfied.'
+      : 'A phase-owned fact is unavailable.',
+    findings,
+  }
 }
 
 function submissionFor(
@@ -191,7 +233,8 @@ function submissionFor(
 describe('MissionRunner external Assurance Gate closure', () => {
   it.each([
     {
-      caseName: 'eligible satisfied',
+      caseName: 'eligible satisfied with phase-owned review',
+      phaseAwareReview: true,
       claimedOutcome: 'satisfied' as const,
       completeCoverage: true,
       expectedAssuranceOutcome: 'satisfied' as const,
@@ -201,6 +244,7 @@ describe('MissionRunner external Assurance Gate closure', () => {
     },
     {
       caseName: 'eligible failed',
+      phaseAwareReview: false,
       claimedOutcome: 'failed' as const,
       completeCoverage: true,
       expectedAssuranceOutcome: 'failed' as const,
@@ -216,6 +260,7 @@ describe('MissionRunner external Assurance Gate closure', () => {
     },
     {
       caseName: 'eligible indeterminate',
+      phaseAwareReview: false,
       claimedOutcome: 'indeterminate' as const,
       completeCoverage: true,
       expectedAssuranceOutcome: 'indeterminate' as const,
@@ -231,6 +276,7 @@ describe('MissionRunner external Assurance Gate closure', () => {
     },
     {
       caseName: 'satisfied claim with incomplete coverage',
+      phaseAwareReview: false,
       claimedOutcome: 'satisfied' as const,
       completeCoverage: false,
       expectedAssuranceOutcome: 'indeterminate' as const,
@@ -246,6 +292,7 @@ describe('MissionRunner external Assurance Gate closure', () => {
     },
   ])('maps $caseName through Kernel-owned Assessment, Result, and Gate', async ({
     caseName,
+    phaseAwareReview,
     claimedOutcome,
     completeCoverage,
     expectedAssuranceOutcome,
@@ -300,11 +347,14 @@ describe('MissionRunner external Assurance Gate closure', () => {
       evidenceStore,
       roleExecutor: {
         start(request) {
+          const structured = phaseAwareReview
+            ? phaseAwareAssessmentOutput(request)
+            : roleOutputs[request.role]
           return Promise.resolve({
             trace: { provider: 'scripted', providerRunId: `scripted-${request.role}` },
             result: Promise.resolve({
               stopReason: 'completed',
-              structured: roleOutputs[request.role],
+              structured,
               workspacePolicyViolations: [],
             }),
             dispose: () => Promise.resolve(),
