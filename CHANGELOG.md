@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ## [0.1.11] - 2026-09-09
 
+- Qualify DeepSeek Harness `0.1.3-alpha.2` and `0.1.5-alpha.1` as exact
+  supported versions through the Security Assurance-owned dual-plugin matrix,
+  and keep the package peer declarations and bilingual support docs aligned.
 - Bind the default and ERII dogfood Assurance Provider registrations to
   `dsh-security-assurance@0.1.0-rc.12`.
 - Ship a portable, opt-in ERII Python/uv dogfood Profile whose release-package
