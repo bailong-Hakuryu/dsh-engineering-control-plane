@@ -13,6 +13,10 @@ const packageJson = JSON.parse(
   peerDependencies?: Record<string, string>
 }
 const bundlePatch = readFileSync(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
+const eriiDogfoodProfile = readFileSync(
+  new URL('../profiles/erii-python.cordis.patch.example.yml', import.meta.url),
+  'utf8',
+)
 const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8')
 
 function releaseSection(version: string): string {
@@ -31,6 +35,7 @@ describe('v0.1 release package', () => {
     expect(packageJson.publishConfig?.access).toBe('public')
     expect(packageJson.files).toEqual(expect.arrayContaining([
       'assets/*.svg',
+      'profiles/*.yml',
       'README.md',
       'CHANGELOG.md',
       'LICENSE',
@@ -49,6 +54,24 @@ describe('v0.1 release package', () => {
     expect(bundlePatch).not.toContain('str_replace_editor')
     expect(bundlePatch).toContain('allowTools: [read, glob, grep]')
     expect(bundlePatch).toContain('allowTools: [read, write, edit, glob, grep]')
+  })
+
+  it('ships a portable ERII dogfood profile without truncating verification scope', () => {
+    expect(eriiDogfoodProfile).toContain('DSH_ERII_PYTHON')
+    expect(eriiDogfoodProfile).toContain('DSH_ERII_TEMP_ROOT')
+    expect(eriiDogfoodProfile).toContain('UV_CACHE_DIR')
+    expect(eriiDogfoodProfile).toContain('process.platform === "win32"')
+    expect(eriiDogfoodProfile).not.toContain('TMPDIR]')
+    expect(eriiDogfoodProfile).toContain('name: pytest-deepseek-continuity-review')
+    expect(eriiDogfoodProfile).toContain('experiments/deepseek-continuity-review/tests')
+    expect(eriiDogfoodProfile).toMatch(
+      /name: ruff[\s\S]*clients\/typescript\/scripts[\s\S]*experiments\/deepseek-continuity-review/u,
+    )
+    expect(eriiDogfoodProfile).toMatch(
+      /name: compileall[\s\S]*clients\/typescript\/scripts[\s\S]*experiments\/deepseek-continuity-review/u,
+    )
+    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.11')
+    expect(eriiDogfoodProfile).not.toMatch(/[A-Z]:\\/u)
   })
 
   it('declares the exact Harness versions verified by the joint matrix', () => {

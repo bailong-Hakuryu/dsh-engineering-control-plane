@@ -64,6 +64,13 @@ pnpm run typecheck
 pnpm run build
 ~~~
 
+Python/uv 仓库可以从随包发布的
+[`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml)
+开始配置。该示例要求显式设置 <code>DSH_ERII_PYTHON</code>、位于工作树之外的
+<code>DSH_ERII_TEMP_ROOT</code> 和预热的离线 <code>UV_CACHE_DIR</code>，并固定 ERII Dogfood 已验证的生命周期测试、主测试、
+continuity-review、凭据扫描、Ruff、Compileall、重构清单和离线构建范围。请复制到目标
+Harness Profile 后运行 <code>--dump-config</code>，不要用它自动替换其他仓库的宿主策略。
+
 启动 Harness 时，请把终端当前目录设为要治理的 Git 仓库。安装后先执行 <code>dsh --profile web --dump-config</code> 检查最终组合，再执行 <code>dsh web</code>。
 
 ### 用户如何调用
@@ -210,6 +217,14 @@ dsh web
 ~~~
 
 Download the package from the [v0.1.10 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.10). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+
+Python/uv repositories can start from the packaged
+[`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
+It requires explicit <code>DSH_ERII_PYTHON</code>, an out-of-worktree
+<code>DSH_ERII_TEMP_ROOT</code>, and a pre-warmed offline <code>UV_CACHE_DIR</code>; it preserves the complete ERII dogfood scope across tests,
+secret scanning, Ruff, Compileall, inventory validation, and offline builds. Copy it into the target
+Harness Profile and inspect <code>--dump-config</code>; it is an explicit host-policy example, not an
+automatic replacement for other repositories.
 
 ## Invocation
 

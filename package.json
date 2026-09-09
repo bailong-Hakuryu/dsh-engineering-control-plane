@@ -47,6 +47,7 @@
     "lib/**/*.js",
     "lib/types/**/*.d.ts",
     "cordis.patch.yml",
+    "profiles/*.yml",
     "README.md",
     "CHANGELOG.md",
     "LICENSE",

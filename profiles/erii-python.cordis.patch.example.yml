@@ -1,0 +1,101 @@
+# ERII validation-only dogfood profile.
+#
+# Before starting Harness from the clean ERII Git worktree, set:
+#   DSH_ERII_PYTHON    absolute path to the Python interpreter used by uv
+#   DSH_ERII_TEMP_ROOT absolute path to a disposable directory outside the worktree
+#   UV_CACHE_DIR       pre-warmed uv cache used by the offline commands below
+#
+# Copy this file to <DSH_HOME>/profiles/headless/cordis.patch.yml or
+# <DSH_HOME>/profiles/web/cordis.patch.yml after installing both packed plugins.
+# The explicit paths below are part of the dogfood contract: removing one narrows
+# the frozen verification claim and must fail the release-package regression test.
+- id: engineering-control-plane
+  config:
+    subagentProvider: spawn
+    maxSubagentDepth: 1
+    repositories:
+      - root: !!js process.cwd()
+        verificationProfile: erii-python
+        assuranceProviders:
+          - providerId: dsh/security-assurance
+            providerVersion: 0.1.0-rc.11
+            activation: when-available
+            configuration:
+              repositoryBindingId: erii-dogfood-ascii
+    rolePolicies:
+      planner:
+        allowTools: [read, glob, grep]
+        denyTools: []
+      developer:
+        allowTools: [read, write, edit, glob, grep]
+        denyTools: []
+      tester:
+        allowTools: [read, glob, grep]
+        denyTools: []
+      reviewer:
+        allowTools: [read, glob, grep]
+        denyTools: []
+    verificationProfiles:
+      - name: erii-python
+        categories:
+          functional:
+            mode: commands
+            commands:
+              - name: lifecycle-backup-restore
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, -m, pytest, -q, --confcutdir=tests, !!js '"--basetemp=" + process.env.DSH_ERII_TEMP_ROOT + "/lifecycle"', tests/test_lifecycle_backup_restore.py]
+                timeoutMs: 180000
+                # Windows exposes TEMP/TMP, while POSIX hosts use their default
+                # temporary directory; never require an absent platform name.
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+              - name: pytest
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, -m, pytest, -q, --confcutdir=tests, !!js '"--basetemp=" + process.env.DSH_ERII_TEMP_ROOT + "/pytest"', tests]
+                timeoutMs: 300000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+              - name: pytest-deepseek-continuity-review
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, -m, pytest, -q, experiments/deepseek-continuity-review/tests]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+          negative:
+            mode: commands
+            commands:
+              - name: check-secrets
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, scripts/check_secrets.py]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+              - name: ruff
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, ruff, check, erii, tests, examples, benchmarks, scripts, clients/typescript/scripts, experiments/deepseek-continuity-review]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+          regression:
+            mode: commands
+            commands:
+              - name: refactoring-inventory
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, scripts/refactoring_inventory.py, --check]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+              - name: compileall
+                argv: [uv, run, --isolated, --offline, --frozen, --extra, dev, --python, !!js process.env.DSH_ERII_PYTHON, python, -m, compileall, -q, erii, examples, tests, benchmarks, scripts, clients/typescript/scripts, experiments/deepseek-continuity-review]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+              - name: build
+                argv: [uv, build, --offline, --python, !!js process.env.DSH_ERII_PYTHON, --out-dir, !!js 'process.env.DSH_ERII_TEMP_ROOT + "/build"', .]
+                timeoutMs: 180000
+                environmentNames: !!js 'process.platform === "win32" ? ["PATH", "PATHEXT", "UV_CACHE_DIR", "TEMP", "TMP"] : ["PATH", "UV_CACHE_DIR"]'
+          security:
+            mode: not_applicable
+            reason: 'Security Assurance owns the selected GitHub Actions supply-chain policy.'
+
+- id: dsh-security-assurance-host-repository-provider
+  config:
+    repositories:
+      - schemaVersion: 1
+        bindingId: erii-dogfood-ascii
+        root: !!js process.cwd()
+        displayName: ERII dogfood
+        bindings:
+          policyId: security/github-actions-supply-chain
+          assessmentProfileId: security/standard
+          evidenceProtectionId: evidence/local-protected
+          dataEgressPolicyId: egress/deny-by-default
+          platform: !!js process.platform
+          deliveryDestinationIds: []

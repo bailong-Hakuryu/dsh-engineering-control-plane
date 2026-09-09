@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Ship a portable, opt-in ERII Python/uv dogfood Profile whose release-package
+  contract prevents lifecycle, continuity-review, TypeScript-script, Ruff, and
+  Compileall verification scope from being silently truncated.
+- Make that Profile's uv environment forwarding platform-safe on Windows and
+  POSIX hosts, and document the pre-warmed offline `UV_CACHE_DIR` requirement.
 - Make delegated role prompts phase-aware, expose current Kernel-owned
   Assurance facts to independent review, and evaluate Provider submissions
   before review so future Gate artifacts and exact Provider pins cannot become
