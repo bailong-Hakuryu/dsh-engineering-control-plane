@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-09-09
+
+- Bind the default and ERII dogfood Assurance Provider registrations to
+  `dsh-security-assurance@0.1.0-rc.12`.
 - Ship a portable, opt-in ERII Python/uv dogfood Profile whose release-package
   contract prevents lifecycle, continuity-review, TypeScript-script, Ruff, and
   Compileall verification scope from being silently truncated.
