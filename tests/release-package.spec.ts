@@ -85,6 +85,7 @@ describe('v0.1 release package', () => {
       '0.1.3-alpha.1',
       '0.1.3-alpha.2',
       '0.1.5-alpha.1',
+      '0.1.5-alpha.2',
     ].join(' || ')
     for (const name of [
       '@deepseek-ai/dsh-agent',
@@ -107,6 +108,7 @@ describe('v0.1 release package', () => {
     expect(current).toContain('ERII')
     expect(current).toContain('phase-aware')
     expect(current).toContain('0.1.0-rc.12')
+    expect(current).toContain('0.1.5-alpha.2')
     expect(published).toContain('0.1.3-alpha.1')
     expect(published).toContain('0.1.0-rc.11')
     expect(published).not.toContain('0.1.0-rc.12')
