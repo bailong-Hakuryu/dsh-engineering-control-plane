@@ -152,7 +152,7 @@ $DSH_HOME/control-plane/
 
 ### v0.1 边界
 
-- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code> 与 <code>0.1.5-alpha.2</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
+- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code> 与 <code>0.1.5-rc.1</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
 - 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
 - <code>client</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
 - 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
@@ -256,7 +256,7 @@ The doctor checks SQLite identity, schema, leases, Evidence references, and dige
 
 When Security Assurance is selected, the Control Plane freezes the baseline HEAD, Git-status fingerprint, and byte-exact produced-change fingerprint into the post-implementation execution Subject. The Provider can independently verify the exact Mission output without receiving a repository path.
 
-The current package targets Harness <code>0.1.2-alpha.1</code> and declares the exact additional verified versions <code>0.1.2-alpha.2</code> through <code>0.1.2-rc.1</code>, <code>0.1.3-alpha.1</code>, <code>0.1.3-alpha.2</code>, <code>0.1.5-alpha.1</code>, and <code>0.1.5-alpha.2</code>. The Security Assurance-owned [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) matrix verifies this closed set.
+The current package targets Harness <code>0.1.2-alpha.1</code> and declares the exact additional verified versions <code>0.1.2-alpha.2</code> through <code>0.1.2-rc.1</code>, <code>0.1.3-alpha.1</code>, <code>0.1.3-alpha.2</code>, <code>0.1.5-alpha.1</code>, <code>0.1.5-alpha.2</code>, and <code>0.1.5-rc.1</code>. The Security Assurance-owned [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) matrix verifies this closed set.
 
 ## Development
 
