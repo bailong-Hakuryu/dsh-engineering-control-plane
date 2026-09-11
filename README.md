@@ -49,12 +49,12 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 3. 在目标 Git 仓库目录启动 Harness Web。
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.11.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.12.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-从 GitHub 下载：[v0.1.11 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.11)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+从 GitHub 下载：[v0.1.12 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.12)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
 默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
 
@@ -152,7 +152,7 @@ $DSH_HOME/control-plane/
 
 ### v0.1 边界
 
-- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code> 与 <code>0.1.5-rc.1</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
+- 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code>、<code>0.1.5-rc.1</code> 与 <code>0.1.5-rc.2</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
 - 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
 - <code>client</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
 - 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
@@ -211,12 +211,12 @@ Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
 3. Start Harness Web from the Git repository you want to govern.
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.11.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.12.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.1.11 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.11). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+Download the package from the [v0.1.12 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.12). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
 
 Python/uv repositories can start from the packaged
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
@@ -256,7 +256,7 @@ The doctor checks SQLite identity, schema, leases, Evidence references, and dige
 
 When Security Assurance is selected, the Control Plane freezes the baseline HEAD, Git-status fingerprint, and byte-exact produced-change fingerprint into the post-implementation execution Subject. The Provider can independently verify the exact Mission output without receiving a repository path.
 
-The current package targets Harness <code>0.1.2-alpha.1</code> and declares the exact additional verified versions <code>0.1.2-alpha.2</code> through <code>0.1.2-rc.1</code>, <code>0.1.3-alpha.1</code>, <code>0.1.3-alpha.2</code>, <code>0.1.5-alpha.1</code>, <code>0.1.5-alpha.2</code>, and <code>0.1.5-rc.1</code>. The Security Assurance-owned [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) matrix verifies this closed set.
+The current package targets Harness <code>0.1.2-alpha.1</code> and declares the exact additional verified versions <code>0.1.2-alpha.2</code> through <code>0.1.2-rc.1</code>, <code>0.1.3-alpha.1</code>, <code>0.1.3-alpha.2</code>, <code>0.1.5-alpha.1</code>, <code>0.1.5-alpha.2</code>, <code>0.1.5-rc.1</code>, and <code>0.1.5-rc.2</code>. The Security Assurance-owned [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) matrix verifies this closed set.
 
 ## Development
 

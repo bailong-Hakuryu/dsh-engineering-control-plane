@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-09-11
+
+- Admit DeepSeek Harness `0.1.5-rc.2` into the exact verified compatibility
+  set and peer dependency disjunction, preventing npm's current Harness peer
+  resolution from failing with `ERESOLVE`.
+- Bind the default and ERII dogfood Assurance Provider registrations to
+  `dsh-security-assurance@0.1.0-rc.13`.
+
 ## [0.1.11] - 2026-09-09
 
 - Qualify DeepSeek Harness `0.1.3-alpha.2`, `0.1.5-alpha.1`,

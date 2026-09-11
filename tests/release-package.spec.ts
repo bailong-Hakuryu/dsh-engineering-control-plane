@@ -29,7 +29,7 @@ function releaseSection(version: string): string {
 
 describe('v0.1 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.1.11')
+    expect(packageJson.version).toBe('0.1.12')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')
@@ -70,7 +70,7 @@ describe('v0.1 release package', () => {
     expect(eriiDogfoodProfile).toMatch(
       /name: compileall[\s\S]*clients\/typescript\/scripts[\s\S]*experiments\/deepseek-continuity-review/u,
     )
-    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.12')
+    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.13')
     expect(eriiDogfoodProfile).not.toMatch(/[A-Z]:\\/u)
   })
 
@@ -87,6 +87,7 @@ describe('v0.1 release package', () => {
       '0.1.5-alpha.1',
       '0.1.5-alpha.2',
       '0.1.5-rc.1',
+      '0.1.5-rc.2',
     ].join(' || ')
     for (const name of [
       '@deepseek-ai/dsh-agent',
@@ -102,17 +103,17 @@ describe('v0.1 release package', () => {
     }
   })
 
-  it('cuts the current changelog without rewriting the published v0.1.10 boundary', () => {
+  it('cuts the current changelog without rewriting the published v0.1.11 boundary', () => {
     const current = releaseSection(packageJson.version)
-    const published = releaseSection('0.1.10')
+    const published = releaseSection('0.1.11')
 
-    expect(current).toContain('ERII')
-    expect(current).toContain('phase-aware')
-    expect(current).toContain('0.1.0-rc.12')
-    expect(current).toContain('0.1.5-alpha.2')
-    expect(current).toContain('0.1.5-rc.1')
-    expect(published).toContain('0.1.3-alpha.1')
-    expect(published).toContain('0.1.0-rc.11')
-    expect(published).not.toContain('0.1.0-rc.12')
+    expect(current).toContain('ERESOLVE')
+    expect(current).toContain('0.1.0-rc.13')
+    expect(current).toContain('0.1.5-rc.2')
+    expect(published).toContain('ERII')
+    expect(published).toContain('phase-aware')
+    expect(published).toContain('0.1.0-rc.12')
+    expect(published).toContain('0.1.5-rc.1')
+    expect(published).not.toContain('0.1.5-rc.2')
   })
 })
