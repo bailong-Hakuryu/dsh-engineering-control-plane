@@ -190,7 +190,7 @@ try {
   assert.match(dump.stdout, /# == dsh-engineering-control-plane/u)
   assert.match(dump.stdout, /name: dsh-engineering-control-plane\/tools/u)
   assert.match(dump.stdout, /providerId: dsh\/security-assurance/u)
-  assert.match(dump.stdout, /providerVersion: 0\.1\.0-rc\.13/u)
+  assert.match(dump.stdout, /providerVersion: 0\.1\.0-rc\.14/u)
 
   await bootAndProbeWeb()
   process.stdout.write('Latest Harness profile smoke passed: packed Control Plane installed and Web responded.\n')

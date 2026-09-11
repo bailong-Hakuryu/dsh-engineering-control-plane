@@ -49,12 +49,12 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 3. 在目标 Git 仓库目录启动 Harness Web。
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.12.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.13.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-从 GitHub 下载：[v0.1.12 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.12)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+从 GitHub 下载：[v0.1.13 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.13)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
 默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
 
@@ -211,12 +211,12 @@ Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
 3. Start Harness Web from the Git repository you want to govern.
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.12.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.13.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.1.12 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.12). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+Download the package from the [v0.1.13 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.13). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
 
 Python/uv repositories can start from the packaged
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
