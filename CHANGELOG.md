@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Show `/mission` description, confirmation, usage, and delegated-session
+  refusal in Chinese and English, because Harness localizes only its
+  built-in commands.
 - Admit DeepSeek Harness `0.1.5-rc.3`, the current npm `latest`, into the
   exact verified peer dependency disjunction. Without it a fresh
   `npm install dsh-engineering-control-plane` fails with `ERESOLVE` because

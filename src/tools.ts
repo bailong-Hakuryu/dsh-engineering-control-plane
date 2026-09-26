@@ -559,15 +559,20 @@ export function apply(ctx: Context): void {
   ctx.inject(['commands'], (commandCtx) => {
     commandCtx.commands.register({
       name: MISSION_COMMAND_NAME,
-      description: 'Start a governed engineering Mission',
+      // Harness localizes only its built-in commands, so plugin text carries
+      // both product languages.
+      description: '启动受治理的工程 Mission · Start a governed engineering Mission',
       input: { hint: '<objective>' },
       handler: ({ agent, rawInput }) => {
         if (agent.session.header.origin === 'subagent') {
-          return { kind: 'error', text: '/mission is available only in a top-level session.' }
+          return {
+            kind: 'error',
+            text: '/mission 只能在顶层会话中使用 · /mission is available only in a top-level session.',
+          }
         }
         const objective = rawInput.trim()
         if (objective.length === 0) {
-          return { kind: 'error', text: 'Usage: /mission <objective>' }
+          return { kind: 'error', text: '用法：/mission <目标> · Usage: /mission <objective>' }
         }
         agent.steer(createUserMessage({
           content: [{ type: 'text', text: missionCommandPrompt(objective) }],
@@ -578,7 +583,7 @@ export function apply(ctx: Context): void {
             summary: 'Start a governed engineering Mission.',
           },
         }))
-        return { kind: 'success', text: 'Mission request submitted.' }
+        return { kind: 'success', text: '已提交 Mission 请求 · Mission request submitted.' }
       },
     })
   })

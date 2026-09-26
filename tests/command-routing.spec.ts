@@ -90,7 +90,7 @@ describe('Mission user routing', () => {
     try {
       expect(fixture.ctx.commands.list(root.agent)).toContainEqual({
         name: 'mission',
-        description: 'Start a governed engineering Mission',
+        description: '启动受治理的工程 Mission · Start a governed engineering Mission',
         input: { hint: '<objective>' },
       })
 
@@ -101,7 +101,7 @@ describe('Mission user routing', () => {
         new AbortController().signal,
       )
 
-      expect(execution?.result).toEqual({ kind: 'success', text: 'Mission request submitted.' })
+      expect(execution?.result).toEqual({ kind: 'success', text: '已提交 Mission 请求 · Mission request submitted.' })
       expect(root.steer).toHaveBeenCalledOnce()
       const message = root.steer.mock.calls[0]?.[0] as ReturnType<typeof createUserMessage>
       expect(message.content).toEqual([{ type: 'text', text: expect.stringContaining('Call mission_start before making repository changes.') }])
@@ -123,8 +123,11 @@ describe('Mission user routing', () => {
         [],
         new AbortController().signal,
       )
-      expect(empty?.result).toEqual({ kind: 'error', text: 'Usage: /mission <objective>' })
-      expect(delegated?.result).toEqual({ kind: 'error', text: '/mission is available only in a top-level session.' })
+      expect(empty?.result).toEqual({ kind: 'error', text: '用法：/mission <目标> · Usage: /mission <objective>' })
+      expect(delegated?.result).toEqual({
+        kind: 'error',
+        text: '/mission 只能在顶层会话中使用 · /mission is available only in a top-level session.',
+      })
       expect(root.steer).not.toHaveBeenCalled()
       expect(child.steer).not.toHaveBeenCalled()
     } finally {
