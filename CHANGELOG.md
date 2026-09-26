@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- **Fix:** direct-use verification no longer runs the repository's install
+  lifecycle scripts (ADR 0094). The default profile ran `pnpm test`, and
+  pnpm's pre-run dependency check installed first, which executed the root
+  `postinstall` and wrote `node_modules/` and `pnpm-lock.yaml` into the
+  worktree. Verification now runs `package.json` scripts through the
+  repository's own package manager (`packageManager`, then lockfile, else npm)
+  and never installs; pnpm gets `--config.verify-deps-before-run=false`.
+  Install dependencies before starting a Mission.
+- **Fix:** a repository without `typecheck` or `build` scripts is no longer
+  sent back for rework on every attempt. The direct-use profile requires only
+  `test`; `typecheck` and `build` count where the repository defines them. The
+  new `package_script` verification category mode expresses this; explicit
+  `commands` categories are unchanged.
+
 ## [0.2.0] - 2026-09-27
 
 - Bind the default and ERII dogfood Assurance Provider registrations exactly

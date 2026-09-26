@@ -41,6 +41,7 @@ export interface VerificationCommandConfig {
 export type VerificationCategoryConfig =
   | { mode: 'commands'; commands: VerificationCommandConfig[] }
   | { mode: 'not_applicable'; reason: string }
+  | { mode: 'package_script'; script: string; timeoutMs: number; missing: 'failed' | 'not_applicable' }
 
 export interface VerificationProfileConfig {
   name: string
@@ -76,6 +77,12 @@ const verificationCategory = z.union([
   z.object({
     mode: z.const('not_applicable').required(),
     reason: z.string().required(),
+  }),
+  z.object({
+    mode: z.const('package_script').required(),
+    script: z.string().required(),
+    timeoutMs: z.number().required(),
+    missing: z.union(['failed', 'not_applicable'] as const).required(),
   }),
 ])
 const rolePolicy = z.object({

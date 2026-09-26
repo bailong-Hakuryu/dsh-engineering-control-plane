@@ -56,13 +56,7 @@ dsh web
 
 从 GitHub 下载：[v0.2.0 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.0)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
-默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
-
-~~~text
-pnpm test
-pnpm run typecheck
-pnpm run build
-~~~
+默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并按仓库自己的 <code>package.json</code> 运行三个脚本：<code>test</code>（必需，缺失即验证失败）、<code>typecheck</code> 与 <code>build</code>（仓库未定义时记为不适用）。包管理器依次取 <code>packageManager</code> 字段、锁文件，默认为 npm；验证时绝不先安装依赖，因此不会触发仓库的 <code>postinstall</code> 等安装钩子，依赖需事先装好（ADR 0094）。
 
 Python/uv 仓库可以从随包发布的
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml)
@@ -158,7 +152,7 @@ $DSH_HOME/control-plane/
 ### 当前边界
 
 - 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code>、<code>0.1.5-rc.1</code>、<code>0.1.5-rc.2</code> 与 <code>0.1.5-rc.3</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
-- 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
+- 默认验证配置面向 Node 项目的 <code>package.json</code> 脚本；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
 - <code>projection</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
 - 在 Harness Web 中，五个 Mission 工具的调用显示为专用卡片：一行标题与摘要，配以状态、门禁和阻塞原因标签，展开后可查看分支、角色、保障结果和可执行操作。卡片只读取会话中已有的工具调用记录，不调用服务、不持有权限。
 - 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
@@ -176,7 +170,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-当前 <code>main</code> 分支发布门禁已通过：33 个测试文件、154 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
+当前 <code>main</code> 分支发布门禁已通过：35 个测试文件、174 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
 
 设计依据和完整决策记录见：[CONTEXT.md](CONTEXT.md)、[docs/adr/](docs/adr/)、[docs/implementation-specification.md](docs/implementation-specification.md)。安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
@@ -222,7 +216,7 @@ dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.2.0 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.0). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+Download the package from the [v0.2.0 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.0). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>. Default checks run the repository's own <code>package.json</code> scripts: <code>test</code> is required (missing fails verification), while <code>typecheck</code> and <code>build</code> count only where defined. The package manager comes from the <code>packageManager</code> field, then the lockfile, else npm, and verification never installs first, so the repository's <code>postinstall</code> and other install hooks never run; install dependencies beforehand (ADR 0094).
 
 Python/uv repositories can start from the packaged
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
@@ -282,7 +276,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-The current <code>main</code> branch gate passes 33 test files and 154 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. The [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) workflow also validates the dual-plugin matrix against the declared Harness versions. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
+The current <code>main</code> branch gate passes 35 test files and 174 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. The [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) workflow also validates the dual-plugin matrix against the declared Harness versions. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
 
 </details>
 

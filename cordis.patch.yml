@@ -13,7 +13,7 @@
         maxSubagentDepth: 1
         repositories:
           - root: !!js process.cwd()
-            verificationProfile: node-pnpm
+            verificationProfile: node-package-scripts
             assuranceProviders:
               - providerId: dsh/security-assurance
                 providerVersion: 0.1.0-rc.15
@@ -33,30 +33,28 @@
           reviewer:
             allowTools: [read, glob, grep]
             denyTools: []
+        # Each script runs through the repository's own package manager
+        # (packageManager field, then lockfile, else npm) without installing
+        # first. A Mission needs a test script; typecheck and build count
+        # only where the repository defines them (ADR 0094).
         verificationProfiles:
-          - name: node-pnpm
+          - name: node-package-scripts
             categories:
               functional:
-                mode: commands
-                commands:
-                  - name: test
-                    argv: [pnpm, test]
-                    timeoutMs: 180000
-                    environmentNames: []
+                mode: package_script
+                script: test
+                timeoutMs: 180000
+                missing: failed
               negative:
-                mode: commands
-                commands:
-                  - name: typecheck
-                    argv: [pnpm, run, typecheck]
-                    timeoutMs: 180000
-                    environmentNames: []
+                mode: package_script
+                script: typecheck
+                timeoutMs: 180000
+                missing: not_applicable
               regression:
-                mode: commands
-                commands:
-                  - name: build
-                    argv: [pnpm, run, build]
-                    timeoutMs: 180000
-                    environmentNames: []
+                mode: package_script
+                script: build
+                timeoutMs: 180000
+                missing: not_applicable
               security:
                 mode: not_applicable
                 reason: 'Security Assurance owns this category when its optional Host Provider is installed.'

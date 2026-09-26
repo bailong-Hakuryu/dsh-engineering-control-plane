@@ -421,7 +421,7 @@ The Kernel-governed evaluation of implementation behavior against configured fun
 _Avoid_: Testing, Tester report
 
 **Verification Profile**:
-An explicit declaration of which verification categories require commands and which are not applicable with an auditable reason.
+An explicit declaration of which verification categories require commands or a Host-named package script, and which are not applicable with an auditable reason. A package script runs through the repository's declared package manager and never installs first.
 _Avoid_: Auto-detected tests, Tester-selected commands
 
 **Effective Policy**:

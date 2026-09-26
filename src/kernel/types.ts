@@ -60,6 +60,12 @@ export interface EffectiveVerificationCommand {
 export type EffectiveVerificationCategory =
   | { readonly mode: 'commands'; readonly commands: readonly EffectiveVerificationCommand[] }
   | { readonly mode: 'not_applicable'; readonly reason: string }
+  | {
+    readonly mode: 'package_script'
+    readonly script: string
+    readonly timeoutMs: number
+    readonly missing: 'failed' | 'not_applicable'
+  }
 
 export interface EffectiveVerificationProfile {
   readonly name: string
