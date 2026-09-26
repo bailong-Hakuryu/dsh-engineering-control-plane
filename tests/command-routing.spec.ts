@@ -1,5 +1,5 @@
 import { Context, Service } from '@deepseek-ai/cordis'
-import { Inbox, type Agent, type AgentStatus } from '@deepseek-ai/dsh-agent'
+import type { Agent, AgentStatus } from '@deepseek-ai/dsh-agent'
 import CommandRuntime from '@deepseek-ai/dsh-commands'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId, type SessionHeader } from '@deepseek-ai/dsh-session'
@@ -32,7 +32,10 @@ function stubAgent(origin?: 'subagent'): { agent: Agent; steer: ReturnType<typeo
     id: session.id,
     options: {},
     session,
-    inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+    // Harness `0.1.5-rc.3` turned the concrete `Inbox` class into a
+    // driver-owned interface. /mission routing never reads the inbox, so the
+    // stub stays independent of either shape.
+    inbox: {} as Agent['inbox'],
     get status() { return status },
     ctx: new Context(),
     send: () => {},

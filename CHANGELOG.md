@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- Admit DeepSeek Harness `0.1.5-rc.3`, the current npm `latest`, into the
+  exact verified peer dependency disjunction. Without it a fresh
+  `npm install dsh-engineering-control-plane` fails with `ERESOLVE` because
+  Harness's own `^0.1.5-rc.2` peer ranges now select rc.3 packages.
+- Keep the `/mission` routing test independent of the Harness `Inbox` shape,
+  which became a driver-owned interface in `0.1.5-rc.3`.
+
 ## [0.1.13] - 2026-09-11
 
 - Bind the default and ERII dogfood Assurance Provider registrations to the
