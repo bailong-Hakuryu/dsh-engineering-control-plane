@@ -15,7 +15,7 @@ import * as assuranceProviderPlugin from '../src/assurance-provider.ts'
 import type { Config } from '../src/config.ts'
 import * as rootPlugin from '../src/index.ts'
 import * as toolsPlugin from '../src/tools.ts'
-import * as clientPlugin from '../src/client.ts'
+import * as clientPlugin from '../src/projection.ts'
 import * as invariantPlugin from '../src/invariant.ts'
 
 const run = promisify(execFile)

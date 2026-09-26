@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- **Breaking:** the browser-safe projection cache moved from
+  `dsh-engineering-control-plane/client` to
+  `dsh-engineering-control-plane/projection`. Harness serves a package's
+  `./client` export as its Web client bundle, so that path now carries the
+  Mission tool cards (ADR 0093).
+- Render the five Mission tools as native Harness Web cards: a one-line title
+  and summary with status, gate, and blocked-reason chips, expanding into
+  branch, roles, assurance outcomes, and available actions. A dependency-free
+  build step transpiles the cards with the project's TypeScript into the
+  Harness loader factory format, rejects any import the page cannot provide,
+  and the profile smoke asserts the Web boot graph serves it.
 - Show `/mission` description, confirmation, usage, and delegated-session
   refusal in Chinese and English, because Harness localizes only its
   built-in commands.

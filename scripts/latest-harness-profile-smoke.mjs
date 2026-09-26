@@ -66,6 +66,24 @@ async function runHarness(args) {
   })
 }
 
+/**
+ * Browser acceptance for the Mission cards: the Web boot graph must list the
+ * package's client, and the served file must be its loader-wrapped factory.
+ */
+async function assertToolCardClientServed(html, pageUrl, cookie, packageName) {
+  const marker = `"id":"${packageName}","url":"`
+  const start = html.indexOf(marker)
+  assert.notEqual(start, -1, `Harness Web boot graph omitted the ${packageName} tool-card client`)
+  const entryUrl = html.slice(start + marker.length, html.indexOf('"', start + marker.length))
+  const served = await fetch(new URL(entryUrl, pageUrl), {
+    ...cookie === undefined ? {} : { headers: { cookie } },
+    signal: AbortSignal.timeout(15_000),
+  })
+  assert.equal(served.ok, true, `${packageName} client bundle returned HTTP ${served.status}`)
+  const factoryHead = /window\.__ModuleLoader__\.load\(\{\s*id: "([^"]+)"/u.exec(await served.text())
+  assert.equal(factoryHead?.[1], packageName, `${packageName} client bundle is not a loader factory artifact`)
+}
+
 async function bootAndProbeWeb() {
   const child = spawn(process.execPath, [
     harnessCli,
@@ -105,9 +123,10 @@ async function bootAndProbeWeb() {
             redirect: 'manual',
             signal: AbortSignal.timeout(15_000),
           })
+          let cookie
           if (response.status >= 300 && response.status < 400) {
             const location = response.headers.get('location')
-            const cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
+            cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
             assert.notEqual(location, null, 'Harness Web authentication redirect omitted Location')
             assert.notEqual(cookie, undefined, 'Harness Web authentication redirect omitted its cookie')
             response = await fetch(new URL(location, url), {
@@ -118,6 +137,7 @@ async function bootAndProbeWeb() {
           assert.equal(response.ok, true, `Harness Web returned HTTP ${response.status}`)
           const body = await response.text()
           assert.match(body, /<html|<!doctype html/iu)
+          await assertToolCardClientServed(body, url, cookie, 'dsh-engineering-control-plane')
           clearTimeout(timer)
           resolveReady()
         } catch (error) {

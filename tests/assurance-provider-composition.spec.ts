@@ -24,7 +24,7 @@ import {
   sealAssuranceSubmissionV1,
 } from '../src/assurance-provider.ts'
 import type { AssuranceProviderActivationConfig, Config } from '../src/config.ts'
-import * as clientPlugin from '../src/client.ts'
+import * as clientPlugin from '../src/projection.ts'
 import * as toolsPlugin from '../src/tools.ts'
 import { registerScriptedEngineeringProvider } from './fixtures/scripted-engineering-provider.ts'
 

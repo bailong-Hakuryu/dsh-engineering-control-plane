@@ -1,7 +1,7 @@
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
-import * as clientPlugin from '../src/client.ts'
-import type { MissionProjectionSnapshot } from '../src/client.ts'
+import * as clientPlugin from '../src/projection.ts'
+import type { MissionProjectionSnapshot } from '../src/projection.ts'
 
 function snapshot(revision: number, status: MissionProjectionSnapshot['status']): MissionProjectionSnapshot {
   return {

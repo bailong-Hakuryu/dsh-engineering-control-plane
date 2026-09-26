@@ -140,7 +140,8 @@ $DSH_HOME/control-plane/
 | --- | --- |
 | <code>dsh-engineering-control-plane</code> | Cordis Service 与 Kernel 契约 |
 | <code>dsh-engineering-control-plane/tools</code> | 五个严格模型工具 |
-| <code>dsh-engineering-control-plane/client</code> | 浏览器安全的版本化投影缓存，不拥有权威状态 |
+| <code>dsh-engineering-control-plane/projection</code> | 浏览器安全的版本化投影缓存，不拥有权威状态（原 <code>/client</code>） |
+| <code>dsh-engineering-control-plane/client</code> | Harness Web Mission 工具卡片（仅浏览器端，无权限） |
 | <code>dsh-engineering-control-plane/invariant</code> | 启动就绪与不变量诊断 |
 | <code>dsh-engineering-control-plane/assurance-provider</code> | 可选的 Security Assurance Provider 契约 |
 
@@ -154,7 +155,8 @@ $DSH_HOME/control-plane/
 
 - 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code>、<code>0.1.5-rc.1</code>、<code>0.1.5-rc.2</code> 与 <code>0.1.5-rc.3</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
 - 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
-- <code>client</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
+- <code>projection</code> 是投影缓存，不是浏览器端 Mission Store；传输和 UI 由宿主集成。
+- 在 Harness Web 中，五个 Mission 工具的调用显示为专用卡片：一行标题与摘要，配以状态、门禁和阻塞原因标签，展开后可查看分支、角色、保障结果和可执行操作。卡片只读取会话中已有的工具调用记录，不调用服务、不持有权限。
 - 该插件负责工程治理，不等同于漏洞扫描器；安全评估由可选的 Security Assurance 插件负责。
 
 ### 开发与验证
@@ -250,7 +252,8 @@ The doctor checks SQLite identity, schema, leases, Evidence references, and dige
 
 - <code>dsh-engineering-control-plane</code>: Cordis Service and Kernel contracts
 - <code>dsh-engineering-control-plane/tools</code>: strict model tools
-- <code>dsh-engineering-control-plane/client</code>: browser-safe projection cache
+- <code>dsh-engineering-control-plane/projection</code>: browser-safe projection cache (formerly <code>/client</code>)
+- <code>dsh-engineering-control-plane/client</code>: Harness Web Mission tool cards (browser-only, no authority). Calls to the five Mission tools render as one line of title and summary with status, gate, and blocked-reason chips, expandable into branch, roles, assurance outcomes, and available actions.
 - <code>dsh-engineering-control-plane/invariant</code>: startup diagnostics
 - <code>dsh-engineering-control-plane/assurance-provider</code>: optional Security Assurance contract
 

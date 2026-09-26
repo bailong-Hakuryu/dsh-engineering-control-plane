@@ -17,6 +17,9 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
     }
   },
   "exports": {
@@ -28,10 +31,11 @@
       "types": "./lib/types/tools.d.ts",
       "default": "./lib/tools.js"
     },
-    "./client": {
-      "types": "./lib/types/client.d.ts",
-      "default": "./lib/client.js"
+    "./projection": {
+      "types": "./lib/types/projection.d.ts",
+      "default": "./lib/projection.js"
     },
+    "./client": "./lib/client.js",
     "./invariant": {
       "types": "./lib/types/invariant.d.ts",
       "default": "./lib/invariant.js"
@@ -57,7 +61,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/build-web-client.mjs",
     "lint": "oxlint src tests scripts --deny-warnings",
     "prepack": "pnpm build",
     "pack:dry-run": "npm --cache .scratch/npm-cache pack --dry-run",
