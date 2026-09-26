@@ -124,6 +124,67 @@ describe('ControlPlaneKernel Assurance Provider terminal outcomes', () => {
     expect(snapshot.blocked).toBeUndefined()
   })
 
+  it('refuses to record a Provider assessment identity that is not a plain reference', async () => {
+    const kernel = createControlPlaneKernel({
+      store: createInMemoryMissionStore(),
+      nextMissionId: () => 'mission-kernel-external-reference',
+      now: () => '2026-08-23T03:45:00.000Z',
+      resolveEffectivePolicy: () => policy,
+    })
+    const started = await kernel.dispatch({
+      kind: 'start',
+      idempotencyKey: 'kernel-external-reference',
+      input: { objective: 'Record only plain Provider assessment references' },
+    }, authority)
+    let snapshot = await freezePostImplementationSubject(kernel, started)
+    const invocationId = snapshot.assuranceProviderInvocations?.[0]?.invocationId
+    const subject = snapshot.assuranceSubjects?.[0]?.subject
+    if (invocationId === undefined || subject === undefined) throw new Error('Fixture assurance identity is missing')
+    await kernel.dispatch({
+      kind: 'begin_assurance_provider_invocation',
+      missionId: snapshot.missionId,
+      expectedRevision: snapshot.revision,
+      invocationId,
+    }, authority)
+    snapshot = await kernel.snapshot(snapshot.missionId, authority)
+
+    await expect(kernel.dispatch({
+      kind: 'settle_assurance_provider_invocation',
+      missionId: snapshot.missionId,
+      expectedRevision: snapshot.revision,
+      invocationId,
+      outcome: {
+        kind: 'sealed_submission',
+        binding: {
+          invocationId,
+          missionId: snapshot.missionId,
+          attempt: 1,
+          provider: descriptor,
+          subject,
+          effectivePolicyDigest: snapshot.effectivePolicyDigest,
+        },
+        submissionDigest: `sha256:${'7'.repeat(64)}`,
+        claimedOutcome: 'failed',
+        externalAssessmentId: 'see <script>',
+        evidenceRecord: {
+          recordId: 'submission-evidence-reference',
+          missionId: snapshot.missionId,
+          attempt: 1,
+          kind: 'assurance-provider-submission',
+          schemaVersion: 1,
+          digest: `sha256:${'6'.repeat(64)}`,
+          byteLength: 1,
+          relativePath: `${snapshot.missionId}/attempt-0001/submission.json`,
+          redacted: false,
+          createdAt: '2026-08-23T03:45:00.000Z',
+        },
+      },
+    }, authority)).rejects.toMatchObject({ code: 'invalid_evidence' })
+    await expect(kernel.snapshot(snapshot.missionId, authority)).resolves.toMatchObject({
+      assuranceProviderInvocations: [{ state: 'begun' }],
+    })
+  })
+
   it('records registration loss that occurs after durable begin admission', async () => {
     const kernel = createControlPlaneKernel({
       store: createInMemoryMissionStore(),

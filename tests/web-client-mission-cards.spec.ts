@@ -118,6 +118,25 @@ describe('Mission tool card view models', () => {
     ])
   })
 
+  it("names the Provider's own assessment behind an assurance result", () => {
+    const model = missionToolCard('mission_status', settled('mission_status', { missionId: MISSION_ID }, status({
+      status: 'REWORK_REQUIRED',
+      blocked: null,
+      assuranceResults: [{
+        requirementId: 'external-provider:dsh/security-assurance@0.1.0-rc.15',
+        attempt: 1,
+        outcome: 'failed',
+        assessmentIds: [`${MISSION_ID}:assurance:1:1:assessment:1`],
+        reasonCodes: ['eligible_submission'],
+        externalAssessmentIds: ['asm-c9918fdc-9880-4c9b-b5c4-f07f6f1d430b'],
+      }],
+    })))
+    expect(fieldTexts(model)).toContainEqual([
+      '保障',
+      'external-provider:dsh/security-assurance@0.1.0-rc.15 · 未满足 · asm-c9918fdc-9880-4c9b-b5c4-f07f6f1d430b',
+    ])
+  })
+
   it('reports the review gate without inventing a blocked reason', () => {
     const model = missionToolCard('mission_status', settled('mission_status', { missionId: MISSION_ID }, status({
       status: 'APPROVED',

@@ -12,6 +12,7 @@ import type {
   AssuranceSubmissionArtifactDraftV1,
 } from '../src/assurance-provider/contracts.ts'
 import { createFilesystemEvidenceStore } from '../src/evidence/filesystem-store.ts'
+import { statusValue } from '../src/tools.ts'
 import {
   createControlPlaneKernel,
   createInMemoryMissionStore,
@@ -406,6 +407,15 @@ describe('MissionRunner external Assurance Gate closure', () => {
         }],
         gate: expectedGate,
       })
+      // ADR 0095: the Provider's own assessment stays reachable from every projection.
+      expect(snapshot.assuranceProviderInvocations).toEqual([expect.objectContaining({
+        state: 'settled',
+        outcome: expect.objectContaining({ externalAssessmentId: 'fixture-external-assessment-1' }),
+      })])
+      expect(snapshot.assuranceAssessments?.[0]?.externalAssessmentId).toBe('fixture-external-assessment-1')
+      expect(snapshot.assuranceResults?.[0]?.externalAssessmentIds).toEqual(['fixture-external-assessment-1'])
+      expect(statusValue(snapshot).assuranceResults[0]?.externalAssessmentIds)
+        .toEqual(['fixture-external-assessment-1'])
       if (claimedOutcome === 'failed') {
         const reworked = await kernel.dispatch({
           kind: 'rework',

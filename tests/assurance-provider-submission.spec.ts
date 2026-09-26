@@ -646,6 +646,7 @@ describe('Assurance Provider Submission import', { timeout: 45_000 }, () => {
           claimedOutcome: 'satisfied',
           submissionDigest: expect.any(String),
           evidenceRecordId: expect.any(String),
+          externalAssessmentId: 'fixture-assessment-1',
         },
       })])
       expect(imported.evidence.records.filter(record => (

@@ -17,6 +17,12 @@ All notable changes to this project are documented in this file.
   `test`; `typecheck` and `build` count where the repository defines them. The
   new `package_script` verification category mode expresses this; explicit
   `commands` categories are unchanged.
+- Name the Provider's own assessment behind each Assurance Result
+  (ADR 0095). `mission_status` and the Mission card now show
+  `externalAssessmentIds` (for Security Assurance, its `asm-…` ID), so a
+  failed security gate can be read with `security_assessment_status` and
+  `security_assessment_findings`; before, only the Control Plane's internal
+  identity was shown, which the Security tools reject.
 
 ## [0.2.0] - 2026-09-27
 

@@ -285,6 +285,8 @@ export interface AssuranceAssessmentV1 {
   readonly outcome: AssuranceClaimedOutcomeV1
   readonly reasonCodes: readonly AssuranceAssessmentReasonCode[]
   readonly evidenceRecordIds: readonly string[]
+  /** The Provider's own assessment behind a settled submission (ADR 0095). */
+  readonly externalAssessmentId?: string
   readonly assessedAt: string
 }
 
@@ -296,6 +298,8 @@ export interface AssuranceResultV1 {
   readonly outcome: AssuranceClaimedOutcomeV1
   readonly assessmentIds: readonly string[]
   readonly reasonCodes: readonly AssuranceAssessmentReasonCode[]
+  /** Provider-owned assessments behind this Result, when the Provider named them (ADR 0095). */
+  readonly externalAssessmentIds?: readonly string[]
 }
 
 interface AssuranceProviderInvocationBaseV1 {
@@ -335,6 +339,8 @@ export type AssuranceProviderInvocationRecordV1 =
       readonly evidenceRecordId: string
       /** Provider claim only; no Assurance Result or Gate authority is implied. */
       readonly claimedOutcome: AssuranceClaimedOutcomeV1
+      /** The Provider's own assessment, so a caller can look it up there (ADR 0095). */
+      readonly externalAssessmentId?: string
     }
   }
   | AssuranceProviderInvocationBaseV1 & {
@@ -516,6 +522,7 @@ export type MissionCommand =
         readonly submissionDigest: string
         readonly claimedOutcome: AssuranceClaimedOutcomeV1
         readonly evidenceRecord: EvidenceRecord
+        readonly externalAssessmentId?: string
       }
       | {
         readonly kind: 'rejected_submission'

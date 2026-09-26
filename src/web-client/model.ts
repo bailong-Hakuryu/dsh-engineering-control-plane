@@ -243,7 +243,14 @@ function status({ state, args, output }: ToolCallFacts): Body {
   const assurance = list(output['assuranceResults']).map(record).flatMap((result) => {
     const requirement = text(result['requirementId'])
     const outcome = label(result['outcome'], OUTCOME)
-    return requirement === undefined || outcome.length === 0 ? [] : [{ join: [literal(requirement), ...outcome] }]
+    // The Provider's own assessments (ADR 0095), looked up with that Provider's tools.
+    const external = list(result['externalAssessmentIds']).flatMap(id => {
+      const value = text(id)
+      return value === undefined ? [] : [literal(value)]
+    })
+    return requirement === undefined || outcome.length === 0
+      ? []
+      : [{ join: [literal(requirement), ...outcome, ...external] }]
   })
   const actions = list(output['legalNextActions']).flatMap(action => label(action, ACTION))
   return {

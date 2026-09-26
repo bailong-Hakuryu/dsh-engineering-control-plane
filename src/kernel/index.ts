@@ -936,6 +936,8 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                 && terminalOutcome.claimedOutcome !== 'failed'
                 && terminalOutcome.claimedOutcome !== 'indeterminate')
               || terminalOutcome.evidenceRecord.redacted
+              || (terminalOutcome.externalAssessmentId !== undefined
+                && !EXTERNAL_ASSESSMENT_ID.test(terminalOutcome.externalAssessmentId))
             ) {
               throw new MissionError(
                 'invalid_evidence',
@@ -966,6 +968,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
                         submissionDigest: terminalOutcome.submissionDigest,
                         evidenceRecordId: terminalOutcome.evidenceRecord.recordId,
                         claimedOutcome: terminalOutcome.claimedOutcome,
+                        ...terminalOutcome.externalAssessmentId === undefined
+                          ? {}
+                          : { externalAssessmentId: terminalOutcome.externalAssessmentId },
                       },
                     }
                   : record
@@ -1115,7 +1120,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             let outcome: 'satisfied' | 'failed' | 'indeterminate' = 'indeterminate'
             let reasonCodes: AssuranceAssessmentReasonCode[]
             let evidenceRecordIds: string[] = []
+            let externalAssessmentId: string | undefined
             if (invocation.state === 'settled') {
+              externalAssessmentId = invocation.outcome.externalAssessmentId
               const eligibility = eligibilityByInvocation.get(invocation.invocationId)
               if (eligibility === undefined) throw new Error('Unreachable settled eligibility')
               evidenceRecordIds = [invocation.outcome.evidenceRecordId]
@@ -1149,6 +1156,7 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
               outcome,
               reasonCodes,
               evidenceRecordIds,
+              ...externalAssessmentId === undefined ? {} : { externalAssessmentId },
               assessedAt,
             }
           })
@@ -1159,6 +1167,9 @@ export function createControlPlaneKernel(options: ControlPlaneKernelOptions): Co
             outcome: assessment.outcome,
             assessmentIds: [assessment.assessmentId],
             reasonCodes: [...assessment.reasonCodes],
+            ...assessment.externalAssessmentId === undefined
+              ? {}
+              : { externalAssessmentIds: [assessment.externalAssessmentId] },
           }))
           return {
             ...current,

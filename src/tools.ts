@@ -160,6 +160,11 @@ const STATUS_SCHEMA = {
           },
           assessmentIds: { type: 'array', required: true, items: { type: 'string' } },
           reasonCodes: { type: 'array', required: true, items: { type: 'string' } },
+          externalAssessmentIds: {
+            type: 'array',
+            description: "The Provider's own assessment IDs; read them with that Provider's tools.",
+            items: { type: 'string' },
+          },
         },
       },
     },
@@ -247,6 +252,8 @@ type StatusValue = {
     outcome: 'satisfied' | 'failed' | 'indeterminate'
     assessmentIds: string[]
     reasonCodes: string[]
+    /** The Provider's own assessments; look them up with that Provider's tools (ADR 0095). */
+    externalAssessmentIds?: string[]
   }[]
   roleRuns: {
     runId: string
@@ -397,6 +404,9 @@ export function statusValue(snapshot: MissionSnapshot): StatusValue {
       outcome: result.outcome,
       assessmentIds: result.assessmentIds.slice(0, 32),
       reasonCodes: result.reasonCodes.slice(0, 32).map(boundedText),
+      ...result.externalAssessmentIds === undefined
+        ? {}
+        : { externalAssessmentIds: result.externalAssessmentIds.slice(0, 32).map(boundedText) },
     })),
     roleRuns: selectedRoleRuns.map(run => ({
       runId: run.runId,

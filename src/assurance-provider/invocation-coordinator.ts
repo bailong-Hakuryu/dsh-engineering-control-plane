@@ -680,6 +680,7 @@ export class AssuranceProviderInvocationCoordinator {
         submissionDigest: validated.submissionDigest,
         claimedOutcome: validated.claimedOutcome,
         evidenceRecord,
+        ...externalAssessmentReference(validated.submission.payload.externalAssessment.assessmentId),
       },
       authority,
       controller,
@@ -792,4 +793,12 @@ export class AssuranceProviderInvocationCoordinator {
       // Diagnostics cannot become Provider execution authority or block durable state changes.
     }
   }
+}
+
+/**
+ * Carry the Provider's own assessment identity when it is a plain reference
+ * the Kernel can record (ADR 0095); an unusual identity never blocks settling.
+ */
+function externalAssessmentReference(assessmentId: string): { externalAssessmentId?: string } {
+  return /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/u.test(assessmentId) ? { externalAssessmentId: assessmentId } : {}
 }
