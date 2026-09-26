@@ -49,12 +49,12 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 3. 在目标 Git 仓库目录启动 Harness Web。
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.13.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.0.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-从 GitHub 下载：[v0.1.13 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.13)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+从 GitHub 下载：[v0.2.0 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.0)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
 默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并冻结以下默认验证命令：
 
@@ -151,7 +151,11 @@ $DSH_HOME/control-plane/
 
 两个插件不共享 SQLite、可写 Evidence 目录、事务句柄或 Kernel 对象。
 
-### v0.1 边界
+### 0.2.0 升级说明
+
+此版本包含公共入口的不兼容变更：原先从 <code>dsh-engineering-control-plane/client</code> 导入投影缓存的调用方，必须改为 <code>dsh-engineering-control-plane/projection</code>；<code>./client</code> 现在仅供 Harness 加载 Web 工具卡片。双插件默认组合精确绑定 Security Assurance <code>0.1.0-rc.15</code>。
+
+### 当前边界
 
 - 当前发布包面向 Harness <code>0.1.2-alpha.1</code>（主目标），并声明兼容 <code>0.1.2-alpha.2</code> 至 <code>0.1.2-rc.1</code>、<code>0.1.3-alpha.1</code>、<code>0.1.3-alpha.2</code>、<code>0.1.5-alpha.1</code>、<code>0.1.5-alpha.2</code>、<code>0.1.5-rc.1</code>、<code>0.1.5-rc.2</code> 与 <code>0.1.5-rc.3</code>；该显式已验证集合由 Security Assurance 仓的 [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) 双插件矩阵每日验证，Harness 仍处于开发预览阶段。
 - 默认验证配置是 pnpm 项目；其他构建系统需要在宿主 Profile 中替换完整的 repository/config 行。
@@ -213,12 +217,12 @@ Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
 3. Start Harness Web from the Git repository you want to govern.
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.1.13.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.0.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.1.13 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.1.13). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
+Download the package from the [v0.2.0 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.0). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>; default checks are <code>pnpm test</code>, <code>pnpm run typecheck</code>, and <code>pnpm run build</code>.
 
 Python/uv repositories can start from the packaged
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
@@ -247,6 +251,10 @@ dsh-control-plane doctor --pretty
 ~~~
 
 The doctor checks SQLite identity, schema, leases, Evidence references, and digest bindings without creating, repairing, migrating, clearing, or deleting state. Exit codes are <code>0</code> (pass), <code>1</code> (issue found), and <code>2</code> (invocation failure).
+
+## Upgrading to 0.2.0
+
+Breaking export migration: import the projection cache from `dsh-engineering-control-plane/projection`, not `dsh-engineering-control-plane/client`. The `./client` export is now reserved for Harness Web tool cards. The default dual-plugin composition binds Security Assurance `0.1.0-rc.15` exactly.
 
 ## Public entries
 

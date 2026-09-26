@@ -27,9 +27,9 @@ function releaseSection(version: string): string {
   return changelog.slice(start, next < 0 ? undefined : next)
 }
 
-describe('v0.1 release package', () => {
+describe('v0.2 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.1.13')
+    expect(packageJson.version).toBe('0.2.0')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')
@@ -70,7 +70,7 @@ describe('v0.1 release package', () => {
     expect(eriiDogfoodProfile).toMatch(
       /name: compileall[\s\S]*clients\/typescript\/scripts[\s\S]*experiments\/deepseek-continuity-review/u,
     )
-    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.14')
+    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.15')
     expect(eriiDogfoodProfile).not.toMatch(/[A-Z]:\\/u)
   })
 
@@ -108,8 +108,8 @@ describe('v0.1 release package', () => {
     const current = releaseSection(packageJson.version)
     const published = releaseSection('0.1.11')
 
-    expect(current).toContain('YAML-parser security hotfix')
-    expect(current).toContain('0.1.0-rc.14')
+    expect(current).toContain('**Breaking:**')
+    expect(current).toContain('0.1.0-rc.15')
     expect(published).toContain('ERII')
     expect(published).toContain('phase-aware')
     expect(published).toContain('0.1.0-rc.12')

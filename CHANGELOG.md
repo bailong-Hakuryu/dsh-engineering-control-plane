@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-27
+
+- Bind the default and ERII dogfood Assurance Provider registrations exactly
+  to `dsh-security-assurance@0.1.0-rc.15`.
+
 - **Breaking:** the browser-safe projection cache moved from
   `dsh-engineering-control-plane/client` to
   `dsh-engineering-control-plane/projection`. Harness serves a package's

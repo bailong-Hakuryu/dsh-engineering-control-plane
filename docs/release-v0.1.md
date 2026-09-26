@@ -1,15 +1,21 @@
-# v0.1 Acceptance Checklist
+# v0.2 Acceptance Checklist
 
 ## Package
 
 - Package: `dsh-engineering-control-plane`
-- Version: `0.1.13`
+- Version: `0.2.0`
 - Node.js: `^22.19.0 || >=24.0.0`
 - License: MIT
 
 The package is prepared for local acceptance. Tagging, GitHub upload, and npm
 publication remain deferred until the delivery owner verifies the exact
 artifact and source revision.
+
+## Upgrade boundary
+
+The projection cache import moves from `./client` to `./projection`.
+`./client` is now the Harness Web tool-card bundle. The default Provider
+binding is exactly Security Assurance `0.1.0-rc.15`.
 
 ## Automated gates
 
