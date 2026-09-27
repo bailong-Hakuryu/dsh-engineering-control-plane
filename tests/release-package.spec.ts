@@ -29,7 +29,7 @@ function releaseSection(version: string): string {
 
 describe('v0.2 release package', () => {
   it('is explicitly publishable under the reviewed license', () => {
-    expect(packageJson.version).toBe('0.2.0')
+    expect(packageJson.version).toBe('0.2.1')
     expect(packageJson.private).toBe(false)
     expect(packageJson.license).toBe('MIT')
     expect(packageJson.publishConfig?.access).toBe('public')
@@ -70,7 +70,7 @@ describe('v0.2 release package', () => {
     expect(eriiDogfoodProfile).toMatch(
       /name: compileall[\s\S]*clients\/typescript\/scripts[\s\S]*experiments\/deepseek-continuity-review/u,
     )
-    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.15')
+    expect(eriiDogfoodProfile).toContain('providerVersion: 0.1.0-rc.16')
     expect(eriiDogfoodProfile).not.toMatch(/[A-Z]:\\/u)
   })
 
@@ -106,10 +106,13 @@ describe('v0.2 release package', () => {
 
   it('cuts the current changelog without rewriting the published v0.1.11 boundary', () => {
     const current = releaseSection(packageJson.version)
+    const previous = releaseSection('0.2.0')
     const published = releaseSection('0.1.11')
 
-    expect(current).toContain('**Breaking:**')
-    expect(current).toContain('0.1.0-rc.15')
+    expect(current).toContain('**Fix:**')
+    expect(current).toContain('0.1.0-rc.16')
+    expect(previous).toContain('**Breaking:**')
+    expect(previous).toContain('0.1.0-rc.15')
     expect(published).toContain('ERII')
     expect(published).toContain('phase-aware')
     expect(published).toContain('0.1.0-rc.12')

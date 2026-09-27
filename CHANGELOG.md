@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-27
+
+- Bind the default and ERII dogfood Assurance Provider registrations exactly
+  to `dsh-security-assurance@0.1.0-rc.16`.
+
 - **Fix:** a Mission sent back for Rework can be approved again. Rework
   enters the next attempt at `PLANNING`, skipping the step that records the
   attempt's `context` evidence, and the Gate requires that record for the
