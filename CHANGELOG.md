@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+- **Fix:** a Mission sent back for Rework can be approved again. Rework
+  enters the next attempt at `PLANNING`, skipping the step that records the
+  attempt's `context` evidence, and the Gate requires that record for the
+  current attempt, so every reworked Mission ended `BLOCKED`
+  (`evidence_missing`, `context`) even after the repair passed. Each
+  attempt now records its own context, including the Rework instructions,
+  before planning. Found in a real Mission whose second attempt passed
+  verification and Security Assurance.
 - **Fix:** direct-use verification no longer runs the repository's install
   lifecycle scripts (ADR 0094). The default profile ran `pnpm test`, and
   pnpm's pre-run dependency check installed first, which executed the root

@@ -411,26 +411,13 @@ export class MissionRunner {
     if (snapshot.status === 'CREATED') snapshot = await this.advance(snapshot, authority, 'ANALYZING')
 
     if (snapshot.status === 'ANALYZING') {
-      if (latestRecord(snapshot, 'context') === undefined) {
-        snapshot = (await this.publishEvidence(snapshot, authority, host.evidenceStore, 'context', {
-          schemaVersion: 1,
-          missionId: snapshot.missionId,
-          attempt: snapshot.attempt,
-          repository: snapshot.repository,
-          intent: {
-            objective: snapshot.objective,
-            ...snapshot.context === undefined ? {} : { context: snapshot.context },
-            acceptanceCriteria: snapshot.acceptanceCriteria,
-            constraints: snapshot.constraints,
-          },
-          inputRecords: snapshot.inputRecords,
-          effectivePolicyDigest: snapshot.effectivePolicyDigest,
-        })).snapshot
-      }
+      snapshot = await this.ensureAttemptContext(snapshot, authority, host.evidenceStore)
       snapshot = await this.advance(snapshot, authority, 'PLANNING')
     }
 
     if (snapshot.status === 'PLANNING') {
+      // Rework enters the next attempt at PLANNING; the Gate still requires that attempt's context.
+      snapshot = await this.ensureAttemptContext(snapshot, authority, host.evidenceStore)
       if (latestRecord(snapshot, 'plan') === undefined) {
         const planner = await this.executeRole(snapshot, authority, host, 'planner', signal)
         snapshot = planner.snapshot
@@ -788,6 +775,28 @@ export class MissionRunner {
     } catch (error) {
       this.options.onError?.(error)
     }
+  }
+
+  private async ensureAttemptContext(
+    snapshot: MissionSnapshot,
+    authority: MissionAuthority,
+    store: RunnerEvidenceStore,
+  ): Promise<MissionSnapshot> {
+    if (latestRecord(snapshot, 'context') !== undefined) return snapshot
+    return (await this.publishEvidence(snapshot, authority, store, 'context', {
+      schemaVersion: 1,
+      missionId: snapshot.missionId,
+      attempt: snapshot.attempt,
+      repository: snapshot.repository,
+      intent: {
+        objective: snapshot.objective,
+        ...snapshot.context === undefined ? {} : { context: snapshot.context },
+        acceptanceCriteria: snapshot.acceptanceCriteria,
+        constraints: snapshot.constraints,
+      },
+      inputRecords: snapshot.inputRecords,
+      effectivePolicyDigest: snapshot.effectivePolicyDigest,
+    })).snapshot
   }
 
   private async rolePrompt(

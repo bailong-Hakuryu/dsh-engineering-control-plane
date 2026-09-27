@@ -170,7 +170,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-当前 <code>main</code> 分支发布门禁已通过：35 个测试文件、176 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
+当前 <code>main</code> 分支发布门禁已通过：36 个测试文件、177 个测试，并覆盖静态检查、类型检查、构建、打包以及 fresh Harness Profile 安装与 Web 探针。公开 CI 在 Ubuntu、macOS 和 Windows 上重复该门禁。
 
 设计依据和完整决策记录见：[CONTEXT.md](CONTEXT.md)、[docs/adr/](docs/adr/)、[docs/implementation-specification.md](docs/implementation-specification.md)。安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
@@ -276,7 +276,7 @@ pnpm pack:profile-smoke
 pnpm release:check
 ~~~
 
-The current <code>main</code> branch gate passes 35 test files and 176 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. The [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) workflow also validates the dual-plugin matrix against the declared Harness versions. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
+The current <code>main</code> branch gate passes 36 test files and 177 tests, plus linting, typecheck, build, packaging, a fresh Harness Profile installation, and a live Web probe. Public CI repeats the gate on Ubuntu, macOS, and Windows. The [Harness Compatibility](https://github.com/bailong-Hakuryu/dsh-security-assurance/actions/workflows/harness-compat.yml) workflow also validates the dual-plugin matrix against the declared Harness versions. See [CONTEXT.md](CONTEXT.md), [docs/adr/](docs/adr/), and [SECURITY.md](SECURITY.md) for the domain model, decisions, and security policy.
 
 </details>
 
