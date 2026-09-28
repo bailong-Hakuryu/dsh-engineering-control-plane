@@ -49,12 +49,12 @@ Mission 只按单向阶段推进；角色输出、验证结果、外部 Assuranc
 3. 在目标 Git 仓库目录启动 Harness Web。
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.1.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.2.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-从 GitHub 下载：[v0.2.1 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.1)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
+从 GitHub 下载：[v0.2.2 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.2)。如果两个插件一起使用，Control Plane 必须先安装，因为它提供共享的不变量注册表。
 
 默认配置会把 Harness 启动时的当前工作目录绑定为 <code>current-workspace</code>，并按仓库自己的 <code>package.json</code> 运行三个脚本：<code>test</code>（必需，缺失即验证失败）、<code>typecheck</code> 与 <code>build</code>（仓库未定义时记为不适用）。包管理器依次取 <code>packageManager</code> 字段、锁文件，默认为 npm；验证时绝不先安装依赖，因此不会触发仓库的 <code>postinstall</code> 等安装钩子，依赖需事先装好（ADR 0094）。
 
@@ -147,7 +147,7 @@ $DSH_HOME/control-plane/
 
 ### 0.2.0 升级说明
 
-此版本包含公共入口的不兼容变更：原先从 <code>dsh-engineering-control-plane/client</code> 导入投影缓存的调用方，必须改为 <code>dsh-engineering-control-plane/projection</code>；<code>./client</code> 现在仅供 Harness 加载 Web 工具卡片。当前 0.2.1 的双插件默认组合精确绑定 Security Assurance <code>0.1.0-rc.16</code>。
+此版本包含公共入口的不兼容变更：原先从 <code>dsh-engineering-control-plane/client</code> 导入投影缓存的调用方，必须改为 <code>dsh-engineering-control-plane/projection</code>；<code>./client</code> 现在仅供 Harness 加载 Web 工具卡片。当前 0.2.2 的双插件默认组合精确绑定 Security Assurance <code>0.1.0-rc.17</code>。
 
 ### 当前边界
 
@@ -211,12 +211,12 @@ Requires Node.js <code>^22.19.0 || >=24.0.0</code> and the DeepSeek Harness CLI:
 3. Start Harness Web from the Git repository you want to govern.
 
 ~~~powershell
-dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.1.tgz
+dsh plugin --profile web add D:\Downloads\dsh-engineering-control-plane-0.2.2.tgz
 dsh --profile web --dump-config
 dsh web
 ~~~
 
-Download the package from the [v0.2.1 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.1). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>. Default checks run the repository's own <code>package.json</code> scripts: <code>test</code> is required (missing fails verification), while <code>typecheck</code> and <code>build</code> count only where defined. The package manager comes from the <code>packageManager</code> field, then the lockfile, else npm, and verification never installs first, so the repository's <code>postinstall</code> and other install hooks never run; install dependencies beforehand (ADR 0094).
+Download the package from the [v0.2.2 Release](https://github.com/bailong-Hakuryu/dsh-engineering-control-plane/releases/tag/v0.2.2). Install this plugin before Security Assurance when using both, because it supplies the shared invariant registry. The launcher working directory becomes <code>current-workspace</code>. Default checks run the repository's own <code>package.json</code> scripts: <code>test</code> is required (missing fails verification), while <code>typecheck</code> and <code>build</code> count only where defined. The package manager comes from the <code>packageManager</code> field, then the lockfile, else npm, and verification never installs first, so the repository's <code>postinstall</code> and other install hooks never run; install dependencies beforehand (ADR 0094).
 
 Python/uv repositories can start from the packaged
 [`profiles/erii-python.cordis.patch.example.yml`](profiles/erii-python.cordis.patch.example.yml).
@@ -248,7 +248,7 @@ The doctor checks SQLite identity, schema, leases, Evidence references, and dige
 
 ## Upgrading to 0.2.0
 
-Breaking export migration: import the projection cache from `dsh-engineering-control-plane/projection`, not `dsh-engineering-control-plane/client`. The `./client` export is now reserved for Harness Web tool cards. In 0.2.1 the default dual-plugin composition binds Security Assurance `0.1.0-rc.16` exactly.
+Breaking export migration: import the projection cache from `dsh-engineering-control-plane/projection`, not `dsh-engineering-control-plane/client`. The `./client` export is now reserved for Harness Web tool cards. In 0.2.2 the default dual-plugin composition binds Security Assurance `0.1.0-rc.17` exactly.
 
 ## Public entries
 

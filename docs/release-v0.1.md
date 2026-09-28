@@ -3,7 +3,7 @@
 ## Package
 
 - Package: `dsh-engineering-control-plane`
-- Version: `0.2.1`
+- Version: `0.2.2`
 - Node.js: `^22.19.0 || >=24.0.0`
 - License: MIT
 
@@ -15,7 +15,7 @@ artifact and source revision.
 
 The projection cache import moves from `./client` to `./projection`.
 `./client` is now the Harness Web tool-card bundle. The default Provider
-binding is exactly Security Assurance `0.1.0-rc.16`.
+binding is exactly Security Assurance `0.1.0-rc.17`.
 
 ## Automated gates
 

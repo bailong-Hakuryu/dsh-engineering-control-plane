@@ -16,7 +16,7 @@
             verificationProfile: node-package-scripts
             assuranceProviders:
               - providerId: dsh/security-assurance
-                providerVersion: 0.1.0-rc.16
+                providerVersion: 0.1.0-rc.17
                 activation: when-available
                 configuration:
                   repositoryBindingId: current-workspace

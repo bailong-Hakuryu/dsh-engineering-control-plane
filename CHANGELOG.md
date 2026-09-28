@@ -4,7 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-- Admit DeepSeek Harness `0.1.7-alpha.2`, `0.1.7-rc.1`, and `0.1.7-rc.2`
+## [0.2.2] - 2026-09-28
+
+- Bind the default and ERII dogfood Assurance Provider registrations exactly
+  to `dsh-security-assurance@0.1.0-rc.17`.
+
+- **Fix:** admit DeepSeek Harness `0.1.7-alpha.2`, `0.1.7-rc.1`, and `0.1.7-rc.2`
   into the exact peer disjunction (Security Assurance ADR 0327). `/mission`
   now tags its instructions with its own `dsh-engineering-control-plane`
   source kind, because 0.1.7 removed the shared `plugin` kind, and the type
