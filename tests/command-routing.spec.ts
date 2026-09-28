@@ -106,6 +106,8 @@ describe('Mission user routing', () => {
       const message = root.steer.mock.calls[0]?.[0] as ReturnType<typeof createUserMessage>
       expect(message.content).toEqual([{ type: 'text', text: expect.stringContaining('Call mission_start before making repository changes.') }])
       expect(message.content).toEqual([{ type: 'text', text: expect.stringContaining('Fix the Windows release gate') }])
+      // Harness 0.1.7 removed the shared plugin kind; each producer names its own (MessageSourceMap).
+      expect(message.source).toEqual({ kind: 'dsh-engineering-control-plane', form: 'instructions' })
     } finally {
       await fixture.dispose()
     }

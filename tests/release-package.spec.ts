@@ -89,6 +89,9 @@ describe('v0.2 release package', () => {
       '0.1.5-rc.1',
       '0.1.5-rc.2',
       '0.1.5-rc.3',
+      '0.1.7-alpha.2',
+      '0.1.7-rc.1',
+      '0.1.7-rc.2',
     ].join(' || ')
     for (const name of [
       '@deepseek-ai/dsh-agent',

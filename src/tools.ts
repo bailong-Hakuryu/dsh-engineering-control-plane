@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type {} from '@deepseek-ai/dsh-commands'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, type ContextFormed } from '@deepseek-ai/dsh-llm'
 import {
   defineTool,
   ToolArgsError,
@@ -15,6 +15,13 @@ import type {
 } from './kernel/index.js'
 import { retryableExternalAssuranceInvocations } from './kernel/assurance-retry.js'
 import type {} from './index.js'
+
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    /** The /mission command's model-facing instructions. Harness 0.1.7 has no shared plugin kind. */
+    'dsh-engineering-control-plane': { kind: 'dsh-engineering-control-plane' } & ContextFormed
+  }
+}
 
 export const name = 'engineering-control-plane-tools'
 export const inject = ['tools', 'engineeringControlPlane']
@@ -586,12 +593,7 @@ export function apply(ctx: Context): void {
         }
         agent.steer(createUserMessage({
           content: [{ type: 'text', text: missionCommandPrompt(objective) }],
-          source: {
-            kind: 'plugin',
-            plugin: 'dsh-engineering-control-plane',
-            form: 'instructions',
-            summary: 'Start a governed engineering Mission.',
-          },
+          source: { kind: 'dsh-engineering-control-plane', form: 'instructions' },
         }))
         return { kind: 'success', text: '已提交 Mission 请求 · Mission request submitted.' }
       },

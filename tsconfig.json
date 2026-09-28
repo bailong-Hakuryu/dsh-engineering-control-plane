@@ -10,7 +10,10 @@
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@deepseek-ai/schemastery": ["../deepseek-harness-latest/vendor/schemastery/lib/types/index.d.ts"]
+    }
   },
   "include": ["src", "tests", "vitest.config.ts"]
 }
