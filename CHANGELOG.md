@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ## [0.2.2] - 2026-09-28
 
+- Admit DeepSeek Harness `0.2.0-rc.1` into the exact peer disjunction
+  alongside Security Assurance rc.17. Verified on 0.2.0-rc.1: full suite,
+  build, and the packed profile smoke.
+
 - Bind the default and ERII dogfood Assurance Provider registrations exactly
   to `dsh-security-assurance@0.1.0-rc.17`.
 
